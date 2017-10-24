@@ -2,6 +2,12 @@
 var rl = require('./rl.js');
 var polyfill = require('./polyfill.js');
 
+var messages = {
+    err: function () {
+        console.log("지원하지 않는 형식을 포함하고 있습니다.");
+    }
+}
+
 function printResult(type, parentType) {
     var total = Object.values(type).reduce(function (pre, cur) {
         return pre + cur;
@@ -26,31 +32,46 @@ var type = {
     "객체": 0
 };
 
+function checkType(element) {
+    if (typeof (element) === "boolean")
+        type.부울++;
+    else if (Number.isInteger(element))
+        type.숫자++;
+    else if (element.toString() === "[object Object]")
+        type.객체++;
+    else
+        type.문자열++;
+}
+
 function arrayParse(array) {
     array.forEach(function (element) {
-        typeof (element) === "boolean" ? type.부울++: Number.isInteger(element) ? type.숫자++ : element.toString() === "[object Object]" ? type.객체++ : type.문자열++;
+        checkType(element);
     });
     printResult(type, "배열");
 }
 
 function objectParse(object) {
-    Object.keys(object).forEach(function (key) {
-        var element = object[key];
-        typeof (element) === "boolean" ? type.부울++: Number.isInteger(element) ? type.숫자++ : type.문자열++;
+    Object.values(object).forEach(function (element) {
+        if (Array.isArray(element))
+            throw err;
+        else
+            checkType(element);
     });
     printResult(type, "객체");
 }
 
 function jsonParse(json) {
-    var parsedJSON = JSON.parse(json);
-
-    parsedJSON.toString() === "[object Object]" ? objectParse(parsedJSON) : arrayParse(parsedJSON);
+    try {
+        var parsedJSON = JSON.parse(json);
+        parsedJSON.toString() === "[object Object]" ? objectParse(parsedJSON) : arrayParse(parsedJSON);
+    } catch (err) {
+        messages.err();
+    }
 }
 
-jsonParse('[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true } ]');
-// rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
+rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-//     jsonParse(answer);
+    jsonParse(answer);
 
-//     rl.close();
-// });
+    rl.close();
+});
