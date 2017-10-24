@@ -10,3 +10,5 @@ rl.on('line', function(input) {
     var result = parser.parse(input);
     console.log(result);
 });
+
+rl.close();
