@@ -1,7 +1,6 @@
 "use strict";
 var rl = require('./rl.js');
 var polyfill = require('./polyfill.js');
-var json_parse = require('./json_parse.js');
 var messages = {
     err: function () {
         console.log("지원하지 않는 형식을 포함하고 있습니다.");
