@@ -1,12 +1,20 @@
 "use strict";
 var rl = require('./rl.js');
 var polyfill = require('./polyfill.js');
-
+var json_parse = require('./json_parse.js');
 var messages = {
     err: function () {
         console.log("지원하지 않는 형식을 포함하고 있습니다.");
     }
 }
+
+var type = {
+    "문자열": 0,
+    "숫자": 0,
+    "부울": 0,
+    "객체": 0,
+    "배열": 0
+};
 
 function printResult(type, parentType) {
     var total = Object.values(type).reduce(function (pre, cur) {
@@ -24,14 +32,6 @@ function printResult(type, parentType) {
 
     console.log(results);
 }
-
-var type = {
-    "문자열": 0,
-    "숫자": 0,
-    "부울": 0,
-    "객체": 0,
-    "배열": 0
-};
 
 function checkType(element) {
     if (typeof (element) === "boolean")
@@ -64,11 +64,19 @@ function jsonParse(json) {
     try {
         var parsedJSON = JSON.parse(json);
         parsedJSON.toString() === "[object Object]" ? objectParse(parsedJSON) : arrayParse(parsedJSON);
+
+        function replacer(key, value) {
+            if (typeof value === "string") {
+                return undefined;
+            }
+            return value;
+        }
+
+        console.log(JSON.stringify(parsedJSON, replacer, 4));
     } catch (err) {
         messages.err();
     }
 }
-
 rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
     jsonParse(answer);
