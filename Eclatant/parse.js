@@ -13,7 +13,7 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
+function arrParse(input) {
   var inputToArray = input.slice(2, -2).split(", ");
   var str = 0;
   var num = 0;
@@ -45,9 +45,23 @@ rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
     tempArr.push(`부울 ${bool}개`);
   }
 
-  console.log(
-    `총 ${inputToArray.length}개의 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`
-  );
+  return `총 ${inputToArray.length}개의 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
+}
 
-  rl.close();
-});
+function start() {
+  rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
+    if (/^\[.+\]$/.test(input)) {
+      console.log(arrParse(input));
+      rl.close();
+    } else {
+      /* */
+    }
+  });
+}
+
+start();
+
+module.exports = {
+  arrParse,
+  start
+};
