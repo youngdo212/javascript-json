@@ -29,7 +29,8 @@ var type = {
     "문자열": 0,
     "숫자": 0,
     "부울": 0,
-    "객체": 0
+    "객체": 0,
+    "배열": 0
 };
 
 function checkType(element) {
@@ -39,6 +40,8 @@ function checkType(element) {
         type.숫자++;
     else if (element.toString() === "[object Object]")
         type.객체++;
+    else if (Array.isArray(element))
+        type.배열++;
     else
         type.문자열++;
 }
@@ -52,10 +55,7 @@ function arrayParse(array) {
 
 function objectParse(object) {
     Object.values(object).forEach(function (element) {
-        if (Array.isArray(element))
-            throw err;
-        else
-            checkType(element);
+        checkType(element);
     });
     printResult(type, "객체");
 }
