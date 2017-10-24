@@ -21,9 +21,6 @@ function arrParse(input) {
   var tempArr = [];
 
   inputToArray.forEach(function(v) {
-    var typeofResult = typeof v;
-    var len = inputToArray.length;
-
     if (v === "true" || v === "false") {
       bool += 1;
     } else if (!isNaN(parseInt(v))) {
