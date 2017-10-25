@@ -2,7 +2,7 @@
 var rl = require('./rl.js');
 var polyfill = require('./polyfill.js');
 var json_parse = require('./json_parse.js');
-
+var json_stringify = require('./json_stringify.js');
 var messages = {
     err: function () {
         console.log("지원하지 않는 형식을 포함하고 있습니다.");
@@ -65,15 +65,16 @@ function parseJSON(JSON) {
     try {
         var parsedJSON = json_parse(JSON);
         parsedJSON.toString() === "[object Object]" ? objectParse(parsedJSON) : arrayParse(parsedJSON);
-
+        console.log(json_stringify(parsedJSON, null, 4));
     } catch (err) {
         messages.err();
     }
 }
+parseJSON('{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }');
 
-rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
+// rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-    parseJSON(answer);
+//     parseJSON(answer);
 
-    rl.close();
-});
+//     rl.close();
+// });
