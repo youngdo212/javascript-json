@@ -41,7 +41,7 @@ function checkArray(input) {
   };
 }
 
-function arrayParse({ leng, bool, num, str }) {
+function printCheckResult(type, { leng, bool, num, str }) {
   var tempArr = [];
 
   if (str !== 0) {
@@ -56,7 +56,9 @@ function arrayParse({ leng, bool, num, str }) {
     tempArr.push(`부울 ${bool}개`);
   }
 
-  return `총 ${leng}개의 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
+  return `총 ${leng}개의 ${type === "{}"
+    ? "객체"
+    : type === "[]" ? "배열" : ""} 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
 }
 
 function checkObject(input) {
@@ -91,13 +93,13 @@ function checkObject(input) {
 function jsonParse() {
   rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
     if (/^\[.+\]$/.test(input)) {
-      console.log(arrayParse(checkArray(input)));
+      console.log(printCheckResult("[]", checkArray(input)));
     } else if (/^\{.+\}$/.test(input)) {
-      // try {
-      //   console.log(objectParse(checkObject(input)));
-      // } catch (err) {
-      //   console.warn(err);
-      // }
+      try {
+        console.log(printCheckResult("{}", checkObject(input)));
+      } catch (err) {
+        console.warn(err);
+      }
     }
 
     rl.close();
@@ -107,8 +109,8 @@ function jsonParse() {
 jsonParse();
 
 module.exports = {
+  printCheckResult,
   checkArray,
-  arrayParse,
   checkObject,
   jsonParse
 };

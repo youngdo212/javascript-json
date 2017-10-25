@@ -1,6 +1,6 @@
-const { arrayParse, checkArray, checkObject } = require("../parse");
+const { printCheckResult, checkArray, checkObject } = require("../parse");
 
-describe("JSON.parse replace", () => {
+describe("JSON.parse replacement", () => {
   describe("checkArray(input)", () => {
     it("input number[]", () => {
       // given
@@ -25,17 +25,17 @@ describe("JSON.parse replace", () => {
     });
   });
 
-  describe("arrayParse", () => {
+  describe("printCheckResult(type, checkResult{})", () => {
     it("input number[]", () => {
       // given
       const input = `[ 10, 21, 4, 314, 99, 0, 72 ]`;
       const checkedInput = checkArray(input);
 
       // when
-      const result = arrayParse(checkedInput);
+      const result = printCheckResult("[]", checkedInput);
 
       // then
-      expect(result).toEqual(`총 7개의 데이터 중에 숫자 7개가 포함되어 있습니다.`);
+      expect(result).toEqual(`총 7개의 배열 데이터 중에 숫자 7개가 포함되어 있습니다.`);
     });
 
     it("input []", () => {
@@ -44,10 +44,26 @@ describe("JSON.parse replace", () => {
       const checkedInput = checkArray(input);
 
       // when
-      const result = arrayParse(checkedInput);
+      const result = printCheckResult("[]", checkedInput);
 
       // then
-      expect(result).toEqual(`총 7개의 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`);
+      expect(result).toEqual(
+        `총 7개의 배열 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`
+      );
+    });
+
+    it("input {}", () => {
+      // given
+      const input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`;
+      const checkedInput = checkObject(input);
+
+      // when
+      const result = printCheckResult("{}", checkedInput);
+
+      // then
+      expect(result).toEqual(
+        `총 4개의 객체 데이터 중에 문자열 2개, 숫자 1개, 부울 1개가 포함되어 있습니다.`
+      );
     });
   });
 
