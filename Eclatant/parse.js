@@ -21,6 +21,10 @@ function isNum(input) {
   return !isNaN(parseInt(input));
 }
 
+function isStr(input) {
+  return typeof input === "string";
+}
+
 function arrParse(input) {
   var inputToArray = input.slice(2, -2).split(", ");
   var str = 0;
@@ -33,7 +37,7 @@ function arrParse(input) {
       bool += 1;
     } else if (isNum(v)) {
       num += 1;
-    } else if (typeof v === "string") {
+    } else if (isStr(v)) {
       str += 1;
     }
   });
