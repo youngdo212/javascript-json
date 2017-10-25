@@ -57,7 +57,7 @@ function arrParse(input) {
   return `총 ${inputToArray.length}개의 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
 }
 
-(() => {
+function start() {
   rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
     if (/^\[.+\]$/.test(input)) {
       console.log(arrParse(input));
@@ -67,8 +67,11 @@ function arrParse(input) {
 
     rl.close();
   });
-})();
+}
+
+start();
 
 module.exports = {
-  arrParse
+  arrParse,
+  start
 };
