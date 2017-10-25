@@ -49,10 +49,11 @@ function start() {
   rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
     if (/^\[.+\]$/.test(input)) {
       console.log(arrParse(input));
-      rl.close();
-    } else {
-      /* */
+    } else if (/^\{.+\}$/.test(input)) {
+      // console.log(objectParse(input));
     }
+
+    rl.close();
   });
 }
 
