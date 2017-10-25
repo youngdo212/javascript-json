@@ -70,11 +70,9 @@ function parseJSON(JSON) {
         messages.err();
     }
 }
-parseJSON('{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }');
+rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-// rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
+    parseJSON(answer);
 
-//     parseJSON(answer);
-
-//     rl.close();
-// });
+    rl.close();
+});

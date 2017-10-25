@@ -79,10 +79,9 @@ var json_stringify = (function () {
                         partial[i] = str(i, value) || "null";
                     }
 
-
                     v = partial.length === 0 ? "[]" :
-                        mind ? "\n" + mind + "[" + partial.join(",") + "]\n" :
-                        "[" + partial.join(",") + "]";
+                        Number.isInteger(key) ? "\n" + mind + "[" + partial.join(", ") + "]\n" :
+                        "[" + partial.join(", ") + "]";
                     gap = mind;
                     return v;
                 }
@@ -117,6 +116,7 @@ var json_stringify = (function () {
                         }
                     }
                 }
+
 
                 v = partial.length === 0 ?
                     "{}" :
