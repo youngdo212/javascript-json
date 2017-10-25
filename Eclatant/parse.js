@@ -17,6 +17,10 @@ function isBool(input) {
   return input === "true" || input === "false";
 }
 
+function isNum(input) {
+  return !isNaN(parseInt(input));
+}
+
 function arrParse(input) {
   var inputToArray = input.slice(2, -2).split(", ");
   var str = 0;
@@ -27,7 +31,7 @@ function arrParse(input) {
   inputToArray.forEach(function(v) {
     if (isBool(v)) {
       bool += 1;
-    } else if (!isNaN(parseInt(v))) {
+    } else if (isNum(v)) {
       num += 1;
     } else if (typeof v === "string") {
       str += 1;
