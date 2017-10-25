@@ -10,7 +10,7 @@ describe("JSON.parse replacement", () => {
       const result = checkArray(input);
 
       // then
-      expect(result).toEqual({ leng: 7, bool: 0, num: 7, str: 0 });
+      expect(result).toEqual({ leng: 7, bool: 0, num: 7, str: 0, obj: 0 });
     });
 
     it("input []", () => {
@@ -21,7 +21,18 @@ describe("JSON.parse replacement", () => {
       const result = checkArray(input);
 
       // then
-      expect(result).toEqual({ leng: 7, bool: 1, num: 3, str: 3 });
+      expect(result).toEqual({ leng: 7, bool: 1, num: 3, str: 3, obj: 0 });
+    });
+
+    it("input object[]", () => {
+      // given
+      const input = `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true } ]`;
+
+      // when
+      const result = checkArray(input);
+
+      // then
+      expect(result).toEqual({ leng: 2, bool: 0, num: 0, str: 0, obj: 2 });
     });
   });
 
@@ -48,7 +59,7 @@ describe("JSON.parse replacement", () => {
 
       // then
       expect(result).toEqual(
-        `총 7개의 배열 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`
+        `총 7개의 배열 데이터 중에 부울 1개, 숫자 3개, 문자열 3개가 포함되어 있습니다.`
       );
     });
 
@@ -62,8 +73,20 @@ describe("JSON.parse replacement", () => {
 
       // then
       expect(result).toEqual(
-        `총 4개의 객체 데이터 중에 문자열 2개, 숫자 1개, 부울 1개가 포함되어 있습니다.`
+        `총 4개의 객체 데이터 중에 부울 1개, 숫자 1개, 문자열 2개가 포함되어 있습니다.`
       );
+    });
+
+    it("input object[]", () => {
+      // given
+      const input = `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true } ]`;
+      const checkedInput = checkArray(input);
+
+      // when
+      const result = printCheckResult("[]", checkedInput);
+
+      // then
+      expect(result).toEqual(`총 2개의 배열 데이터 중에 객체 2개가 포함되어 있습니다.`);
     });
   });
 
@@ -80,7 +103,8 @@ describe("JSON.parse replacement", () => {
         leng: 4,
         bool: 1,
         num: 1,
-        str: 2
+        str: 2,
+        obj: 0
       });
     });
   });

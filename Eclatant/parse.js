@@ -17,11 +17,29 @@ function isStr(input) {
   return typeof input === "string";
 }
 
+// function isObj(input) {
+// return checkObject(input);
+// return /^\{.+\}$/.test(input);
+// }
+
 function checkArray(input) {
   var inputToArray = input.slice(2, -2).split(", ");
-  var str = 0;
-  var num = 0;
   var bool = 0;
+  var num = 0;
+  var str = 0;
+  var obj = 0;
+
+  var checkObject = input.match(/\{.+?\}/g);
+
+  if (checkObject !== null) {
+    return {
+      leng: checkObject.length,
+      bool,
+      num,
+      str,
+      obj: checkObject.length
+    };
+  }
 
   inputToArray.forEach(function(v) {
     if (isBool(v)) {
@@ -37,23 +55,28 @@ function checkArray(input) {
     leng: inputToArray.length,
     bool,
     num,
-    str
+    str,
+    obj
   };
 }
 
-function printCheckResult(type, { leng, bool, num, str }) {
+function printCheckResult(type, { leng, bool, num, str, obj }) {
   var tempArr = [];
 
-  if (str !== 0) {
-    tempArr.push(`문자열 ${str}개`);
+  if (bool !== 0) {
+    tempArr.push(`부울 ${bool}개`);
   }
 
   if (num !== 0) {
     tempArr.push(`숫자 ${num}개`);
   }
 
-  if (bool !== 0) {
-    tempArr.push(`부울 ${bool}개`);
+  if (str !== 0) {
+    tempArr.push(`문자열 ${str}개`);
+  }
+
+  if (obj !== 0) {
+    tempArr.push(`객체 ${obj}개`);
   }
 
   return `총 ${leng}개의 ${type === "{}"
@@ -65,13 +88,15 @@ function checkObject(input) {
   var bool = 0;
   var num = 0;
   var str = 0;
+  var obj = 0;
 
   var targetArray = input.slice(2, -2).split(", ");
 
   targetArray.map(v => v.split(" : ")).forEach(v => {
-    if (!/^".+"$/.test(v[0])) {
-      throw new Error("잘못된 키입니다.");
-    }
+    // if (!/^".+"$/.test(v[0])) {
+    // throw new Error("잘못된 키입니다.");
+    // return false;
+    // }
 
     if (isBool(v[1])) {
       bool += 1;
@@ -86,7 +111,8 @@ function checkObject(input) {
     leng: targetArray.length,
     bool,
     num,
-    str
+    str,
+    obj
   };
 }
 
@@ -95,11 +121,11 @@ function jsonParse() {
     if (/^\[.+\]$/.test(input)) {
       console.log(printCheckResult("[]", checkArray(input)));
     } else if (/^\{.+\}$/.test(input)) {
-      try {
-        console.log(printCheckResult("{}", checkObject(input)));
-      } catch (err) {
-        console.warn(err);
-      }
+      // try {
+      console.log(printCheckResult("{}", checkObject(input)));
+      // } catch (err) {
+      // console.warn(err);
+      // }
     }
 
     rl.close();
