@@ -71,10 +71,9 @@ function parseJSON(JSON) {
     }
 }
 
-parseJSON('[ 10, "jk", 4, "314", 99, "crong", false ]');
-// rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
+rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-//     jsonParse(answer);
+    parseJSON(answer);
 
-//     rl.close();
-// });
+    rl.close();
+});
