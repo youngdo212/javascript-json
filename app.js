@@ -1,6 +1,8 @@
 "use strict";
 var rl = require('./rl.js');
 var polyfill = require('./polyfill.js');
+var json_parse = require('./json_parse.js');
+
 var messages = {
     err: function () {
         console.log("지원하지 않는 형식을 포함하고 있습니다.");
@@ -59,26 +61,20 @@ function objectParse(object) {
     printResult(type, "객체");
 }
 
-function jsonParse(json) {
+function parseJSON(JSON) {
     try {
-        var parsedJSON = JSON.parse(json);
+        var parsedJSON = json_parse(JSON);
         parsedJSON.toString() === "[object Object]" ? objectParse(parsedJSON) : arrayParse(parsedJSON);
 
-        function replacer(key, value) {
-            if (typeof value === "string") {
-                return undefined;
-            }
-            return value;
-        }
-
-        console.log(JSON.stringify(parsedJSON, replacer, 4));
     } catch (err) {
         messages.err();
     }
 }
-rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-    jsonParse(answer);
+parseJSON('[ 10, "jk", 4, "314", 99, "crong", false ]');
+// rl.question('분석할 JSON 데이터를 입력하세요.\n', (answer) => {
 
-    rl.close();
-});
+//     jsonParse(answer);
+
+//     rl.close();
+// });
