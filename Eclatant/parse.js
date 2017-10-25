@@ -13,6 +13,10 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 
+function isBool(input) {
+  return input === "true" || input === "false";
+}
+
 function arrParse(input) {
   var inputToArray = input.slice(2, -2).split(", ");
   var str = 0;
@@ -21,7 +25,7 @@ function arrParse(input) {
   var tempArr = [];
 
   inputToArray.forEach(function(v) {
-    if (v === "true" || v === "false") {
+    if (isBool(v)) {
       bool += 1;
     } else if (!isNaN(parseInt(v))) {
       num += 1;
