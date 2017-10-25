@@ -1,25 +1,53 @@
-const { arrParse } = require("../parse");
+const { arrayParse, checkArray } = require("../parse");
 
-describe("Parse Test", () => {
-  it("input number[]", () => {
-    // given
-    const input = `[ 10, 21, 4, 314, 99, 0, 72 ]`;
+describe("JSON.parse replace", () => {
+  describe("checkArray(input)", () => {
+    it("input number[]", () => {
+      // given
+      const input = `[ 10, 21, 4, 314, 99, 0, 72 ]`;
 
-    // when
-    const result = arrParse(input);
+      // when
+      const result = checkArray(input);
 
-    // then
-    expect(result).toEqual(`총 7개의 데이터 중에 숫자 7개가 포함되어 있습니다.`);
+      // then
+      expect(result).toEqual({ leng: 7, bool: 0, num: 7, str: 0 });
+    });
+
+    it("input []", () => {
+      // given
+      const input = `[ 10, "jk", 4, "314", 99, "crong", false ]`;
+
+      // when
+      const result = checkArray(input);
+
+      // then
+      expect(result).toEqual({ leng: 7, bool: 1, num: 3, str: 3 });
+    });
   });
 
-  it("input []", () => {
-    // given
-    const input = `[ 10, "jk", 4, "314", 99, "crong", false ]`;
+  describe("arrayParse", () => {
+    it("input number[]", () => {
+      // given
+      const input = `[ 10, 21, 4, 314, 99, 0, 72 ]`;
+      const checkedInput = checkArray(input);
 
-    // when
-    const result = arrParse(input);
+      // when
+      const result = arrayParse(checkedInput);
 
-    // then
-    expect(result).toEqual(`총 7개의 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`);
+      // then
+      expect(result).toEqual(`총 7개의 데이터 중에 숫자 7개가 포함되어 있습니다.`);
+    });
+
+    it("input []", () => {
+      // given
+      const input = `[ 10, "jk", 4, "314", 99, "crong", false ]`;
+      const checkedInput = checkArray(input);
+
+      // when
+      const result = arrayParse(checkedInput);
+
+      // then
+      expect(result).toEqual(`총 7개의 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`);
+    });
   });
 });
