@@ -1,4 +1,4 @@
-const { arrayParse, checkArray } = require("../parse");
+const { arrayParse, checkArray, checkObject } = require("../parse");
 
 describe("JSON.parse replace", () => {
   describe("checkArray(input)", () => {
@@ -48,6 +48,24 @@ describe("JSON.parse replace", () => {
 
       // then
       expect(result).toEqual(`총 7개의 데이터 중에 문자열 3개, 숫자 3개, 부울 1개가 포함되어 있습니다.`);
+    });
+  });
+
+  describe("checkObject", () => {
+    it("input {}", () => {
+      // given
+      const input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`;
+
+      // when
+      const result = checkObject(input);
+
+      // then
+      expect(result).toEqual({
+        leng: 4,
+        bool: 1,
+        num: 1,
+        str: 2
+      });
     });
   });
 });

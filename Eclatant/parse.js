@@ -59,12 +59,45 @@ function arrayParse({ leng, bool, num, str }) {
   return `총 ${leng}개의 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
 }
 
+function checkObject(input) {
+  var bool = 0;
+  var num = 0;
+  var str = 0;
+
+  var targetArray = input.slice(2, -2).split(", ");
+
+  targetArray.map(v => v.split(" : ")).forEach(v => {
+    if (!/^".+"$/.test(v[0])) {
+      throw new Error("잘못된 키입니다.");
+    }
+
+    if (isBool(v[1])) {
+      bool += 1;
+    } else if (isNum(v[1])) {
+      num += 1;
+    } else if (isStr(v[1])) {
+      str += 1;
+    }
+  });
+
+  return {
+    leng: targetArray.length,
+    bool,
+    num,
+    str
+  };
+}
+
 function jsonParse() {
   rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
     if (/^\[.+\]$/.test(input)) {
       console.log(arrayParse(checkArray(input)));
     } else if (/^\{.+\}$/.test(input)) {
-      // console.log(objectParse(checkObject(input)));
+      // try {
+      //   console.log(objectParse(checkObject(input)));
+      // } catch (err) {
+      //   console.warn(err);
+      // }
     }
 
     rl.close();
@@ -76,5 +109,6 @@ jsonParse();
 module.exports = {
   checkArray,
   arrayParse,
+  checkObject,
   jsonParse
 };
