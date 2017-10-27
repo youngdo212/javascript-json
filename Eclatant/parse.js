@@ -17,11 +17,6 @@ function isStr(input) {
   return typeof input === "string";
 }
 
-// function isObj(input) {
-// return checkObject(input);
-// return /^\{.+\}$/.test(input);
-// }
-
 function checkArray(input) {
   var inputToArray = input.slice(2, -2).split(", ");
   var bool = 0;
@@ -93,11 +88,6 @@ function checkObject(input) {
   var targetArray = input.slice(2, -2).split(", ");
 
   targetArray.map(v => v.split(" : ")).forEach(v => {
-    // if (!/^".+"$/.test(v[0])) {
-    // throw new Error("잘못된 키입니다.");
-    // return false;
-    // }
-
     if (isBool(v[1])) {
       bool += 1;
     } else if (isNum(v[1])) {
@@ -121,11 +111,7 @@ function jsonParse() {
     if (/^\[.+\]$/.test(input)) {
       console.log(printCheckResult("[]", checkArray(input)));
     } else if (/^\{.+\}$/.test(input)) {
-      // try {
       console.log(printCheckResult("{}", checkObject(input)));
-      // } catch (err) {
-      // console.warn(err);
-      // }
     }
 
     rl.close();
