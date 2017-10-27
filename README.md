@@ -1,6 +1,5 @@
 # javascript-json
 
-
 ## Array 분석
 - 목적 : 배열의 선언을 문자열로 입력받아 문법이 유효한지 검사하고 입력한 데이터들의 type을 판별하여 각각의 개수를 출력한다.
 
@@ -20,50 +19,91 @@
   4. 배열을 순회하면서 아래 case들을 테스트한다.
     1. double quote로 시작해서 double quote로 끝나는가? //String인지 검사
       - [yes]: double quote를 제외한 값을 string 값으로 결과 배열에 저장.
-      - [no]: Error:'double quote의 위치가 올바르지 않음.' => GOTO(1)
+      - [no]:  GOTO(4.2)
     2. 숫자인가?
       - [yes]: 해당 값을 Number type로 변환하여 결과 배열에 저장.
-      - [no]: => GOTO(5.3)
+      - [no]: => GOTO(4.3)
     3. true || false?
       - [yes]: 해당 값을 boolean type으로 변환하여 결과 배열에 저장.
-      - [no]: => GOTO(5.4)
+      - [no]: => GOTO(4)
   5. 결과 배열 출력.
 
-- 문법 검사 방법 (해당 문자 바로 뒤에 올 수 있는 값인지 검사함)
- - '['
-   {' ', 숫자, 따옴표, ']'}
+- syntax 검사 방법
+  아래 상태에 따라 다음에 읽은 문자열이 유효한지 아닌지 판별함.
+  1. initial (초기 상태)
+    - ' ' => initial
+    - '[' => wait input
 
-  - 콤마
-    {' ', 숫자, 따옴표}
+  2. wait input (입력 대기)
+    - ' ' => wait input
+    - '-' => encounter sign
+    - '0' => encounter zero
+    - '1~9' => encounter nature number
+    - '\'' => encounter single quote
+    - '/"' => encounter double quote
+    - ']' => end
 
-  - 열리는 따옴표
-    {모든 값, '\"'}
+  3. wait continue or end (추가 입력 혹은 종료)
+    - ' ' => encounter space
+    - ',' => encounter comma
+    - ']' => end
 
-  - 닫히는 따옴표
-    {comma, ' ', ']'}
+  4. encounter sign (부호 입력)
+    - '0' => encounter zero
+    - '1~9' => encounter nature number
 
-  - '-' (음수 부호)
-    {0, 1~9}
+  5. encounter zero (0 입력)
+    - '.' => encounter dot
+    - ' ' => wait continue or end
+    - ',' => encounter comma
+    - ']' => end
 
-  - 0 (첫자리가 0인 경우)
-    {dot, comma, ']'}
+  6. encounter comma (콤마 입력)
+    - ' ' => encounter comma
+    - '-' => encounter sign
+    - '0' => encounter zero
+    - '1~9' => encounter nature number
+    - '\'' => encounter single quote
+    - '/"' => encounter double quote
 
-  - 1~9
-    { 0~9, dot, e, comma, ']' }
-    - 0~9
-      { 0~9, dot, e, comma, ']' }
+  7. encounter dot (점 입력)
+    - '0~9' => encounter fractional parts
 
-  - dot
-    { 0~9 }
-      - 0~9
-      { e, comma, ']' }
+  8. encounter fractional parts (실수부 입력)
+    - '0~9' => encounter fractional parts
+    - 'e' => encounter exponent symbol
+    - ' ' => encounter space
+    - ',' => encounter comma
+    - ']' => end
 
-  - e
-    {-, +}
-      - '-' & '+'
-      {0, 1~9}
-      - 0
-        {comma, 1~9, ']' }
+  9. encounter nature number (자연수 입력)
+    - '0~9' => encounter nature number
+    - 'e' => encounter exponent symbol
+    - '.' => encounter dot
+    - ']' => end
 
-      - 1~9
-        {comma, 0~9, ']'}
+  10. encounter exponent symbol (e 입력)
+    - '0~9' => encounter exponent symbol
+    - '+' => encounter sign for exponent
+    - '-' => encounter sign for exponent
+
+  11. encounter sign for exponent (e-notation 지수부 입력 최소한 숫자 1개 값이 들어오는지 검증)
+    - '0~9' => encounter exponent value
+
+  12. encounter exponent value (e-notation 지수부 입력)
+    - '0~9' => encounter exponent value
+    - ' ' => encounter space
+    - ',' => encounter comma
+    - ']' => end
+
+  13. encounter single quote (따옴표 입력)
+    - '\*' => encounter single quote
+    - '\'' => wait continue or end
+
+  14. encounter double quote (쌍따옴표 입력)
+    - '\*' => encounter double quote
+    - '\'' => wait continue or end
+
+  15. end (종료)
+
+
