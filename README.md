@@ -34,8 +34,8 @@
     - ' ' => initial
     - '[' => wait input
 
-  2. wait input (입력 대기)
-    - ' ' => wait input
+  2. waiting input (입력 대기)
+    - ' ' => waiting input
     - '-' => encounter sign
     - '0' => encounter zero
     - '1~9' => encounter nature number
@@ -43,8 +43,8 @@
     - '/"' => encounter double quote
     - ']' => end
 
-  3. wait continue or end (추가 입력 혹은 종료)
-    - ' ' => encounter space
+  3. waiting extra input (추가 입력 혹은 종료)
+    - ' ' => waiting extra input
     - ',' => encounter comma
     - ']' => end
 
@@ -54,7 +54,7 @@
 
   5. encounter zero (0 입력)
     - '.' => encounter dot
-    - ' ' => wait continue or end
+    - ' ' => wating extra input
     - ',' => encounter comma
     - ']' => end
 
@@ -64,7 +64,7 @@
     - '0' => encounter zero
     - '1~9' => encounter nature number
     - '\'' => encounter single quote
-    - '/"' => encounter double quote
+    - '\"' => encounter double quote
 
   7. encounter dot (점 입력)
     - '0~9' => encounter fractional parts
@@ -72,7 +72,7 @@
   8. encounter fractional parts (실수부 입력)
     - '0~9' => encounter fractional parts
     - 'e' => encounter exponent symbol
-    - ' ' => encounter space
+    - ' ' => wating extra input
     - ',' => encounter comma
     - ']' => end
 
@@ -80,29 +80,31 @@
     - '0~9' => encounter nature number
     - 'e' => encounter exponent symbol
     - '.' => encounter dot
+    - ' ' => wating extra input
+    - ',' => encounter comma
     - ']' => end
 
   10. encounter exponent symbol (e 입력)
     - '0~9' => encounter exponent symbol
-    - '+' => encounter sign for exponent
-    - '-' => encounter sign for exponent
+    - '+' => encounter sign of exponent
+    - '-' => encounter sign of exponent
 
-  11. encounter sign for exponent (e-notation 지수부 입력 최소한 숫자 1개 값이 들어오는지 검증)
+  11. encounter sign of exponent (e-notation 지수부 입력 최소한 숫자 1개 값이 들어오는지 검증)
     - '0~9' => encounter exponent value
 
   12. encounter exponent value (e-notation 지수부 입력)
     - '0~9' => encounter exponent value
-    - ' ' => encounter space
+    - ' ' => wating extra input
     - ',' => encounter comma
     - ']' => end
 
   13. encounter single quote (따옴표 입력)
     - '\*' => encounter single quote
-    - '\'' => wait continue or end
+    - '\'' => wating extra input
 
   14. encounter double quote (쌍따옴표 입력)
     - '\*' => encounter double quote
-    - '\'' => wait continue or end
+    - '\'' => wating extra input
 
   15. end (종료)
 
