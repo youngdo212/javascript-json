@@ -1,6 +1,9 @@
+var constants = require('./constants');
+var characters = constants.characters;
+var states = constants.states;
+
 var parser = {
     result: [],
-
     checkTypeOfString: function(token) {
         /* TODO
          * - {token}값이 String 값인지 여부를 반환
@@ -30,16 +33,7 @@ var parser = {
         return input;
     },
     parse: function(input) {
-        var tokens = removeWhiteSpcaces(input).split('$');
 
-        tokens.forEach(function(token) {
-
-            // 1. checkTypeOfString()
-            // 2. checkTypeOfNumber()
-            // 3. checkTypeOfBoolean()
-            // 4. throw Error
-
-        }.bind(this));
 
         return this.result;
     }

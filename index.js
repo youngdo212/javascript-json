@@ -1,4 +1,5 @@
 var readline = require('readline');
+var validator = require('./validator');
 var parser = require('./parser');
 
 var rl = readline.createInterface({
@@ -8,8 +9,10 @@ var rl = readline.createInterface({
 
 rl.on('line', function(input) {
     try {
-        var result = parser.parse(input);
-        console.log(result);
+        if (validator.validate(input)) {
+            var result = parser.parse(input);
+            console.log(result);
+        }
     } catch(exception) {
         console.log(exception.message);
     }
