@@ -4,14 +4,25 @@ var characters = {
     backslash: '\\',
     comma: ',',
     space: ' ',
+    dot: '.',
     bracketStart: '[',
     bracketEnd: ']',
     braceStart: '{',
     braceEnd: '}',
     numbers: ['0','1','2','3','4','5','6','7','8','9'],
+    zero: '0',
     plus: '+',
     minus: '-',
-    exponent: 'e'
+    exponent: 'e',
+    isNumber: function(char) {
+        return this.numbers.indexOf(char) !== -1;
+    },
+    isSignCharacter: function(char) {
+        return (char === this.plus || char === this.minus);
+    },
+    isQuote: function(char) {
+        return (char === this.singleQuote || char === this.doubleQuote);
+    }
 };
 
 var states = {
@@ -29,7 +40,12 @@ var states = {
     ENCOUNTER_EXPONENT_VALUE: 11,
     ENCOUNTER_SINGLE_QUOTE: 12,
     ENCOUNTER_DOUBLE_QUOTE: 13,
-    END: 14
+    END: 14,
+    isNotAllowedSpaceCharacter: function (state) {
+        return (state !== this.INITIAL &&
+            state !== this.WATING_INPUT &&
+            state !== this.ENCOUNTER_COMMA);
+    }
 };
 
 var validCharactersMap = [
