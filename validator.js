@@ -4,16 +4,17 @@ var states = constants.states;
 var validCharactersMap = constants.validCharactersMap;
 
 var validator = {
-    state: states.INITIAL,
-    index: 0,
-    isNumber: function(char) {
-        return characters.numbers.indexOf(char) !== -1
-    },
-    isSignCharacter: function(char) {
-        return char === characters.plus || char === characters.minus;
-    },
-    isQuote: function(char) {
-        return char === characters.singleQuote || char === characters.doubleQuote;
+    state: null,
+    input: null,
+    index: null,
+    currentChar: null,
+    init: function(input) {
+        this.input = input;
+        this.index =  0;
+        this.currentChar = this.input[this.index];
+        this.state = states.INITIAL;
+
+        return this;
     },
     findIndexOfNextQuote: function(str, quote) {
         var lastIndex = str.length - 1;
@@ -34,57 +35,74 @@ var validator = {
         }
         return foundIndex;
     },
-    validate: function (input) {
+    encounterQuote: function() {
+        var restOfInput = this.input.substr(this.index + 1, this.input.length - 1);
+        var indexOfNextQuote = this.findIndexOfNextQuote(restOfInput, this.currentChar);
+
+        if (indexOfNextQuote === -1) {
+            throw Error('index:' + this.index + ' 에서 시작하는 ' + this.currentChar + '가 닫히지 않음.')
+        }
+
+        this.state = states.WATING_EXTRA_INPUT;
+        this.index += indexOfNextQuote + 2;
+    },
+    encounterNumber: function() {
+        switch (this.state) {
+            case states.ENCOUNTER_DOT:
+                this.state = states.ENCOUNTER_FRACTIONAL_PARTS;
+            break;
+
+            case states.ENCOUNTER_SIGN_OF_EXPONENT:
+            case states.ENCOUNTER_EXPONENT_SYMBOL:
+                this.state = states.ENCOUNTER_EXPONENT_VALUE;
+            break;
+
+            case states.WATING_INPUT:
+            case states.ENCOUNTER_SIGN:
+            case states.ENCOUNTER_COMMA:
+                if (this.currentChar === characters.zero) {
+                    this.state = states.ENCOUNTER_ZERO;
+                } else {
+                    this.state = states.ENCOUNTER_NATURE_NUMBER;
+                }
+            break;
+        }
+    },
+    run: function () {
         while (this.state !== states.END) {
-            var thisChar = input[this.index];
+            this.currentChar = this.input[this.index];
             var validCharacters = validCharactersMap[this.state];
 
-            //string 처리 먼저
-            if (this.isQuote(thisChar)) {
-                if (this.state === states.QUOTES_OPENED) {
-                    var restOfInput = input.substr(this.index + 1, input.length - 1);
-                    var indexOfNextQuote = this.findIndexOfNextQuote(restOfInput, thisChar);
-
-                    if (indexOfNextQuote === -1) {
-                        throw Error('index:' + this.index + ' 에서 시작하는 ' + thisChar + '가 닫히지 않음.')
-                    }
-
-                    this.state = states.WATING_EXTRA_INPUT;
-                    this.index += indexOfNextQuote + 2;
-                } else {
-                    this.state = states.QUOTES_OPENED;
-                    this.index++;
-                }
-
+            if (characters.isQuote(this.currentChar)) {
+                this.encounterQuote();
                 continue;
             }
 
-            if (validCharacters.indexOf(thisChar) === -1) {
+            if (validCharacters.indexOf(this.currentChar) === -1) {
                 throw Error('Syntax Error!!!');
             }
 
-            if (thisChar === characters.bracketStart) { // [
+            if (characters.isNumber(this.currentChar)) {
+                this.encounterNumber();
+            } else if (characters.isSignCharacter(this.currentChar)) {
+                if (this.state === states.ENCOUNTER_EXPONENT_SYMBOL) {
+                    this.state = states.ENCOUNTER_SIGN_OF_EXPONENT;
+                } else {
+                    this.state = states.ENCOUNTER_SIGN;
+                }
+            } else if (this.currentChar === characters.bracketStart) {
                 this.state = states.WATING_INPUT;
-            } else if (thisChar === characters.space) {
-                if (this.state !== states.INITIAL &&
-                    this.state !== states.WATING_INPUT &&
-                    this.state !== states.WATING_EXTRA_INPUT &&
-                    this.state !== states.ENCOUNTER_COMMA) {
-
+            } else if (this.currentChar === characters.comma) {
+                this.state = states.ENCOUNTER_COMMA;
+            } else if (this.currentChar === characters.space) {
+                if (states.isNotAllowedSpaceCharacter(this.state)) {
                     this.state = states.WATING_EXTRA_INPUT;
                 }
-            } else if (thisChar === characters.zero) { // num
-                if (this.state === states.AFTER_SPACE) {
-                    throw Error ('공백 뭐냐');
-                }
-                this.state = states.AFTER_NUMBER;
-            } else if (thisChar === characters.comma) { // ,
-                this.state = states.AFTER_COMMA;
-            } else if (this.isSignCharacter(thisChar)) { // - or +
-                this.state = states.AFTER_SIGN;
-            } else if (thisChar === characters.exponent) { // e
-                this.state = states.AFTER_EXPONENT;
-            } else if (thisChar === characters.bracketEnd) { // ]
+            } else if (this.currentChar === characters.exponent) {
+                this.state = states.ENCOUNTER_EXPONENT_SYMBOL;
+            } else if (this.currentChar === characters.dot) {
+                this.state = states.ENCOUNTER_DOT;
+            } else if (this.currentChar === characters.bracketEnd) {
                 this.state = states.END;
             }
 

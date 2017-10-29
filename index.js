@@ -9,7 +9,9 @@ var rl = readline.createInterface({
 
 rl.on('line', function(input) {
     try {
-        if (validator.validate(input)) {
+        var isValidInput = validator.init(input).run();
+
+        if (isValidInput) {
             var result = parser.parse(input);
             console.log(result);
         }
