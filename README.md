@@ -106,6 +106,12 @@
     - '\*' => encounter double quote
     - '\'' => wating extra input
 
-  15. end (종료)
+  15. encounter boolean true ('t' 입력)
+    - 'true' 문자열과 일치 => wating extra input
+    - 'true' 문자열과 일치하지 않음 => Error
 
+  16. encounter boolean false ('f' 입력)
+    - 'false' 문자열과 일치 => wating extra input
+    - 'false' 문자열과 일치하지 않음 => Error
 
+  17. end (종료)

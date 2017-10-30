@@ -46,6 +46,30 @@ var validator = {
         this.state = states.WATING_EXTRA_INPUT;
         this.index += indexOfNextQuote + 2;
     },
+    encounterBoolean: function() {
+        var keyword = null;
+        var nextIndex = 0;
+        var inputToken = null;
+
+        if (this.currentChar === 't') {
+            keyword = 'true';
+            nextIndex = this.index + keyword.length;
+            inputToken = this.input.substr(this.index, keyword.length);
+        } else {
+            keyword = 'false';
+            nextIndex = this.index + keyword.length;
+            inputToken = this.input.substr(this.index, keyword.length);
+        }
+
+        debugger;
+
+        if (keyword === inputToken) {
+            this.state = states.WATING_EXTRA_INPUT;
+            this.index = nextIndex;
+        } else {
+            throw Error('Syntax Error!');
+        }
+    },
     encounterNumber: function() {
         switch (this.state) {
             case states.ENCOUNTER_DOT:
@@ -70,6 +94,8 @@ var validator = {
     },
     run: function () {
         while (this.state !== states.END) {
+            debugger;
+
             this.currentChar = this.input[this.index];
             var validCharacters = validCharactersMap[this.state];
 
@@ -77,6 +103,13 @@ var validator = {
                 this.encounterQuote();
                 continue;
             }
+
+            if (characters.isBoolean(this.currentChar) ) {
+                this.encounterBoolean();
+                continue;
+            }
+
+            debugger;
 
             if (validCharacters.indexOf(this.currentChar) === -1) {
                 throw Error('Syntax Error!!!');
@@ -108,6 +141,8 @@ var validator = {
 
             this.index++;
         }
+
+        return this.state === states.END;
     }
 };
 

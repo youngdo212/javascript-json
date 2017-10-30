@@ -22,6 +22,9 @@ var characters = {
     },
     isQuote: function(char) {
         return (char === this.singleQuote || char === this.doubleQuote);
+    },
+    isBoolean: function(char) {
+        return char === 't' || char === 'f';
     }
 };
 
@@ -40,7 +43,9 @@ var states = {
     ENCOUNTER_EXPONENT_VALUE: 11,
     ENCOUNTER_SINGLE_QUOTE: 12,
     ENCOUNTER_DOUBLE_QUOTE: 13,
-    END: 14,
+    ENCOUNTER_BOOLEAN_TRUE: 14,
+    ENCOUNTER_BOOLEAN_FALSE: 15,
+    END: 16,
     isNotAllowedSpaceCharacter: function (state) {
         return (state !== this.INITIAL &&
             state !== this.WATING_INPUT &&
