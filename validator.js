@@ -61,8 +61,6 @@ var validator = {
             inputToken = this.input.substr(this.index, keyword.length);
         }
 
-        debugger;
-
         if (keyword === inputToken) {
             this.state = states.WATING_EXTRA_INPUT;
             this.index = nextIndex;
@@ -94,8 +92,6 @@ var validator = {
     },
     run: function () {
         while (this.state !== states.END) {
-            debugger;
-
             this.currentChar = this.input[this.index];
             var validCharacters = validCharactersMap[this.state];
 
@@ -108,8 +104,6 @@ var validator = {
                 this.encounterBoolean();
                 continue;
             }
-
-            debugger;
 
             if (validCharacters.indexOf(this.currentChar) === -1) {
                 throw Error('Syntax Error!!!');

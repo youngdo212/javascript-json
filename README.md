@@ -54,6 +54,7 @@
 
   5. encounter zero (0 입력)
     - '.' => encounter dot
+    - 'e' => encounter exponent symbol
     - ' ' => wating extra input
     - ',' => encounter comma
     - ']' => end
