@@ -13,6 +13,8 @@ var characters = {
     zero: '0',
     plus: '+',
     minus: '-',
+    true: 't',
+    false: 'f',
     exponent: 'e',
     isNumber: function(char) {
         return this.numbers.indexOf(char) !== -1;
@@ -24,50 +26,83 @@ var characters = {
         return (char === this.singleQuote || char === this.doubleQuote);
     },
     isBoolean: function(char) {
-        return char === 't' || char === 'f';
+        return char === this.true || char === this.false;
     }
 };
 
-var states = {
-    INITIAL: 0,
-    WATING_INPUT: 1,
-    WATING_EXTRA_INPUT: 2,
-    ENCOUNTER_SIGN: 3,
-    ENCOUNTER_ZERO: 4,
-    ENCOUNTER_COMMA: 5,
-    ENCOUNTER_DOT: 6,
-    ENCOUNTER_FRACTIONAL_PARTS: 7,
-    ENCOUNTER_NATURE_NUMBER: 8,
-    ENCOUNTER_EXPONENT_SYMBOL: 9,
-    ENCOUNTER_SIGN_OF_EXPONENT: 10,
-    ENCOUNTER_EXPONENT_VALUE: 11,
-    ENCOUNTER_SINGLE_QUOTE: 12,
-    ENCOUNTER_DOUBLE_QUOTE: 13,
-    ENCOUNTER_BOOLEAN_TRUE: 14,
-    ENCOUNTER_BOOLEAN_FALSE: 15,
-    END: 16,
-    isNotAllowedSpaceCharacter: function (state) {
-        return (state !== this.INITIAL &&
-            state !== this.WATING_INPUT &&
-            state !== this.ENCOUNTER_COMMA);
+var states = [
+    {
+        name: 'INITIAL',
+        validCharacters: [' ', '[', ]
+    },
+    {
+        name: 'WATING_INPUT',
+        validCharacters: [' ', ',', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"', ']' ]
+    },
+    {
+        name: 'WATING_ADDITIONAL_INPUT',
+        validCharacters: [' ', ',', ']']
+    },
+    {
+        name: 'ENCOUNTER_SIGN',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    },
+    {
+        name: 'ENCOUNTER_ZERO',
+        validCharacters: [' ', '.', 'e', ',', ']']
+    },
+    {
+        name: 'ENCOUNTER_COMMA',
+        validCharacters: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"']
+    },
+    {
+        name: 'ENCOUNTER_DOT',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    },
+    {
+        name: 'ENCOUNTER_FRACTIONAL_PARTS',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', ',', ']']
+    },
+    {
+        name: 'ENCOUNTER_NATURE_NUMBER',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', '.', ',', ']']
+    },
+    {
+        name: 'ENCOUNTER_EXPONENT_SYMBOL',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+    },
+    {
+        name: 'ENCOUNTER_SIGN_OF_EXPONENT',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    },
+    {
+        name: 'ENCOUNTER_EXPONENT_VALUE',
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', ']']
+    },
+    {
+        name: 'ENCOUNTER_SINGLE_QUOTE'
+    },
+    {
+        name: 'ENCOUNTER_DOUBLE_QUOTE'
+    },
+    {
+        name: 'ENCOUNTER_BOOLEAN_TRUE'
+    },
+    {
+        name: 'ENCOUNTER_BOOLEAN_FALSE'
+    },
+    {
+        name: 'END'
     }
-};
-
-var validCharactersMap = [
-    [' ', '[', ],
-    [' ', ',', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"', ']' ],
-    [' ', ',', ']'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    [' ', '.', 'e', ',', ']'],
-    [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', ',', ']'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', '.', ',', ']'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', ']']
 ];
+
+states.getStateByName = function(name) {
+    for (var i = 0, len = this.length; i < len; i++) {
+        if (this[i].name === name) {
+            return this[i];
+        }
+    }
+};
 
 module.exports.characters = characters;
 module.exports.states = states;
-module.exports.validCharactersMap = validCharactersMap;

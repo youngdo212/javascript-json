@@ -1,6 +1,5 @@
 var constants = require('./constants');
 var characters = constants.characters;
-var states = constants.states;
 
 var parser = {
     index: null,
@@ -12,6 +11,7 @@ var parser = {
         var nextIndex = this.findIndexOfNextQuote(restOfInput, this.currentChar);
 
         var stringToken = this.input.substr(this.index + 1, nextIndex);
+
         this.resultObject.push(stringToken);
         this.index += nextIndex + 2;
     },
@@ -20,7 +20,7 @@ var parser = {
         var nextIndex = 0;
         var inputToken = null;
 
-        if (this.currentChar === 't') {
+        if (this.currentChar === characters.true) {
             nextIndex = 4;
             inputToken = this.input.substr(this.index, nextIndex);
             this.resultObject.push(true);

@@ -43,8 +43,8 @@
     - '/"' => encounter double quote
     - ']' => end
 
-  3. waiting extra input (추가 입력 혹은 종료)
-    - ' ' => waiting extra input
+  3. waiting additional input (추가 입력 혹은 종료)
+    - ' ' => waiting additional input
     - ',' => encounter comma
     - ']' => end
 
@@ -55,7 +55,7 @@
   5. encounter zero (0 입력)
     - '.' => encounter dot
     - 'e' => encounter exponent symbol
-    - ' ' => wating extra input
+    - ' ' => wating additional input
     - ',' => encounter comma
     - ']' => end
 
@@ -73,7 +73,7 @@
   8. encounter fractional parts (실수부 입력)
     - '0~9' => encounter fractional parts
     - 'e' => encounter exponent symbol
-    - ' ' => wating extra input
+    - ' ' => wating additional input
     - ',' => encounter comma
     - ']' => end
 
@@ -81,7 +81,7 @@
     - '0~9' => encounter nature number
     - 'e' => encounter exponent symbol
     - '.' => encounter dot
-    - ' ' => wating extra input
+    - ' ' => wating additional input
     - ',' => encounter comma
     - ']' => end
 
@@ -95,24 +95,24 @@
 
   12. encounter exponent value (e-notation 지수부 입력)
     - '0~9' => encounter exponent value
-    - ' ' => wating extra input
+    - ' ' => wating additional input
     - ',' => encounter comma
     - ']' => end
 
   13. encounter single quote (따옴표 입력)
-    - 다음 따옴표 찾아서 건너뜀 => wating extra input
+    - 다음 따옴표 찾아서 건너뜀 => wating additional input
     - 따옴표 못찾으면 Error
 
   14. encounter double quote (쌍따옴표 입력)
-    - 다음 쌍따옴표 찾아서 건너뜀 => wating extra input
+    - 다음 쌍따옴표 찾아서 건너뜀 => wating additional input
     - 따옴표 못찾으면 Error
 
   15. encounter boolean true ('t' 입력)
-    - 'true' 문자열과 일치 => wating extra input
+    - 'true' 문자열과 일치 => wating additional input
     - 'true' 문자열과 일치하지 않음 => Error
 
   16. encounter boolean false ('f' 입력)
-    - 'false' 문자열과 일치 => wating extra input
+    - 'false' 문자열과 일치 => wating additional input
     - 'false' 문자열과 일치하지 않음 => Error
 
   17. end (종료)
