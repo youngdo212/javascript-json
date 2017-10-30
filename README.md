@@ -100,12 +100,12 @@
     - ']' => end
 
   13. encounter single quote (따옴표 입력)
-    - '\*' => encounter single quote
-    - '\'' => wating extra input
+    - 다음 따옴표 찾아서 건너뜀 => wating extra input
+    - 따옴표 못찾으면 Error
 
   14. encounter double quote (쌍따옴표 입력)
-    - '\*' => encounter double quote
-    - '\'' => wating extra input
+    - 다음 쌍따옴표 찾아서 건너뜀 => wating extra input
+    - 따옴표 못찾으면 Error
 
   15. encounter boolean true ('t' 입력)
     - 'true' 문자열과 일치 => wating extra input
