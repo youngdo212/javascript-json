@@ -12,7 +12,7 @@ rl.on('line', function(input) {
         var isValidInput = validator.init(input).run();
 
         if (isValidInput) {
-            var result = parser.parse(input);
+            var result = parser.init(input).parse();
             console.log(result);
         }
     } catch(exception) {

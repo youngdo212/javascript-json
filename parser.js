@@ -3,39 +3,107 @@ var characters = constants.characters;
 var states = constants.states;
 
 var parser = {
-    result: [],
-    checkTypeOfString: function(token) {
-        /* TODO
-         * - {token}값이 String 값인지 여부를 반환
-         */
+    index: null,
+    input: null,
+    currentChar: null,
+    resultObject: [],
+    getStringToken: function() {
+        var restOfInput = this.input.substr(this.index + 1);
+        var nextIndex = this.findIndexOfNextQuote(restOfInput, this.currentChar);
 
-        return false;
+        var stringToken = this.input.substr(this.index + 1, nextIndex);
+        this.resultObject.push(stringToken);
+        this.index += nextIndex + 2;
     },
-    checkTypeOfNumber: function(token) {
-        /* TODO
-         * - {token}값이 Number 값인지 여부를 반환
-         */
+    getBooleanToken: function() {
+        var keyword = null;
+        var nextIndex = 0;
+        var inputToken = null;
 
-        return false;
+        if (this.currentChar === 't') {
+            nextIndex = 4;
+            inputToken = this.input.substr(this.index, nextIndex);
+            this.resultObject.push(true);
+        } else {
+            nextIndex = 5;
+            inputToken = this.input.substr(this.index, nextIndex);
+            this.resultObject.push(false);
+        }
+
+        this.index += nextIndex;
     },
-    checkTypeOfBoolean: function(token) {
-        /* TODO
-         * - {token}값이 Boolean 값인지 여부를 반환
-         */
+    getNumberToken: function() {
+        var restOfInput = this.input.substr(this.index);
 
-        return false;
+        var indexOfNextComma = restOfInput.indexOf(characters.comma);
+        var indexOfNextSpace = restOfInput.indexOf(characters.space);
+        var indexOfBracketEnd = restOfInput.indexOf(characters.bracketEnd);
+
+        var nextIndex = 0;
+
+        if (indexOfNextComma === -1 && indexOfNextSpace === -1) {
+            nextIndex = indexOfBracketEnd;
+        } else if (indexOfNextComma === -1) {
+            nextIndex = indexOfNextSpace;
+        } else if (indexOfNextSpace === -1) {
+            nextIndex = indexOfNextSpace;
+        } else {
+            nextIndex = (indexOfNextComma < indexOfNextSpace) ? indexOfNextComma : indexOfNextSpace;
+        }
+
+        var numberToken = this.input.substr(this.index, nextIndex);
+
+        this.resultObject.push(new Number(numberToken).valueOf());
+        this.index += nextIndex;
     },
-    removeWhiteSpcaces: function(input) {
-        /* TODO
-         * - {input}값을 순회하며 double quotes내에 존재하는 공백을 제외한 모든 공백을 제거한다.
-         */
+    findIndexOfNextQuote: function(str, quote) {
+        var foundIndex = str.indexOf(quote);
 
-        return input;
+        if (foundIndex === -1) {
+            return -1;
+        }
+
+        if (foundIndex > 0 && str[foundIndex - 1] === characters.backslash) {
+            var nextIndex = findIndexOfNextQuote(str.substr(foundIndex + 1), quote);
+
+            if (nextIndex === -1) {
+                foundIndex = -1;
+            } else {
+                foundIndex += nextIndex + 1;
+            }
+        }
+        return foundIndex;
     },
-    parse: function(input) {
+    init: function(input) {
+        this.index = 0;
+        this.input = input;
+        this.currentChar = this.input[this.index];
 
+        return this;
+    },
+    parse: function() {
+        while (this.input[this.index] !== characters.bracketEnd) {
+            this.currentChar = this.input[this.index];
 
-        return this.result;
+            if (characters.isQuote(this.currentChar)) {
+                this.getStringToken();
+                continue;
+            }
+
+            if (characters.isBoolean(this.currentChar)) {
+                this.getBooleanToken();
+                continue;
+            }
+
+            if (characters.isNumber(this.currentChar)) {
+                this.getNumberToken();
+                continue;
+            }
+
+            this.index++;
+        }
+
+        return this.resultObject;
     }
 };
 
