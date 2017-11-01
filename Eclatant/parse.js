@@ -5,6 +5,14 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 
+var check = {
+  '"': -1,
+  ":": -1,
+  key: -1,
+  curly: -1,
+  bracket: -1
+};
+
 function isBool(input) {
   return input === "true" || input === "false";
 }
@@ -15,6 +23,14 @@ function isNum(input) {
 
 function isStr(input) {
   return typeof input === "string";
+}
+
+function isArray(input) {
+  return /^\[.+\]$/.test(input);
+}
+
+function isObject(input) {
+  return /^\{.+\}$/.test(input);
 }
 
 function checkArray(input) {
@@ -55,30 +71,6 @@ function checkArray(input) {
   };
 }
 
-function printCheckResult(type, { leng, bool, num, str, obj }) {
-  var tempArr = [];
-
-  if (bool !== 0) {
-    tempArr.push(`부울 ${bool}개`);
-  }
-
-  if (num !== 0) {
-    tempArr.push(`숫자 ${num}개`);
-  }
-
-  if (str !== 0) {
-    tempArr.push(`문자열 ${str}개`);
-  }
-
-  if (obj !== 0) {
-    tempArr.push(`객체 ${obj}개`);
-  }
-
-  return `총 ${leng}개의 ${type === "{}"
-    ? "객체"
-    : type === "[]" ? "배열" : ""} 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
-}
-
 function checkObject(input) {
   var bool = 0;
   var num = 0;
@@ -106,23 +98,50 @@ function checkObject(input) {
   };
 }
 
-function jsonParse() {
-  rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
-    if (/^\[.+\]$/.test(input)) {
-      console.log(printCheckResult("[]", checkArray(input)));
-    } else if (/^\{.+\}$/.test(input)) {
-      console.log(printCheckResult("{}", checkObject(input)));
-    }
+function printCheckResult(type, { leng, bool, num, str, obj }) {
+  var tempArr = [];
 
-    rl.close();
+  if (bool !== 0) {
+    tempArr.push(`부울 ${bool}개`);
+  }
+
+  if (num !== 0) {
+    tempArr.push(`숫자 ${num}개`);
+  }
+
+  if (str !== 0) {
+    tempArr.push(`문자열 ${str}개`);
+  }
+
+  if (obj !== 0) {
+    tempArr.push(`객체 ${obj}개`);
+  }
+
+  return `총 ${leng}개의 ${type === "{}"
+    ? "객체"
+    : type === "[]" ? "배열" : ""} 데이터 중에 ${tempArr.join(", ")}가 포함되어 있습니다.`;
+}
+
+function IO() {
+  rl.question("분석할 JSON 데이터를 입력하세요.\n", function(input) {
+    controller(input);
   });
 }
 
-jsonParse();
+function controller(response) {
+  if (isArray) {
+    console.log(printCheckResult("[]", checkArray(response)));
+  } else if (isObject) {
+    console.log(printCheckResult("{}", checkObject(response)));
+  }
+
+  rl.close();
+}
+
+IO();
 
 module.exports = {
   printCheckResult,
   checkArray,
-  checkObject,
-  jsonParse
+  checkObject
 };
