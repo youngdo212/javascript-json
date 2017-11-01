@@ -2,21 +2,17 @@
 
 var readline = require('./config/readline')();
 var common = require('./src/common');
-var processer = require('./src/command-processer');
+var parser = require('./src/jsonParser');
 
 
 (function () {
   common.messages.waitInsert();
   readline.prompt();
 
-  readline.on('line', function (command) {
-    processer.setCommand(command)
-
-    if (processer.verifyCommand()) {
-      processer.processCommand();
-    } else {
-      common.messages.commandError();
-    }
+  readline.on('line', function (insert) {
+    var dataCount = parser(insert);
+    common.messages.jsonCount(dataCount);
+    common.messages.waitInsert();
     readline.prompt();
   });
 })();
