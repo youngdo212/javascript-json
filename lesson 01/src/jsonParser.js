@@ -60,8 +60,11 @@ var parser = (function () {
           case ' ':
             break;
           case ']':
-            typeStack.pop();
+            var result = parseNumOrBool(currentData);
+            currentObject.push(result);
             currentObject.push("array end");
+            typeStack.pop();
+            break;
           case ',':
             var result = parseNumOrBool(currentData);
             currentObject.push(result);
