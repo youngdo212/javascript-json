@@ -11,7 +11,6 @@ var parser = (function () {
 
   var parseByLetter = function (insertedString) {
     var typeStack = [];
-    var currentLetter = "";
     var currentData = "";
     var currentObject = [];
 
@@ -20,33 +19,33 @@ var parser = (function () {
         switch (insertedString[i]) {
           case "[":
             typeStack.push("array");
+            currentObject.push("array start");
             break;
           case " ":
             break;
           default:
             break;
         }
-
-      } else if (typeStack[typeStack.length - 1] === 'array') {
+      } else if (typeStack[typeStack.length - 1] === "array") {
         switch (insertedString[i]) {
           case ']':
             typeStack.pop();
-            currentObject.push('array');
+            currentObject.push("array end");
             break;
           case '"':
-            typeStack.push('string');
+            typeStack.push("string");
             currentData = [];
             break;
           case ' ':
           case ',':
             break;
           default:
-            typeStack.push('numberOrBool');
+            typeStack.push("numberOrBool");
             currentData = [];
             currentData += insertedString[i];
             break;
         }
-      } else if (typeStack[typeStack.length - 1] === 'string') {
+      } else if (typeStack[typeStack.length - 1] === "string") {
         switch (insertedString[i]) {
           case '"':
             currentObject.push(currentData);
@@ -60,12 +59,10 @@ var parser = (function () {
         switch (insertedString[i]) {
           case ' ':
             break;
-          case ',':
-            var result = parseNumOrBool(currentData);
-            currentObject.push(result);
-            typeStack.pop();
-            break;
           case ']':
+            typeStack.pop();
+            currentObject.push("array end");
+          case ',':
             var result = parseNumOrBool(currentData);
             currentObject.push(result);
             typeStack.pop();
