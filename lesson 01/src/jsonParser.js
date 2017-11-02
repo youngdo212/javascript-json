@@ -2,7 +2,7 @@ var util = require('./utils');
 var log = util.log;
 
 var parser = (function () {
-  var parse = function (insert) {
+  var parseJson = function (insert) {
     parsedArray = parseByLetter(insert);
     return dataCount;
   }
@@ -87,7 +87,7 @@ var parser = (function () {
     }
   }
   return {
-    parse
+    parseJson
   };
 })();
 
