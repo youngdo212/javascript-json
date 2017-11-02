@@ -3,10 +3,9 @@ var log = util.log;
 
 var parser = (function () {
   var parse = function (insert) {
-    parsedObject = parseByLetter(insert);
-    // dataCount = countType(parsedObject);
-    // return dataCount;
-    return parsedObject;
+    parsedArray = parseByLetter(insert);
+    dataCount = countType(parsedArray);
+    return dataCount;
   }
 
   var parseByLetter = function (insertedString) {
@@ -34,14 +33,14 @@ var parser = (function () {
             break;
           case '"':
             typeStack.push("string");
-            currentData = [];
+            currentData = "";
             break;
           case ' ':
           case ',':
             break;
           default:
             typeStack.push("numberOrBool");
-            currentData = [];
+            currentData = "";
             currentData += insertedString[i];
             break;
         }
@@ -88,11 +87,20 @@ var parser = (function () {
       return false;
     }
   }
-  var countType = function (parsedObject) {
-    var dataCount = {};
-    dataCount.string = 3;
-    dataCount.number = 2;
-    dataCount.bool = 1;
+  var countType = function (parsedArray) {
+    var dataCount = { array: 0, string: 0, number: 0, bool: 0 };
+    parsedArray.forEach(function (data) {
+      if (data === "array start") {
+        dataCount.array++;
+      } else if (data === "array end") {
+      } else if (typeof data === "string") {
+        dataCount.string++;
+      } else if (typeof data === "number") {
+        dataCount.number++;
+      } else if (typeof data === "boolean") {
+        dataCount.bool++;
+      }
+    })
     return dataCount;
   }
   return {
