@@ -166,5 +166,35 @@ states.getStateByName = function(name) {
     }
 };
 
+states.forEach(function(state) {
+    state.getValidCharacters = function (type) {
+        if (!this.validCharacters) {
+            return undefined;
+        }
+
+        if (this.validCharacters instanceof Array) {
+            return this.validCharacters;
+        }
+
+        return this.validCharacters[type];
+    };
+
+    state.getNextState = function(type, char) {
+        debugger;
+        if (typeof nextState === 'number') {
+            console.log(states[nextState]);
+            return states[nextState];
+        }
+
+        debugger;
+
+        if (this.validCharacters instanceof Array) {
+            return states[this.nextState[this.validCharacters.indexOf(char)]];
+        }
+
+        debugger;
+        return states[this.nextState[type][this.validCharacters[type].indexOf(char)]];
+    };
+});
 module.exports.characters = characters;
 module.exports.states = states;
