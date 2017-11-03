@@ -45,19 +45,19 @@ var states = [
     {
         name: 'WAITING_FOR_INPUT_VALUE', // 1
         validCharacters: {
-            array: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"', '{' ],
-            object: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\"', '{', '[' ]
+            array: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', '\'', '\"', '{' ],
+            object: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', '\"', '{', '[' ]
         },
         nextState: {
-            array: [1, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 15, 16, 2],
-            object: [1, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16, 2, 2]
+            array: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2],
+            object: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2]
         }
     },
     {
         name: 'WAITING_FOR_CONTINUE_OR_END', // 2
         validCharacters: {
-            array: [' ', ', ', ']'],
-            object: [' ', ',' '}']
+            array: [' ', ',', ']'],
+            object: [' ', ',', '}']
         },
         nextState: {
             array: [2, 1, 17],
@@ -82,8 +82,8 @@ var states = [
     {
         name: 'ENCOUNTER_ZERO', // 6
         validCharacters: {
-            array: [',', ' ', '.', 'e', 'E', , ']'],
-            obejct: [',', ' ', 'e', 'E', '}' ]
+            array: [',', ' ', '.', 'e', 'E', ']'],
+            obejct: [',', ' ', '.', 'e', 'E', '}' ]
         },
         nextState: {
             array: [1, 2, 8, 10, 10, 17],
@@ -120,7 +120,7 @@ var states = [
     {
         name: 'ENCOUNTER_EXPONENT_SYMBOL', // 10
         validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-'],
-        nextState: [10, 10, 10 ,10 ,10 ,10 ,10, 10, 10, 10, 11, 11]
+        nextState: [12, 12, 12 ,12 ,12 ,12 ,12, 12, 12, 12, 11, 11]
     },
     {
         name: 'ENCOUNTER_SIGN_OF_EXPONENT', // 11
@@ -139,20 +139,16 @@ var states = [
         }
     },
     {
-        name: 'ENCOUNTER_SINGLE_QUOTE', // 13
-        nextState: 2
+        name: 'ENCOUNTER_SINGLE_QUOTE' // 13
     },
     {
-        name: 'ENCOUNTER_DOUBLE_QUOTE', // 14
-        nextState: 2
+        name: 'ENCOUNTER_DOUBLE_QUOTE' // 14
     },
     {
-        name: 'ENCOUNTER_BOOLEAN_TRUE', // 15
-        nextState:2
+        name: 'ENCOUNTER_BOOLEAN_TRUE' // 15
     },
     {
-        name: 'ENCOUNTER_BOOLEAN_FALSE', // 16
-        nextState: 2
+        name: 'ENCOUNTER_BOOLEAN_FALSE' // 16
     },
     {
         name: 'END_ARRAY' // 17
@@ -161,6 +157,14 @@ var states = [
         name: 'END_OBJECT' // 18
     }
 ];
+
+states.getStateByName = function(name) {
+    for (var i = 0, len = this.length; i < len; i++) {
+        if (this[i].name === name) {
+            return this[i];
+        }
+    }
+};
 
 module.exports.characters = characters;
 module.exports.states = states;
