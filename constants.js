@@ -83,11 +83,11 @@ var states = [
         name: 'ENCOUNTER_ZERO', // 6
         validCharacters: {
             array: [',', ' ', '.', 'e', 'E', ']'],
-            obejct: [',', ' ', '.', 'e', 'E', '}' ]
+            object: [',', ' ', '.', 'e', 'E', '}' ]
         },
         nextState: {
             array: [1, 2, 8, 10, 10, 17],
-            obejct: [3, 2, 8, 10, 10, 18]
+            object: [3, 2, 8, 10, 10, 18]
         }
     },
     {
@@ -167,20 +167,27 @@ states.getStateByName = function(name) {
 };
 
 states.forEach(function(state) {
-    state.getValidCharacters = function (type) {
+    state.isNotValidCharacter = function (type, char) {
         if (!this.validCharacters) {
             return undefined;
         }
+        debugger;
+        var validCharacters = null;
 
         if (this.validCharacters instanceof Array) {
-            return this.validCharacters;
+            validCharacters = this.validCharacters;
+        } else {
+            validCharacters = this.validCharacters[type];
         }
-
-        return this.validCharacters[type];
+        debugger;
+        return validCharacters.indexOf(char) === -1;
     };
 
     state.getNextState = function(type, char) {
+        var index = -1;
+
         debugger;
+
         if (typeof nextState === 'number') {
             console.log(states[nextState]);
             return states[nextState];
@@ -189,11 +196,15 @@ states.forEach(function(state) {
         debugger;
 
         if (this.validCharacters instanceof Array) {
-            return states[this.nextState[this.validCharacters.indexOf(char)]];
+            index = this.validCharacters.indexOf(char);
+            return states[this.nextState[index]];
         }
 
+        index = this.validCharacters[type].indexOf(char);
+
         debugger;
-        return states[this.nextState[type][this.validCharacters[type].indexOf(char)]];
+
+        return states[this.nextState[type][index]];
     };
 });
 module.exports.characters = characters;
