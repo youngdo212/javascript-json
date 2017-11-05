@@ -79,7 +79,7 @@ var parser = {
     parseArray: function(input) {
         var indexOfValidChar = 0;
         var thisChar = null;
-        var validCharacters = null;
+        var isNotValidCharacter = null;
         var token = '';
         var nextState;
         var context = null;
@@ -87,12 +87,13 @@ var parser = {
         debugger;
 
         while (this.state.name !== 'END_ARRAY') {
-            debugger;
             thisChar = this.input[this.index];
-            validCharacters = this.state.getValidCharacters('array');
+            isNotValidCharacter = this.state.isNotValidCharacter('array', thisChar);
             nextState = this.state.getNextState('array', thisChar);
 
-            debugger;
+            if (isNotValidCharacter) {
+                throw Error('Syntax Error!!!');
+            }
 
             if (characters.isQuote(thisChar)) {
                 token = this.getStringToken();
@@ -111,16 +112,6 @@ var parser = {
 
                 continue;
             }
-
-            debugger;
-
-            indexOfValidChar = validCharacters.indexOf(thisChar);
-
-            if (indexOfValidChar === -1) {
-                throw Error('Syntax Error!!!');
-            }
-
-            debugger;
 
             if (thisChar === characters.bracketStart)  {
                 if (this.state.name === 'INITIAL') {
@@ -154,13 +145,9 @@ var parser = {
                 continue;
             }
 
-            debugger;
-
             if (characters.isSignCharacter(thisChar) || characters.isNumber(thisChar) || characters.exponent === thisChar || characters.dot === thisChar) {
                 token += thisChar;
             }
-
-            debugger;
 
             if (thisChar === characters.comma || thisChar === characters.bracketEnd) {
                 if (token.type === 'array' || token.type === 'object') {
@@ -176,35 +163,147 @@ var parser = {
                 token = '';
             }
 
-            debugger;
-
             this.state = nextState;
             this.index++;
         }
 
-        debugger;
-
         return this.resultObject;
     },
     parseObject: function() {
+        var indexOfValidChar = 0;
+        var thisChar = null;
+        var isNotValidCharacter = null;
+        var nextState;
+        var context = null;
 
-    },
-    parse: function(input) {
+        var thisProperty = {
+            value: ''
+        };
+
         debugger;
+
+        while (this.state.name !== 'END_OBJECT') {
+            thisChar = this.input[this.index];
+            isNotValidCharacter = this.state.isNotValidCharacter('object', thisChar);
+            nextState = this.state.getNextState('object', thisChar);
+
+            debugger;
+
+            if (isNotValidCharacter) {
+                throw Error('Syntax Error!!!');
+            }
+
+            if (characters.isQuote(thisChar)) {
+                token = this.getStringToken();
+
+                if (this.state.name === 'WAITING_FOR_INPUT_KEY') {
+                    thisProperty.key = token.value;
+                }
+
+                if (this.state.name === 'WAITING_FOR_INPUT_VALUE') {
+                    thisProperty.value = token.value;
+                    thisProperty.type = token.type;
+                }
+
+                this.index += token.nextIndex;
+                this.state = nextState;
+
+                continue;
+            }
+
+            if (characters.isBoolean(thisChar) ) {
+                token = this.getBooleanToken();
+                thisProperty.value = token.value;
+                thisProperty.type = token.type;
+
+                this.index += token.nextIndex;
+                this.state = nextState;
+
+                continue;
+            }
+
+            debugger;
+
+            if (thisChar === characters.bracketStart)  {
+                // backup context
+                context = this.getContext();
+
+                thisProperty.value = this.parseArray.call(this, input);
+                thisProperty.type = 'array';
+
+                context.state = nextState;
+                context.index = this.index;
+
+                this.restoreContext(context);
+                continue;
+            }
+
+            if (thisChar === characters.braceStart) {
+                if (this.state.name === 'INITIAL') {
+                    this.resultObject = {};
+                    this.state = nextState;
+                    this.index++;
+                    continue;
+                }
+
+                context = this.getContext();
+
+                thisProperty.value = this.parseObject.call(this, input);
+                thisProperty.type = 'array';
+
+                context.state = nextState;
+                context.index = this.index;
+
+                this.restoreContext(context);
+                continue;
+            }
+
+            if (characters.isSignCharacter(thisChar) || characters.isNumber(thisChar) || characters.exponent === thisChar || characters.dot === thisChar) {
+                thisProperty.value += thisChar;
+            }
+
+            if (thisChar === characters.comma || thisChar === characters.braceEnd) {
+                if (thisProperty.type === 'boolean') {
+                    thisProperty.value = (token.value === 'true');
+                } else if (!isNaN(new Number(thisProperty.value).valueOf())) {
+                    thisProperty.value = new Number(thisProperty.value).valueOf();
+                }
+
+                this.resultObject[thisProperty.key] = thisProperty.value;
+                thisProperty = {
+                    value: ''
+                };
+            }
+
+            this.state = nextState;
+            this.index++;
+
+            debugger;
+        }
+
+        return this.resultObject;
+    },
+    init(input) {
         // initialize
         this.input = input;
         this.state = states.getStateByName('INITIAL');
         this.index = 0;
 
+        return this;
+    },
+    parse: function(input) {
+        debugger;
         var indexOfBracket = input.indexOf(characters.bracketStart);
-        var indexOfBrace = input.indexOf(characters.bracketStart);
+        var indexOfBrace = input.indexOf(characters.braceStart);
+
+        debugger;
 
         if (indexOfBracket === -1 && indexOfBrace === -1) {
             throw Error('Syntax error occurred!');
-        } else if (indexOfBracket === -1 || indexOfBrace < indexOfBracket) {
-            this.resultObject = this.parseObject(input);
+        } else if (indexOfBracket === -1 || (indexOfBrace > indexOfBracket)) {
+            this.resultObject = this.init(input).parseObject();
         } else {
-            this.resultObject = this.parseArray(input);
+            this.resultObject = this.init(input).parseArray();
         }
 
         debugger;
