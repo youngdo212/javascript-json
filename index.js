@@ -15,74 +15,50 @@ function displayCounts(object) {
         array: 0
     };
 
+    var values = null;
+    var objectName = null;
+
     if (object instanceof Array) {
-        object.forEach(function(item) {
-            switch (typeof item) {
-                case 'number':
-                    count.number++;
-                break;
-
-                case 'string':
-                    count.string++;
-                break;
-
-                case 'boolean':
-                    count.boolean++;
-                break;
-
-                case 'object':
-                    if (item instanceof Array) {
-                        count.array++;
-                    } else {
-                        count.object++;
-                    }
-                break;
-            }
-        });
-
-        if (object.length === 0) {
-            console.log('빈 배열입니다.');
-            return ;
-        }
-
-        var message = '총 ' + object.length + '개의 배열 데이터 중에 ';
-
+        values = object;
+        objectName = '배열';
     } else {
         var keys = Object.keys(object);
-
-        keys.forEach(function(key) {
-            var value = object[key];
-
-            switch (typeof value) {
-                case 'number':
-                    count.number++;
-                break;
-
-                case 'string':
-                    count.string++;
-                break;
-
-                case 'boolean':
-                    count.boolean++;
-                break;
-
-                case 'object':
-                    if (value instanceof Array) {
-                        count.array++;
-                    } else {
-                        count.object++;
-                    }
-                break;
-            }
+        values = keys.map(function(key) {
+            return object[key];
         });
-
-        if (keys.length === 0) {
-            console.log('빈 객체입니다.');
-            return ;
-        }
-
-        var message = '총 ' + keys.length + '개의 객체 데이터 중에 ';
+        objectName = '객체';
     }
+
+    values.forEach(function(item) {
+        switch (typeof item) {
+            case 'number':
+                count.number++;
+            break;
+
+            case 'string':
+                count.string++;
+            break;
+
+            case 'boolean':
+                count.boolean++;
+            break;
+
+            case 'object':
+                if (item instanceof Array) {
+                    count.array++;
+                } else {
+                    count.object++;
+                }
+            break;
+        }
+    });
+
+    if (values.length === 0) {
+        console.log('빈 ' + objectName + '입니다.');
+        return ;
+    }
+
+    var message = '총 ' + values.length + '개의 ' + objectName + ' 데이터 중에 ';
 
     if (count.string > 0) {
         message += '문자열 ' + count.string + '개, ';
@@ -104,9 +80,9 @@ function displayCounts(object) {
         message += '배열 ' + count.object + '개, ';
     }
 
-    message = message.substring(0, message.length - 3);
-
+    message = message.substring(0, message.length - 2);
     message += '가 포함되어 있습니다.';
+
     console.log(message);
 }
 
@@ -137,6 +113,8 @@ function toJsonString(options) {
         });
     }
 
+    jsonStr += startChar;
+
     hasObject = values.some(function (item) {
         return typeof item === 'object';
     });
@@ -147,12 +125,12 @@ function toJsonString(options) {
 
     values.forEach(function(item, index) {
         if (hasObject || values.length > limitPerLine) {
-            for (var i in depth * tabSize) {
+            for (var i = 0; i < depth * tabSize; i++) {
                 jsonStr += ' ';
             }
         }
 
-        if (object instanceof Array) {
+        if (object instanceof Array === false) {
             jsonStr += '\"' + keys[index] + '\" : ';
         }
 
@@ -186,7 +164,7 @@ function toJsonString(options) {
     });
 
     if (hasObject || values.length > limitPerLine) {
-        for (var i in ((depth - 1) * tabSize)) {
+        for (var i = 0; i < (depth - 1) * tabSize; i++) {
             jsonStr += ' ';
         }
     }
