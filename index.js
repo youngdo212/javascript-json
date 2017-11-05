@@ -11,7 +11,8 @@ function displayCounts(object) {
         string: 0,
         number: 0,
         boolean: 0,
-        object: 0
+        object: 0,
+        array: 0
     };
 
     if (object instanceof Array) {
@@ -30,7 +31,11 @@ function displayCounts(object) {
                 break;
 
                 case 'object':
-                    count.object++;
+                    if (item instanceof Array) {
+                        count.array++;
+                    } else {
+                        count.object++;
+                    }
                 break;
             }
         });
@@ -62,7 +67,11 @@ function displayCounts(object) {
                 break;
 
                 case 'object':
-                    count.object++;
+                    if (value instanceof Array) {
+                        count.array++;
+                    } else {
+                        count.object++;
+                    }
                 break;
             }
         });
@@ -91,6 +100,10 @@ function displayCounts(object) {
         message += '객체 ' + count.object + '개, ';
     }
 
+    if (count.array > 0) {
+        message += '배열 ' + count.object + '개, ';
+    }
+
     message = message.substring(0, message.length - 3);
 
     message += '가 포함되어 있습니다.';
@@ -100,7 +113,6 @@ function displayCounts(object) {
 rl.on('line', function(input) {
     try {
         var parsedObject = parser.parse(input);
-
         displayCounts(parsedObject);
     } catch(exception) {
         console.log(exception.message);
