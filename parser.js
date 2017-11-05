@@ -6,6 +6,7 @@ var parser = {
     state: null,
     input: null,
     index: 0,
+    depth: 0,
     resultObject: null,
     typeOfObject: null,
     getStringToken: function() {
@@ -56,7 +57,9 @@ var parser = {
         var context = this.getContext();
         var subStr = this.input.substr(this.index);
 
+        this.depth++;
         token.value = this.parse(subStr);
+        this.depth--;
 
         this.resultObject = context.resultObject;
         this.typeOfObject = context.typeOfObject;
@@ -134,6 +137,13 @@ var parser = {
 
         return true;
     },
+    validateRestOfInput: function() {
+        for (var i = this.index; i < this.input.length; i++) {
+            if (this.input[i] !== characters.space) {
+                throw Error('Syntax Error!!');
+            }
+        }
+    },
     parse: function(input) {
         //initialize
         this.state = states.getStateByName('INITIAL');
@@ -153,8 +163,8 @@ var parser = {
 
         if (this.isEmptyObject()) {
             var endChar = (this.typeOfObject === 'array') ? ']' : '}';
-            this.index = this.input.indexOf(endChar);
-            return this.resultObject;
+            this.index = this.input.indexOf(endChar) + 1;
+            this.state = states.getStateByName('END');
         }
 
         while (this.state.name !== 'END') {
@@ -201,6 +211,10 @@ var parser = {
 
             this.state = nextState;
             this.index++;
+        }
+
+        if (this.depth === 0) {
+            this.validateRestOfInput();
         }
 
         return this.resultObject;
