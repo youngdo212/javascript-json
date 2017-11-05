@@ -6,7 +6,6 @@ var parser = {
     state: null,
     input: null,
     index: 0,
-    currentToken: null,
     resultObject: null,
     getStringToken: function() {
         var quote = this.input[this.index];
@@ -20,7 +19,7 @@ var parser = {
         var token = {};
         token.value = restOfInput.substr(0, indexOfNextQuote);
         token.type = 'string';
-        token.nextIndex = indexOfNextQuote + 2;
+        token.nextIndex = indexOfNextQuote + 1;
 
         return token;
     },
@@ -28,7 +27,7 @@ var parser = {
         var char = this.input[this.index];
         var keyword = (char === characters.true) ? 'true' : 'false' ;
         var inputToken = this.input.substr(this.index, keyword.length);
-        var nextIndex = keyword.length;
+        var nextIndex = keyword.length - 1;
 
         var token = {};
 
@@ -60,127 +59,92 @@ var parser = {
         }
         return foundIndex;
     },
-    getContext: function() {
-        var context = {};
+    parseToken: function(token) {
+        var value = null;
 
-        context.index = this.index;
-        context.input = this.input;
-        context.state = this.state;
-        context.resultObject = this.resultObject;
+        if (token.type === 'array' || token.type === 'object') {
+            value = token;
+        } else if (token.type === 'string') {
+            value = token.value;
+        } else if (token.type === 'boolean') {
+            value = (token.value === 'true');
+        } else {
+            value = new Number(token).valueOf();
+        }
 
-        return context;
+        return value;
     },
-    restoreContext: function(context) {
-        this.index = context.index;
-        this.input = context.input;
-        this.state = context.state;
-        this.resultObject = context.resultObject;
-    },
-    parseArray: function(input) {
-        var indexOfValidChar = 0;
+    parseArray: function() {
         var thisChar = null;
         var isNotValidCharacter = null;
-        var token = '';
         var nextState;
-        var context = null;
+        var resultObject = [];
+        var token = '';
+        var value = null;
 
         debugger;
+
+        this.state = states.getStateByName('INITIAL');
 
         while (this.state.name !== 'END_ARRAY') {
             thisChar = this.input[this.index];
             isNotValidCharacter = this.state.isNotValidCharacter('array', thisChar);
             nextState = this.state.getNextState('array', thisChar);
 
+            debugger;
+
+            // check syntax is valid
             if (isNotValidCharacter) {
                 throw Error('Syntax Error!!!');
             }
 
+            // make token (string)
             if (characters.isQuote(thisChar)) {
                 token = this.getStringToken();
-
                 this.index += token.nextIndex;
-                this.state = nextState;
-
-                continue;
-            }
-
-            if (characters.isBoolean(thisChar) ) {
+            } else if (characters.isBoolean(thisChar) ) {
                 token = this.getBooleanToken();
-
                 this.index += token.nextIndex;
-                this.state = nextState;
-
-                continue;
-            }
-
-            if (thisChar === characters.bracketStart)  {
-                if (this.state.name === 'INITIAL') {
-                    this.resultObject = [];
-                    this.state = nextState;
-                    this.index++;
-                    continue;
-                }
-
-                // backup context
-                context = this.getContext();
-                token = this.parseArray.call(this, input);
+            } else if (thisChar === characters.bracketStart && this.state.name !== 'INITIAL')  {
+                token = this.parseArray();
                 token.type = 'array';
-
-                context.state = nextState;
-                context.index = this.index;
-
-                this.restoreContext(context);
-                continue;
-            }
-
-            if (thisChar === characters.braceStart) {
-                context = this.getContext();
-                token = this.parseObject.call(this, input);
+            } else if (thisChar === characters.braceStart) {
+                token = this.parseObject();
                 token.type = 'object';
-
-                context.state = nextState;
-                context.index = this.index;
-
-                this.restoreContext(context);
-                continue;
-            }
-
-            if (characters.isSignCharacter(thisChar) || characters.isNumber(thisChar) || characters.exponent === thisChar || characters.dot === thisChar) {
+            } else if (characters.isComponentOfNumber(thisChar)) {
                 token += thisChar;
             }
 
-            if (thisChar === characters.comma || thisChar === characters.bracketEnd) {
-                if (token.type === 'array' || token.type === 'object') {
-                    this.resultObject.push(token);
-                } else if (token.type === 'string') {
-                    this.resultObject.push(token.value);
-                } else if (token.type === 'boolean') {
-                    this.resultObject.push((token.value === 'true'));
-                } else if (new Number(token).valueOf() !== NaN) {
-                    this.resultObject.push(new Number(token).valueOf());
-                }
+            debugger;
 
+            // get value from token
+            if (thisChar === characters.comma || thisChar === characters.bracketEnd) {
+                value = this.parseToken(token);
+                resultObject.push(value);
                 token = '';
             }
+
+            debugger;
 
             this.state = nextState;
             this.index++;
         }
 
-        return this.resultObject;
+        return resultObject;
     },
     parseObject: function() {
         var indexOfValidChar = 0;
         var thisChar = null;
         var isNotValidCharacter = null;
         var nextState;
-        var context = null;
-
-        var thisProperty = {
-            value: ''
-        };
+        var resultObject = {};
+        var token;
+        var key;
+        var value;
 
         debugger;
+
+        this.state = states.getStateByName('INITIAL');
 
         while (this.state.name !== 'END_OBJECT') {
             thisChar = this.input[this.index];
@@ -193,86 +157,32 @@ var parser = {
                 throw Error('Syntax Error!!!');
             }
 
+            // make token (string)
             if (characters.isQuote(thisChar)) {
                 token = this.getStringToken();
+                this.index += token.nextIndex;
 
                 if (this.state.name === 'WAITING_FOR_INPUT_KEY') {
-                    thisProperty.key = token.value;
+                    key = token.value;
+                    token = '';
                 }
-
-                if (this.state.name === 'WAITING_FOR_INPUT_VALUE') {
-                    thisProperty.value = token.value;
-                    thisProperty.type = token.type;
-                }
-
-                this.index += token.nextIndex;
-                this.state = nextState;
-
-                continue;
-            }
-
-            if (characters.isBoolean(thisChar) ) {
+            } else if (characters.isBoolean(thisChar) ) {
                 token = this.getBooleanToken();
-                thisProperty.value = token.value;
-                thisProperty.type = token.type;
-
                 this.index += token.nextIndex;
-                this.state = nextState;
-
-                continue;
-            }
-
-            debugger;
-
-            if (thisChar === characters.bracketStart)  {
-                // backup context
-                context = this.getContext();
-
-                thisProperty.value = this.parseArray.call(this, input);
-                thisProperty.type = 'array';
-
-                context.state = nextState;
-                context.index = this.index;
-
-                this.restoreContext(context);
-                continue;
-            }
-
-            if (thisChar === characters.braceStart) {
-                if (this.state.name === 'INITIAL') {
-                    this.resultObject = {};
-                    this.state = nextState;
-                    this.index++;
-                    continue;
-                }
-
-                context = this.getContext();
-
-                thisProperty.value = this.parseObject.call(this, input);
-                thisProperty.type = 'array';
-
-                context.state = nextState;
-                context.index = this.index;
-
-                this.restoreContext(context);
-                continue;
-            }
-
-            if (characters.isSignCharacter(thisChar) || characters.isNumber(thisChar) || characters.exponent === thisChar || characters.dot === thisChar) {
-                thisProperty.value += thisChar;
+            } else if (thisChar === characters.bracketStart)  {
+                token = this.parseArray();
+                token.type = 'array';
+            } else if (thisChar === characters.braceStart && this.state.name !== 'INITIAL') {
+                token = this.parseObject();
+                token.type = 'object';
+            } else if (characters.isComponentOfNumber(thisChar)) {
+                token += thisChar;
             }
 
             if (thisChar === characters.comma || thisChar === characters.braceEnd) {
-                if (thisProperty.type === 'boolean') {
-                    thisProperty.value = (token.value === 'true');
-                } else if (!isNaN(new Number(thisProperty.value).valueOf())) {
-                    thisProperty.value = new Number(thisProperty.value).valueOf();
-                }
-
-                this.resultObject[thisProperty.key] = thisProperty.value;
-                thisProperty = {
-                    value: ''
-                };
+                value = this.parseToken(token);
+                resultObject[key] = value;
+                token = '';
             }
 
             this.state = nextState;
@@ -281,17 +191,12 @@ var parser = {
             debugger;
         }
 
-        return this.resultObject;
-    },
-    init(input) {
-        // initialize
-        this.input = input;
-        this.state = states.getStateByName('INITIAL');
-        this.index = 0;
-
-        return this;
+        return resultObject;
     },
     parse: function(input) {
+        //initialize
+        this.input = input;
+
         debugger;
         var indexOfBracket = input.indexOf(characters.bracketStart);
         var indexOfBrace = input.indexOf(characters.braceStart);
@@ -301,9 +206,9 @@ var parser = {
         if (indexOfBracket === -1 && indexOfBrace === -1) {
             throw Error('Syntax error occurred!');
         } else if (indexOfBracket === -1 || (indexOfBrace > indexOfBracket)) {
-            this.resultObject = this.init(input).parseObject();
+            this.resultObject = this.parseObject();
         } else {
-            this.resultObject = this.init(input).parseArray();
+            this.resultObject = this.parseArray();
         }
 
         debugger;

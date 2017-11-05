@@ -16,11 +16,8 @@ var characters = {
     true: 't',
     false: 'f',
     exponent: 'e',
-    isNumber: function(char) {
-        return this.numbers.indexOf(char) !== -1;
-    },
-    isSignCharacter: function(char) {
-        return (char === this.plus || char === this.minus);
+    isComponentOfNumber: function(char) {
+        return (this.numbers.indexOf(char) !== -1) || char === this.plus || char === this.minus || char === this.dot || char === this.exponent;
     },
     isQuote: function(char) {
         return (char === this.singleQuote || char === this.doubleQuote);
