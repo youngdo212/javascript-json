@@ -6,7 +6,7 @@ var rl = readline.createInterface({
     output: process.stdout
 });
 
-function displayArray(array) {
+function displayCounts(object) {
     var count = {
         string: 0,
         number: 0,
@@ -14,32 +14,66 @@ function displayArray(array) {
         object: 0
     };
 
-    array.forEach(function(item) {
-        switch (typeof item) {
-            case 'number':
-                count.number++;
-            break;
+    if (object instanceof Array) {
+        object.forEach(function(item) {
+            switch (typeof item) {
+                case 'number':
+                    count.number++;
+                break;
 
-            case 'string':
-                count.string++;
-            break;
+                case 'string':
+                    count.string++;
+                break;
 
-            case 'boolean':
-                count.boolean++;
-            break;
+                case 'boolean':
+                    count.boolean++;
+                break;
 
-            case 'object':
-                count.object++;
-            break;
+                case 'object':
+                    count.object++;
+                break;
+            }
+        });
+
+        if (object.length === 0) {
+            console.log('빈 배열입니다.');
+            return ;
         }
-    });
 
-    if (array.length === 0) {
-        console.log('빈 배열입니다.');
-        return ;
+        var message = '총 ' + object.length + '개의 배열 데이터 중에 ';
+
+    } else {
+        var keys = Object.keys(object);
+
+        keys.forEach(function(key) {
+            var value = object[key];
+
+            switch (typeof value) {
+                case 'number':
+                    count.number++;
+                break;
+
+                case 'string':
+                    count.string++;
+                break;
+
+                case 'boolean':
+                    count.boolean++;
+                break;
+
+                case 'object':
+                    count.object++;
+                break;
+            }
+        });
+
+        if (keys.length === 0) {
+            console.log('빈 객체입니다.');
+            return ;
+        }
+
+        var message = '총 ' + keys.length + '개의 객체 데이터 중에 ';
     }
-
-    var message = '총 ' + array.length + '개의 배열 데이터 중에 ';
 
     if (count.string > 0) {
         message += '문자열 ' + count.string + '개, ';
@@ -63,21 +97,12 @@ function displayArray(array) {
     console.log(message);
 }
 
-function displayObject(object) {
-
-}
-
 rl.on('line', function(input) {
     try {
         var parsedObject = parser.parse(input);
 
-        if (parsedObject instanceof Array) {
-            displayArray(parsedObject);
-        } else {
-            displayObject(parsedObject);
-        }
+        displayCounts(parsedObject);
     } catch(exception) {
-        console.log(exception);
         console.log(exception.message);
     }
 
