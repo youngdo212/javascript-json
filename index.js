@@ -110,10 +110,103 @@ function displayCounts(object) {
     console.log(message);
 }
 
+function toJsonString(options) {
+    var object = options.object;
+    var tabSize = options.tabSize || 4;
+    var limitPerLine = options.limitPerLine || 4;
+    var depth = options.depth || 1;
+
+    var jsonStr = '';
+    var keys = null;
+    var values = null;
+    var hasObject = false;
+
+    var startChar;
+    var endChar;
+
+    if (object instanceof Array) {
+        startChar = '[';
+        endChar = ']';
+        values = object;
+    } else {
+        startChar = '{';
+        endChar = '}';
+        keys = Object.keys(object);
+        values = keys.map(function(key) {
+            return object[key];
+        });
+    }
+
+    hasObject = values.some(function (item) {
+        return typeof item === 'object';
+    });
+
+    if (hasObject || values.length > limitPerLine) {
+        jsonStr += '\n';
+    }
+
+    values.forEach(function(item, index) {
+        if (hasObject || values.length > limitPerLine) {
+            for (var i in depth * tabSize) {
+                jsonStr += ' ';
+            }
+        }
+
+        if (object instanceof Array) {
+            jsonStr += '\"' + keys[index] + '\" : ';
+        }
+
+        switch (typeof item) {
+            case 'string':
+                jsonStr += '\"' + item + '\"';
+            break;
+
+            case 'number':
+            case 'boolean':
+                jsonStr += item;
+            break;
+
+            case 'object':
+                jsonStr += toJsonString({
+                    object: item,
+                    tabSize: tabSize,
+                    limitPerLine: limitPerLine,
+                    depth: depth + 1
+                });
+            break;
+        }
+
+        if (index !== values.length - 1) {
+            jsonStr += ', ';
+        }
+
+        if (hasObject || values.length > limitPerLine) {
+            jsonStr += '\n';
+        }
+    });
+
+    if (hasObject || values.length > limitPerLine) {
+        for (var i in ((depth - 1) * tabSize)) {
+            jsonStr += ' ';
+        }
+    }
+
+    jsonStr += endChar;
+
+    return jsonStr;
+}
+
 rl.on('line', function(input) {
     try {
         var parsedObject = parser.parse(input);
         displayCounts(parsedObject);
+
+        var jsonStr = toJsonString({
+            object: parsedObject,
+            tabSize: 4
+        });
+
+        console.log(jsonStr);
     } catch(exception) {
         console.log(exception.message);
     }
