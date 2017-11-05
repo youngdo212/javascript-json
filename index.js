@@ -186,6 +186,7 @@ rl.on('line', function(input) {
 
         console.log(jsonStr);
     } catch(exception) {
+        console.log(exception);
         console.log(exception.message);
     }
 

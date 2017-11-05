@@ -16,6 +16,12 @@ var characters = {
     true: 't',
     false: 'f',
     exponent: 'e',
+    isStartChar: function(char) {
+        return char === this.bracketStart || char === this.braceStart;
+    },
+    isEndChar: function(char) {
+        return char === this.bracketEnd || char === this.braceEnd;
+    },
     isComponentOfNumber: function(char) {
         return (this.numbers.indexOf(char) !== -1) || char === this.plus || char === this.minus || char === this.dot || char === this.exponent;
     },
@@ -58,7 +64,7 @@ var states = [
         },
         nextState: {
             array: [2, 1, 17],
-            object: [2, 3, 18]
+            object: [2, 3, 17]
         }
     },
     {
@@ -74,17 +80,17 @@ var states = [
     {
         name: 'ENCOUNTER_SIGN', // 5
         validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-        nextState: [6, 7, 7, 7, 7, 7, 7, 7, 7, 7 ]
+        nextState: [6, 7, 7, 7, 7, 7, 7, 7, 7, 7]
     },
     {
         name: 'ENCOUNTER_ZERO', // 6
         validCharacters: {
             array: [',', ' ', '.', 'e', 'E', ']'],
-            object: [',', ' ', '.', 'e', 'E', '}' ]
+            object: [',', ' ', '.', 'e', 'E', '}']
         },
         nextState: {
             array: [1, 2, 8, 10, 10, 17],
-            object: [3, 2, 8, 10, 10, 18]
+            object: [3, 2, 8, 10, 10, 17]
         }
     },
     {
@@ -95,7 +101,7 @@ var states = [
         },
         nextState: {
             array: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 1, 17],
-            object: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 3, 18]
+            object: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 3, 17]
         }
     },
     {
@@ -111,7 +117,7 @@ var states = [
         },
         nextState: {
             array: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 1, 17],
-            object: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 3, 18]
+            object: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 3, 17]
         }
     },
     {
@@ -132,7 +138,7 @@ var states = [
         },
         nextState: {
             array: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 1, 17],
-            object: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 3, 18]
+            object: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 3, 17]
         }
     },
     {
@@ -148,10 +154,7 @@ var states = [
         name: 'ENCOUNTER_BOOLEAN_FALSE' // 16
     },
     {
-        name: 'END_ARRAY' // 17
-    },
-    {
-        name: 'END_OBJECT' // 18
+        name: 'END' // 17
     }
 ];
 
@@ -168,7 +171,7 @@ states.forEach(function(state) {
         if (!this.validCharacters) {
             return undefined;
         }
-        debugger;
+
         var validCharacters = null;
 
         if (this.validCharacters instanceof Array) {
@@ -176,21 +179,17 @@ states.forEach(function(state) {
         } else {
             validCharacters = this.validCharacters[type];
         }
-        debugger;
+
         return validCharacters.indexOf(char) === -1;
     };
 
     state.getNextState = function(type, char) {
         var index = -1;
 
-        debugger;
-
         if (typeof nextState === 'number') {
             console.log(states[nextState]);
             return states[nextState];
         }
-
-        debugger;
 
         if (this.validCharacters instanceof Array) {
             index = this.validCharacters.indexOf(char);
@@ -199,10 +198,9 @@ states.forEach(function(state) {
 
         index = this.validCharacters[type].indexOf(char);
 
-        debugger;
-
         return states[this.nextState[type][index]];
     };
 });
+
 module.exports.characters = characters;
 module.exports.states = states;
