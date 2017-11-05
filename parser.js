@@ -19,7 +19,7 @@ var parser = {
         var token = {};
         token.value = restOfInput.substr(0, indexOfNextQuote);
         token.type = 'string';
-        token.nextIndex = indexOfNextQuote + 1;
+        token.nextIndex = this.index + indexOfNextQuote + 1;
 
         return token;
     },
@@ -27,10 +27,9 @@ var parser = {
         var char = this.input[this.index];
         var keyword = (char === characters.true) ? 'true' : 'false' ;
         var inputToken = this.input.substr(this.index, keyword.length);
-        var nextIndex = keyword.length - 1;
+        var nextIndex = this.index + keyword.length - 1;
 
         var token = {};
-
         if (keyword === inputToken) {
             token.value = inputToken;
             token.nextIndex = nextIndex;
@@ -40,6 +39,24 @@ var parser = {
         } else {
             throw Error('Syntax Error!');
         }
+    },
+    getArrayToken: function() {
+        var token = {};
+
+        token.value = this.parseArray();
+        token.type = 'array';
+        token.nextIndex = this.index - 1;
+
+        return token;
+    },
+    getObjectToken: function() {
+        var token = {};
+
+        token.value = this.parseObject();
+        token.type = 'object';
+        token.nextIndex = this.index - 1;
+
+        return token;
     },
     findIndexOfNextQuote: function(str, quote) {
         var foundIndex = str.indexOf(quote);
@@ -60,27 +77,27 @@ var parser = {
         return foundIndex;
     },
     parseToken: function(token) {
-        var value = null;
+        var parsed = null;
 
-        if (token.type === 'array' || token.type === 'object') {
-            value = token;
-        } else if (token.type === 'string') {
-            value = token.value;
+        if (token.type === 'array' || token.type === 'object' || token.type === 'string') {
+            parsed = token.value;
         } else if (token.type === 'boolean') {
-            value = (token.value === 'true');
+            parsed = (token.value === 'true');
         } else {
-            value = new Number(token).valueOf();
+            parsed = new Number(token.value).valueOf();
         }
 
-        return value;
+        return parsed;
     },
     parseArray: function() {
         var thisChar = null;
         var isNotValidCharacter = null;
         var nextState;
         var resultObject = [];
-        var token = '';
-        var value = null;
+        var parsedToken = null;
+        var token = {
+            value: ''
+        };
 
         debugger;
 
@@ -101,27 +118,24 @@ var parser = {
             // make token (string)
             if (characters.isQuote(thisChar)) {
                 token = this.getStringToken();
-                this.index += token.nextIndex;
+                this.index = token.nextIndex;
             } else if (characters.isBoolean(thisChar) ) {
                 token = this.getBooleanToken();
-                this.index += token.nextIndex;
+                this.index = token.nextIndex;
             } else if (thisChar === characters.bracketStart && this.state.name !== 'INITIAL')  {
-                token = this.parseArray();
-                token.type = 'array';
+                token = this.getArrayToken();
+                this.index = token.nextIndex;
             } else if (thisChar === characters.braceStart) {
-                token = this.parseObject();
-                token.type = 'object';
+                token = this.getObjectToken();
+                this.index = token.nextIndex;
             } else if (characters.isComponentOfNumber(thisChar)) {
-                token += thisChar;
-            }
-
-            debugger;
-
-            // get value from token
-            if (thisChar === characters.comma || thisChar === characters.bracketEnd) {
-                value = this.parseToken(token);
-                resultObject.push(value);
-                token = '';
+                token.value += thisChar;
+            } else if (thisChar === characters.comma || thisChar === characters.bracketEnd) {
+                parsedToken = this.parseToken(token);
+                resultObject.push(parsedToken);
+                token = {
+                    value: ''
+                };
             }
 
             debugger;
@@ -138,9 +152,11 @@ var parser = {
         var isNotValidCharacter = null;
         var nextState;
         var resultObject = {};
-        var token;
-        var key;
-        var value;
+        var propertyKey;
+        var token = {
+            value: ''
+        };
+        var parsedToken;
 
         debugger;
 
@@ -160,29 +176,31 @@ var parser = {
             // make token (string)
             if (characters.isQuote(thisChar)) {
                 token = this.getStringToken();
-                this.index += token.nextIndex;
+                this.index = token.nextIndex;
 
                 if (this.state.name === 'WAITING_FOR_INPUT_KEY') {
-                    key = token.value;
-                    token = '';
+                    propertyKey = token.value;
+                    token = {
+                        value: ''
+                    };
                 }
             } else if (characters.isBoolean(thisChar) ) {
                 token = this.getBooleanToken();
-                this.index += token.nextIndex;
+                this.index = token.nextIndex;
             } else if (thisChar === characters.bracketStart)  {
-                token = this.parseArray();
-                token.type = 'array';
+                token = this.getArrayToken();
+                this.index = token.nextIndex;
             } else if (thisChar === characters.braceStart && this.state.name !== 'INITIAL') {
-                token = this.parseObject();
-                token.type = 'object';
+                token = this.getObjectToken();
+                this.index = token.nextIndex;
             } else if (characters.isComponentOfNumber(thisChar)) {
-                token += thisChar;
-            }
-
-            if (thisChar === characters.comma || thisChar === characters.braceEnd) {
-                value = this.parseToken(token);
-                resultObject[key] = value;
-                token = '';
+                token.value += thisChar;
+            } else if (thisChar === characters.comma || thisChar === characters.braceEnd) {
+                parsedToken = this.parseToken(token);
+                resultObject[propertyKey] = parsedToken;
+                token = {
+                    value: ''
+                };
             }
 
             this.state = nextState;
@@ -205,7 +223,11 @@ var parser = {
 
         if (indexOfBracket === -1 && indexOfBrace === -1) {
             throw Error('Syntax error occurred!');
-        } else if (indexOfBracket === -1 || (indexOfBrace > indexOfBracket)) {
+        } else if (indexOfBracket === -1) {
+            this.resultObject = this.parseObject();
+        } else if (indexOfBrace === -1) {
+            this.resultObject = this.parseArray();
+        } else if (indexOfBrace < indexOfBracket) {
             this.resultObject = this.parseObject();
         } else {
             this.resultObject = this.parseArray();
