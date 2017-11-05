@@ -118,6 +118,22 @@ var parser = {
 
         return type;
     },
+    isEmptyObject: function() {
+        var startChar = (this.typeOfObject === 'array') ? '[' : '{';
+        var endChar = (this.typeOfObject === 'array') ? ']' : '}';
+
+        var startIndex = this.input.indexOf(startChar) + 1;
+        var endIndex = this.input.indexOf(endChar);
+
+        for (var i = startIndex; i < endIndex; i++) {
+            console.log(this.input[i]);
+            if (this.input[i] !== characters.space) {
+                return false;
+            }
+        }
+
+        return true;
+    },
     parse: function(input) {
         //initialize
         this.state = states.getStateByName('INITIAL');
@@ -134,6 +150,12 @@ var parser = {
         var token = '';
 
         debugger;
+
+        if (this.isEmptyObject()) {
+            var endChar = (this.typeOfObject === 'array') ? ']' : '}';
+            this.index = this.input.indexOf(endChar);
+            return this.resultObject;
+        }
 
         while (this.state.name !== 'END') {
             thisChar = this.input[this.index];
