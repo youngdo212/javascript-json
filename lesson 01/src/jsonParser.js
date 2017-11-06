@@ -38,18 +38,17 @@ JsonUnit.prototype.parseValue = function () {
 }
 
 JsonUnit.prototype.ignoreSpaces = function () {
-  while (this.insertedData[this.parsingPointer] === " ") {
+  while (this.parsingLetter === " ") {
     this.parsingPointer++;
   }
   return this;
 }
 
 JsonUnit.prototype.getNextType = function () {
-  var next = this.insertedData[this.parsingPointer];
-  if (next === '[') return "Array";
-  if (next === '"') return "String";
-  if (/-|[1-9]/.test(next)) return "Number";
-  if (/t|f/i.test(next)) return "Bool";
+  if (this.parsingLetter === '[') return "Array";
+  if (this.parsingLetter === '"') return "String";
+  if (/-|[1-9]/.test(this.parsingLetter)) return "Number";
+  if (/t|f/i.test(this.parsingLetter)) return "Bool";
   throw new Error(errors.typeError);
 }
 
@@ -68,8 +67,7 @@ JsonUnit.prototype.getBlockEnd = function () {
 }
 
 JsonUnit.prototype.getElementEnd = function () {
-  var letter = this.insertedData[parsingPointer];
-  var endPointer = (letter === '"') ? this.getStringEnd() : this.parsingPointer
+  var endPointer = (this.parsingLetter === '"') ? this.getStringEnd() : this.parsingPointer
 
   for (; endPointer <= this.dataEndPoint; endPointer++) {
     if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
@@ -80,8 +78,8 @@ JsonUnit.prototype.getElementEnd = function () {
 }
 
 JsonUnit.prototype.getStringEnd = function () {
-  var endPointer = this.insertedData[parsingPointer];
-  if (this.insertedData[this.parsingPointer]) {
+  var endPointer = this.parsingPointer;
+  if (this.parsingLetter) {
 
   }
 
