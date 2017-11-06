@@ -89,18 +89,27 @@ JsonUnit.prototype.getStringEnd = function () {
 }
 
 JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
-  var number = Number(insertedData.slice(startPoint, endPoint));
+  var number = Number(this.insertedData.slice(startPoint, endPoint));
   if (!isNaN(number)) return number;
   throw new Error(errors.typeError);
 }
+
 JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
-  var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
+  var parsingBool = this.insertedData.slice(startPoint, endPoint).toLowerCase();
   if (parsingBool === "true") return true;
   if (parsingBool === "false") return false;
   throw new Error(errors.typeError);
 }
-JsonUnit.prototype.parseString = function (startPoint, endPoint) {
 
+JsonUnit.prototype.parseString = function (startPoint, endPoint) {
+  var parsingString = "";
+  for(var i = 1; startPoint + i < endPoint ; i++){
+    if(this.insertedData[startPoint + i] === '"' || this.insertedData[startPoint + i] === '\\'){
+      throw new Error(errors.typeError);
+    }
+    parsingString += this.insertedData[startPoint + i];
+  }
+  return parsingString;
 }
 JsonUnit.prototype.ignoreLastSpaces = function () {
 
