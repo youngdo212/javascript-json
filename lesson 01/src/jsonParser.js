@@ -16,10 +16,12 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.parsedData = parsedData;
 }
 
-Object.defineProperty(JsonUnit.prototype, "parsingLetter", { get: function () { return this.insertedData[this.parsingPointer]; } })
+Object.defineProperty(JsonUnit.prototype, "parsingLetter", 
+  { get: function () { return this.insertedData[this.parsingPointer]; } }
+)
 
 JsonUnit.prototype.parseData = function () {
-  while (true) {
+  while (this.parsingPointer <= this.insertedData.length) {
     this.ignoreSpaces();
     if (this.parsingPointer >= this.dataEndPoint) return this;
 
@@ -27,27 +29,30 @@ JsonUnit.prototype.parseData = function () {
     if (dataType === "Array") this.parseArray();
     else this.parseValue(dataType);
   }
+  throw new Error(errors.blockError);
 }
 
 JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
   var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
-  this.parsedElements.push(innerBlock.parseData().parsedData);
+  this.parsedData.push(innerBlock.parseData().parsedData);
   this.parsingPointer = arrayEnd + 1;
-  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
+  this.parsingPointer = this.getElementEnd();
   return this;
 }
 
 JsonUnit.prototype.parseValue = function (valueType) {
   var valueEnd = this.getElementEnd();
   var pureValueEnd = this.exceptLastSpaces(this.parsingPointer, valueEnd);
-  this.parsedElements.push(this["parse" + valueType]());
+  this.parsedData.push(this["parse" + valueType]());
   this.parsingPointer = valueEnd + 1;
   return this;
 }
 
 JsonUnit.prototype.ignoreSpaces = function () {
   while (this.parsingLetter === " ") {
+    log(this.parsingLetter)
+    log(this.parsingPointer)
     this.parsingPointer++;
   }
   return this;
@@ -68,7 +73,7 @@ JsonUnit.prototype.getBlockEnd = function () {
   for (; endPointer <= this.dataEndPoint; endPointer++) {
     if (this.insertedData[endPointer] === '[') innerArrayCount++;
     if (this.insertedData[endPointer] === ']') innerArrayCount--;
-    if (innerArrayCount === -1) {
+    if (innerArrayCount === 0) {
       return endPointer;
     }
   }
