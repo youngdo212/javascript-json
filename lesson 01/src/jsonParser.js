@@ -118,9 +118,12 @@ JsonUnit.prototype.parseString = function (startPoint, endPoint) {
   return parsingString;
 }
 
-JsonUnit.prototype.ignoreLastSpaces = function () {
-
+JsonUnit.prototype.exceptLastSpaces = function (startPoint, endPoint) {
+  while(this.insertedData[endPoint] === ' '){
+    endPoint--;
+    if(endPoint < startPoint) throw new Error(errors.typeError);
+  }
+  return endPoint;
 }
-
 
 module.exports = parser;
