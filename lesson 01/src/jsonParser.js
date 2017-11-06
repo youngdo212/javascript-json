@@ -44,8 +44,9 @@ JsonUnit.prototype.ignoreSpaces = function () {
 JsonUnit.prototype.getNextType = function () {
   var next = this.insertedData[this.parsingPointer];
   if (next === '[') return "Array";
-  var valueCheck = /\"|t|f|T|F|-|[1-9]/ //", t, f, T, F, -, 1~9 일 경우 true
-  if (valueCheck.test(next)) return "Value";
+  if (next === '"') return "String";
+  if (/-|[1-9]/.test(next)) return "Number";
+  if (/t|f/i.test(next)) return "Bool";
   throw new Error(errors.typeError);
 }
 
@@ -75,13 +76,13 @@ JsonUnit.prototype.getElementEnd = function () {
   throw new Error(errors.typeError);
 }
 
-JsonUnit.prototype.parseNumber = function () {
+JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
 
 }
-JsonUnit.prototype.parseBool = function () {
+JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
 
 }
-JsonUnit.prototype.parseString = function () {
+JsonUnit.prototype.parseString = function (startPoint, endPoint) {
 
 }
 JsonUnit.prototype.ignoreLastSpaces = function () {
