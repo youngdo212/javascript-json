@@ -14,10 +14,15 @@ var reader = require('./src/jsonReader');
     var parsedData;
     var dataCount;
 
-    parsedData = parser.parseJson(insert);
-    // dataCount = reader.countType(parsedData);
-    // common.messages.jsonCount(dataCount);
-    console.log(parsedData);
+    try {
+      parsedData = parser.parseJson(insert);
+      // dataCount = reader.countType(parsedData);
+      // common.messages.jsonCount(dataCount);
+      console.log(parsedData);
+    }
+    catch (error) {
+      console.log(error);
+    }
 
     common.messages.waitInsert();
     readline.prompt();
