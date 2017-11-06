@@ -6,15 +6,49 @@ var rl = readline.createInterface({
     output: process.stdout
 });
 
-function displayCounts(object) {
-    var count = {
-        string: 0,
-        number: 0,
-        boolean: 0,
-        object: 0,
-        array: 0
+function getCounts(object) {
+    var types = [
+        {
+            name: '문자열',
+            type: 'string',
+            count: 0
+        },
+        {
+            name: '숫자',
+            type: 'number',
+            count: 0
+        },
+        {
+            name: '부울',
+            type: 'boolean',
+            count: 0
+        },
+        {
+            name: '널',
+            type: 'null',
+            count: 0
+        },
+        {
+            name: '객체',
+            type: 'object',
+            count: 0
+        },
+        {
+            name: '배열',
+            type: 'array',
+            count: 0
+        }
+    ];
+
+    types.getType = function (type) {
+        var index = this.findIndex(function (item) {
+            return item.type === type;
+        });
+
+        return this[index];
     };
 
+    var keys = null;
     var values = null;
     var objectName = null;
 
@@ -22,7 +56,7 @@ function displayCounts(object) {
         values = object;
         objectName = '배열';
     } else {
-        var keys = Object.keys(object);
+        keys = Object.keys(object);
         values = keys.map(function(key) {
             return object[key];
         });
@@ -30,60 +64,43 @@ function displayCounts(object) {
     }
 
     values.forEach(function(item) {
-        switch (typeof item) {
+        var type = typeof item;
+
+        switch (type) {
             case 'number':
-                count.number++;
-            break;
-
             case 'string':
-                count.string++;
-            break;
-
             case 'boolean':
-                count.boolean++;
+                types.getType(type).count++;
             break;
 
             case 'object':
-                if (item instanceof Array) {
-                    count.array++;
+                if (item === null) {
+                    types.getType('null').count++;
+                } else if (item instanceof Array) {
+                    types.getType('array').count++;
                 } else {
-                    count.object++;
+                    types.getType('object').count++;
                 }
             break;
         }
     });
 
     if (values.length === 0) {
-        console.log('빈 ' + objectName + '입니다.');
-        return ;
+        return '빈 ' + objectName + '입니다.';
     }
 
     var message = '총 ' + values.length + '개의 ' + objectName + ' 데이터 중에 ';
 
-    if (count.string > 0) {
-        message += '문자열 ' + count.string + '개, ';
-    }
+    types.forEach(function(item, index) {
+        if (item.count > 0) {
+            message += item.name + ' ' + item.count + '개, ';
+        }
+    });
 
-    if (count.number > 0) {
-        message += '숫자 ' + count.number + '개, ';
-    }
-
-    if (count.boolean > 0) {
-        message += '부울 ' + count.boolean + '개, ';
-    }
-
-    if (count.object > 0) {
-        message += '객체 ' + count.object + '개, ';
-    }
-
-    if (count.array > 0) {
-        message += '배열 ' + count.object + '개, ';
-    }
-
-    message = message.substring(0, message.length - 2);
+    message = message.substr(0, message.length - 2);
     message += '가 포함되어 있습니다.';
 
-    console.log(message);
+    return message;
 }
 
 function toJsonString(options) {
@@ -145,12 +162,16 @@ function toJsonString(options) {
             break;
 
             case 'object':
-                jsonStr += toJsonString({
-                    object: item,
-                    tabSize: tabSize,
-                    limitPerLine: limitPerLine,
-                    depth: depth + 1
-                });
+                if (item === null) {
+                    jsonStr += 'null';
+                } else {
+                    jsonStr += toJsonString({
+                        object: item,
+                        tabSize: tabSize,
+                        limitPerLine: limitPerLine,
+                        depth: depth + 1
+                    });
+                }
             break;
         }
 
@@ -177,13 +198,14 @@ function toJsonString(options) {
 rl.on('line', function(input) {
     try {
         var parsedObject = parser.parse(input);
-        displayCounts(parsedObject);
+        var countMessage = getCounts(parsedObject);
 
         var jsonStr = toJsonString({
             object: parsedObject,
             tabSize: 4
         });
 
+        console.log(countMessage);
         console.log(jsonStr);
     } catch(exception) {
         console.log(exception);

@@ -25,17 +25,30 @@ var parser = {
 
         return token;
     },
-    getBooleanToken: function() {
+    getKeywordToken: function() {
         var char = this.input[this.index];
-        var keyword = (char === characters.true) ? 'true' : 'false' ;
-        var inputToken = this.input.substr(this.index, keyword.length);
+        var token = {};
+        var keyword = null;
+        var type = null;
+
+        if (char === characters.true) {
+            keyword = 'true';
+            type = 'boolean';
+        } else if (char === characters.false) {
+            keyword = 'false';
+            type = 'boolean';
+        } else {
+            keyword = 'null';
+            type = 'null';
+        }
+
+        var tokenStr = this.input.substr(this.index, keyword.length);
         var nextIndex = this.index + keyword.length - 1;
 
-        var token = {};
-        if (keyword === inputToken) {
-            token.value = inputToken;
+        if (keyword === tokenStr) {
+            token.value = keyword;
             token.nextIndex = nextIndex;
-            token.type = 'boolean';
+            token.type = type;
 
             return token;
         } else {
@@ -95,6 +108,8 @@ var parser = {
             parsed = token.value;
         } else if (token.type === 'boolean') {
             parsed = (token.value === 'true');
+        } else if (token.type === 'null') {
+            parsed = null;
         } else {
             parsed = new Number(token).valueOf();
         }
@@ -129,7 +144,6 @@ var parser = {
         var endIndex = this.input.indexOf(endChar);
 
         for (var i = startIndex; i < endIndex; i++) {
-            console.log(this.input[i]);
             if (this.input[i] !== characters.space) {
                 return false;
             }
@@ -188,10 +202,11 @@ var parser = {
                     propertyKey = token.value;
                     token = '';
                 }
-            } else if (characters.isBoolean(thisChar) ) {
-                token = this.getBooleanToken();
+            } else if (characters.isKeyword(thisChar) ) {
+                // true, false, null
+                token = this.getKeywordToken();
                 this.index = token.nextIndex;
-            } else if (characters.isStartChar(thisChar)  && this.state.name !== 'INITIAL') {
+            } else if (characters.isStartChar(thisChar) && this.state.name !== 'INITIAL') {
                 token = this.getObjectToken();
             } else if (characters.isComponentOfNumber(thisChar)) {
                 token += thisChar;

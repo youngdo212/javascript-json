@@ -15,7 +15,11 @@ var characters = {
     minus: '-',
     true: 't',
     false: 'f',
+    null: 'n',
     exponent: 'e',
+    isKeyword: function(char) {
+        return char === this.true || char === this.false || char === this.null;
+    },
     isStartChar: function(char) {
         return char === this.bracketStart || char === this.braceStart;
     },
@@ -48,12 +52,12 @@ var states = [
     {
         name: 'WAITING_FOR_INPUT_VALUE', // 1
         validCharacters: {
-            array: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', '\'', '\"', '{', '[' ],
-            object: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', '\"', '{', '[' ]
+            array: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', 'n', 'u', '\'', '\"', '{', '[' ],
+            object: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', 'n', 'u', '\"', '{', '[' ]
         },
         nextState: {
-            array: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2],
-            object: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2]
+            array: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2, 2],
+            object: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2]
         }
     },
     {
@@ -63,8 +67,8 @@ var states = [
             object: [' ', ',', '}']
         },
         nextState: {
-            array: [2, 1, 17],
-            object: [2, 3, 17]
+            array: [2, 1, 13],
+            object: [2, 3, 13]
         }
     },
     {
@@ -89,8 +93,8 @@ var states = [
             object: [',', ' ', '.', 'e', 'E', '}']
         },
         nextState: {
-            array: [1, 2, 8, 10, 10, 17],
-            object: [3, 2, 8, 10, 10, 17]
+            array: [1, 2, 8, 10, 10, 13],
+            object: [3, 2, 8, 10, 10, 13]
         }
     },
     {
@@ -100,8 +104,8 @@ var states = [
             object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', '.', ' ', ',', '}']
         },
         nextState: {
-            array: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 1, 17],
-            object: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 3, 17]
+            array: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 1, 13],
+            object: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 3, 13]
         }
     },
     {
@@ -116,8 +120,8 @@ var states = [
             object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', ' ', ',', '}']
         },
         nextState: {
-            array: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 1, 17],
-            object: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 3, 17]
+            array: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 1, 13],
+            object: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 3, 13]
         }
     },
     {
@@ -137,24 +141,12 @@ var states = [
             object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', '}']
         },
         nextState: {
-            array: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 1, 17],
-            object: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 3, 17]
+            array: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 1, 13],
+            object: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 3, 13]
         }
     },
     {
-        name: 'ENCOUNTER_SINGLE_QUOTE' // 13
-    },
-    {
-        name: 'ENCOUNTER_DOUBLE_QUOTE' // 14
-    },
-    {
-        name: 'ENCOUNTER_BOOLEAN_TRUE' // 15
-    },
-    {
-        name: 'ENCOUNTER_BOOLEAN_FALSE' // 16
-    },
-    {
-        name: 'END' // 17
+        name: 'END' // 13
     }
 ];
 
@@ -187,7 +179,6 @@ states.forEach(function(state) {
         var index = -1;
 
         if (typeof nextState === 'number') {
-            console.log(states[nextState]);
             return states[nextState];
         }
 
