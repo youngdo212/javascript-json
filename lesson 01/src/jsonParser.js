@@ -51,18 +51,28 @@ JsonUnit.prototype.getNextType = function () {
 
 JsonUnit.prototype.getBlockEnd = function () {
   var innerArrayCount = 0
-  for (var blockEnd = this.parsingPointer; blockEnd <= this.dataEndPoint; blockEnd++) {
-    if (this.insertedData[blockEnd] === '[') innerArrayCount++;
-    if (this.insertedData[blockEnd] === ']') innerArrayCount--;
+  var endPointer = this.parsingPointer;
+
+  for (; endPointer <= this.dataEndPoint; endPointer++) {
+    if (this.insertedData[endPointer] === '[') innerArrayCount++;
+    if (this.insertedData[endPointer] === ']') innerArrayCount--;
     if (innerArrayCount === -1) {
-      return blockEnd;
+      return endPointer;
     }
   }
   throw new Error(errors.blockError);
 }
 
 JsonUnit.prototype.getElementEnd = function () {
+  var letter = insertedData[parsingPointer];
+  var endPointer = (letter === '"') ? this.getStringEnd() : this.parsingPointer
 
+  for (; endPointer <= this.dataEndPoint; endPointer++) {
+    if (insertedData[endPointer] === ']' || insertedData[endPointer] === ',') {
+      return endPointer;
+    }
+  }
+  throw new Error(errors.typeError);
 }
 
 JsonUnit.prototype.parseNumber = function () {
