@@ -15,21 +15,21 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.parsedData = parsedData;
 }
 JsonUnit.prototype.parseData = function () {
-  this.ignoreSpaces();
-  if (this.parsingPointer >= this.dataEndPoint) {
-    return this;
+  while (true) {
+    this.ignoreSpaces();
+    if (this.parsingPointer >= this.dataEndPoint) return this;
+    this["parse" + this.getNextType()]();
   }
-  this["parse" + this.getNextType()]();
-  return this;
 }
 JsonUnit.prototype.parseArray = function () {
-  // var arrayEnd = this.getBlockEnd();
-  // var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
-  // this.parsedElements.push(innerBlock.parseData().parsedData);
-  // this.parsingPointer += arrayEnd + 1;
-  // this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
+  var arrayEnd = this.getBlockEnd();
+  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
+  this.parsedElements.push(innerBlock.parseData().parsedData);
+  this.parsingPointer += arrayEnd + 1;
+  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
   return this;
 }
+
 JsonUnit.prototype.parseValue = function () {
   return this;
 }
@@ -40,23 +40,31 @@ JsonUnit.prototype.ignoreSpaces = function () {
   }
   return this;
 }
+
 JsonUnit.prototype.getNextType = function () {
   var next = this.insertedData[this.parsingPointer];
-  var valueCheck = /\"|t|f|T|F|-|[1-9]/
-  if (next === '[') {
-    return "Array";
-  }
-  if (valueCheck.test(next)) {
-    return "Value";
-  }
+  if (next === '[') return "Array";
+  var valueCheck = /\"|t|f|T|F|-|[1-9]/ //", t, f, T, F, -, 1~9 일 경우 true
+  if (valueCheck.test(next)) return "Value";
   throw new Error(errors.typeError);
 }
+
+JsonUnit.prototype.getBlockEnd = function () {
+  var innerArrayCount = 0
+  for (var blockEnd = this.parsingPointer; blockEnd <= this.dataEndPoint; blockEnd++) {
+    if (this.insertedData[blockEnd] === '[') innerArrayCount++;
+    if (this.insertedData[blockEnd] === ']') innerArrayCount--;
+    if (innerArrayCount === -1) {
+      return blockEnd;
+    }
+  }
+  throw new Error(errors.blockError);
+}
+
 JsonUnit.prototype.getElementEnd = function () {
 
 }
-JsonUnit.prototype.getBlockEnd = function () {
 
-}
 JsonUnit.prototype.parseNumber = function () {
 
 }
@@ -71,72 +79,6 @@ JsonUnit.prototype.ignoreLastSpaces = function () {
 }
 
 
-var parseByLetter = function (insertedData) {
-
-  for (var i = 0; i < insertedString.length; i++) {
-    if (typeStack.length === 0) {
-      switch (insertedString[i]) {
-        case "[":
-          typeStack.push("array");
-          currentObject.push("array start");
-          break;
-        case " ":
-          break;
-        default:
-          break;
-      }
-    } else if (typeStack[typeStack.length - 1] === "array") {
-      switch (insertedString[i]) {
-        case ']':
-          typeStack.pop();
-          currentObject.push("array end");
-          break;
-        case '"':
-          typeStack.push("string");
-          currentData = "";
-          break;
-        case ' ':
-        case ',':
-          break;
-        default:
-          typeStack.push("numberOrBool");
-          currentData = "";
-          currentData += insertedString[i];
-          break;
-      }
-    } else if (typeStack[typeStack.length - 1] === "string") {
-      switch (insertedString[i]) {
-        case '"':
-          currentObject.push(currentData);
-          typeStack.pop();
-          break;
-        default:
-          currentData += insertedString[i];
-          break;
-      }
-    } else {
-      switch (insertedString[i]) {
-        case ' ':
-          break;
-        case ']':
-          var result = parseNumOrBool(currentData);
-          currentObject.push(result);
-          currentObject.push("array end");
-          typeStack.pop();
-          break;
-        case ',':
-          var result = parseNumOrBool(currentData);
-          currentObject.push(result);
-          typeStack.pop();
-          break;
-        default:
-          currentData += insertedString[i];
-          break;
-      }
-    }
-  }
-  return currentObject;
-}
 var parseNumOrBool = function (parsingData) {
   var num = parseInt(parsingData);
   if (!isNaN(num)) {
