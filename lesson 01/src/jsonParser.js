@@ -8,13 +8,16 @@ var parser = {
     return parsingJson.parseData().parsedData;
   },
 }
+
 JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.insertedData = insertedData;
   this.parsingPointer = parsingPointer;
   this.dataEndPoint = dataEndPoint;
   this.parsedData = parsedData;
 }
+
 Object.defineProperty(JsonUnit.prototype, "parsingLetter", { get: function () { return this.insertedData[this.parsingPointer]; } })
+
 JsonUnit.prototype.parseData = function () {
   while (true) {
     this.ignoreSpaces();
@@ -78,21 +81,22 @@ JsonUnit.prototype.getElementEnd = function () {
 }
 
 JsonUnit.prototype.getStringEnd = function () {
-  var endPointer = this.parsingPointer;
-  if (this.parsingLetter) {
-
+  var endPointer = this.parsingPointer + 1;
+  while (this.insertedData[endPointer] !== '"') {
+    endPointer++;
+    if (endPointer > this.dataEndPoint) throw new Error(errors.typeError);
   }
-
-  for (; endPointer <= this.dataEndPoint; endPointer++) {
-    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
-      return endPointer;
-    }
-  }
-  throw new Error(errors.typeError);
 }
 
 JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
-
+  var num = parseInt(parsingData);
+  if (!isNaN(num)) {
+    return num;
+  } else if (parsingData === "true") {
+    return true;
+  } else if (parsingData === "false") {
+    return false;
+  }
 }
 JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
 
@@ -104,16 +108,5 @@ JsonUnit.prototype.ignoreLastSpaces = function () {
 
 }
 
-
-var parseNumOrBool = function (parsingData) {
-  var num = parseInt(parsingData);
-  if (!isNaN(num)) {
-    return num;
-  } else if (parsingData === "true") {
-    return true;
-  } else if (parsingData === "false") {
-    return false;
-  }
-}
 
 module.exports = parser;
