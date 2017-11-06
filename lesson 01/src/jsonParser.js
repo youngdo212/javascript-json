@@ -140,8 +140,5 @@ var parseNumOrBool = function (parsingData) {
     return false;
   }
 }
-return {
-  parseJson
-};
 
 module.exports = parser;
