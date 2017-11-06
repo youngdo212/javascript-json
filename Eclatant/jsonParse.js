@@ -157,7 +157,11 @@ function checkArray(jsonString) {
   for (var i = 0; i < len; i += 1) {
     var target = manipulatedString[i];
 
-    if (target === `]`) {
+    if (target === " ") {
+      continue;
+    }
+
+    if (target === `]` && !objectSwitch) {
       var { parsed: parsedArray } = checkArray(
         manipulatedString.slice(beginIndex, i + 1)
       );
@@ -167,19 +171,20 @@ function checkArray(jsonString) {
       checkedResult.arrCount += 1;
 
       arraySwitch = false;
-      // beginIndex = -1;
+      beginIndex = -1;
       continue;
     } else if (arraySwitch) {
       continue;
     }
 
-    if (target === "[") {
+    if (target === "[" && !objectSwitch) {
       if (arraySwitch) {
         throw new ParseError(`User가 [ 이후에 [ 를 사용하였습니다`, `checkArray()`);
       }
 
       arraySwitch = true;
       beginIndex = i;
+      continue;
     }
 
     if (target === "{") {
@@ -282,7 +287,7 @@ function checkObject(jsonString) {
       beginIndex = i;
     }
 
-    if (target === "]") {
+    if (target === "]" && arraySwitch) {
       var { parsed: parsedArray } = checkArray(
         manipulatedString.slice(beginIndex, i + 1)
       );
@@ -358,36 +363,39 @@ function checkObject(jsonString) {
   return checkedResult;
 }
 
-controller(`[ 10, 21, 4, 314, 99, 0, 72 ]`);
-controller(`[ 10, "jk", 4, "314", 99, "crong", false ]`);
-controller(
-  `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`
-);
-controller(
-  `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
-);
-controller(`[ "name" : "KIM JUNG" ]`);
-controller(`{ "name" : "KIM JUNG' }`);
-controller(`{ "name" : "KIM JUNG" "alias" : "JK" }`);
-controller(
-  `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`
-);
-controller(
-  `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOON JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
-);
-controller(
-  '{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }'
-);
-controller(
-  `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`
-);
-controller(
-  `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : [ "hana", "hayul", "haun" ] }`
-);
-controller(
-  `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`
-);
+// controller(`[ 10, 21, 4, 314, 99, 0, 72 ]`);
+// controller(`[ 10, "jk", 4, "314", 99, "crong", false ]`);
+// controller(
+//   `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`
+// );
+// controller(
+//   `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
+// );
+// controller(`[ "name" : "KIM JUNG" ]`);
+// controller(`{ "name" : "KIM JUNG' }`);
+// controller(`{ "name" : "KIM JUNG" "alias" : "JK" }`);
+// controller(
+//   `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`
+// );
+// controller(
+//   `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOON JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
+// );
+// controller(
+//   '{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }'
+// );
+// controller(
+//   `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`
+// );
+// controller(
+//   `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : [ "hana", "hayul", "haun" ] }`
+// );
+// controller(
+//   `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`
+// );
 
 // controller(`[ "a", [ "b" ], [ [ "c" ] ] ]`);
 // controller(`[ { "a" : [ "b" , { "c": { "d" : "e" } } ] } ]`);
+// controller(`[ 012345 ]`);
+controller(`[ 1 23 ]`);
 // controller(`[ { "a" : 1 , "b" : [ 1, 2, 3 ] }, [ 4, 5, 6 ] ]`);
+// controller(`[ undefined ]`);
