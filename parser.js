@@ -173,8 +173,6 @@ var parser = {
         var propertyKey = null;
         var token = '';
 
-        debugger;
-
         if (this.isEmptyObject()) {
             var endChar = (this.typeOfObject === 'array') ? ']' : '}';
             this.index = this.input.indexOf(endChar) + 1;
@@ -185,8 +183,6 @@ var parser = {
             thisChar = this.input[this.index];
             isNotValidCharacter = this.state.isNotValidCharacter(this.typeOfObject, thisChar);
             nextState = this.state.getNextState(this.typeOfObject, thisChar);
-
-            debugger;
 
             // check syntax is valid
             if (isNotValidCharacter) {
@@ -221,8 +217,6 @@ var parser = {
 
                 token = '';
             }
-
-            debugger;
 
             this.state = nextState;
             this.index++;
