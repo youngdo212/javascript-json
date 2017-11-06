@@ -1,5 +1,6 @@
 var util = require('./utils');
 var log = util.log;
+var error = require('./errors');
 
 var parser = {
   parseJson: function (insertedData) {
@@ -36,7 +37,7 @@ JsonUnit.prototype.parseArray = function () {
   var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
   this.parsedElements.push(innerBlock.parseData().parsedData);
   this.parsingPointer += arrayEnd + 1;
-  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로
+  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
   return this;
 }
 JsonUnit.prototype.parseValue = function () {
@@ -50,9 +51,24 @@ JsonUnit.prototype.ignoreSpaces = function () {
   return this;
 }
 JsonUnit.prototype.getNextType = function () {
+  switch (this.insertedData[this.parsingPointer]) {
+    case '[':
+      return "Array";
+    case '"':
+      return "String";
+    case '"':
+      return "String";
+    case 't':
+    case 'f':
+    case 'T':
+    case 'F':
+      return "Bool";
+    default:
+      throw new Error(errors.typeError);
+  }
 
 }
-JsonUnit.prototype.getTypeEnd = function () {
+JsonUnit.prototype.getElementEnd = function () {
 
 }
 JsonUnit.prototype.getBlockEnd = function () {
