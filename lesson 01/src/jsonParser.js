@@ -22,8 +22,10 @@ JsonUnit.prototype.parseData = function () {
   while (true) {
     this.ignoreSpaces();
     if (this.parsingPointer >= this.dataEndPoint) return this;
-    if (this.getNextType() === "Array") this.parseArray();
-    else this.parseValue();
+
+    var dataType = this.getNextType();
+    if (dataType === "Array") this.parseArray();
+    else this.parseValue(dataType);
   }
 }
 
@@ -31,12 +33,16 @@ JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
   var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
   this.parsedElements.push(innerBlock.parseData().parsedData);
-  this.parsingPointer += arrayEnd + 1;
+  this.parsingPointer = arrayEnd + 1;
   this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
   return this;
 }
 
-JsonUnit.prototype.parseValue = function () {
+JsonUnit.prototype.parseValue = function (valueType) {
+  var valueEnd = this.getElementEnd();
+  var pureValueEnd = this.exceptLastSpaces(this.parsingPointer, valueEnd);
+  this.parsedElements.push(this["parse" + valueType]());
+  this.parsingPointer = valueEnd + 1;
   return this;
 }
 
@@ -111,6 +117,7 @@ JsonUnit.prototype.parseString = function (startPoint, endPoint) {
   }
   return parsingString;
 }
+
 JsonUnit.prototype.ignoreLastSpaces = function () {
 
 }
