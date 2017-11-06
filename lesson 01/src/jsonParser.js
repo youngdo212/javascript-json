@@ -19,26 +19,15 @@ JsonUnit.prototype.parseData = function () {
   if (this.parsingPointer >= this.dataEndPoint) {
     return this;
   }
-  var parsingType = this.getNextType();
-  this.parse[parsingType]();
-  switch (this.getNextType()) {
-    case "Array":
-      this.parseArray();
-      break;
-    case "String":
-    case "Number":
-    case "Bool":
-      this.parseValue();
-      break;
-  }
+  this["parse" + this.getNextType()]();
   return this;
 }
 JsonUnit.prototype.parseArray = function () {
-  var arrayEnd = this.getBlockEnd();
-  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
-  this.parsedElements.push(innerBlock.parseData().parsedData);
-  this.parsingPointer += arrayEnd + 1;
-  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
+  // var arrayEnd = this.getBlockEnd();
+  // var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
+  // this.parsedElements.push(innerBlock.parseData().parsedData);
+  // this.parsingPointer += arrayEnd + 1;
+  // this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로 blockEnd 감지 => elementEnd 감지 순으로 진행
   return this;
 }
 JsonUnit.prototype.parseValue = function () {
@@ -52,20 +41,15 @@ JsonUnit.prototype.ignoreSpaces = function () {
   return this;
 }
 JsonUnit.prototype.getNextType = function () {
-  log(this.insertedData);
-  switch (this.insertedData[this.parsingPointer]) {
-    case '[':
-      return "Array";
-    case '"':
-      return "String";
-    case 't':
-    case 'f':
-    case 'T':
-    case 'F':
-      return "Bool";
-    default:
-      throw new Error(errors.typeError);
+  var next = this.insertedData[this.parsingPointer];
+  var valueCheck = /\"|t|f|T|F|-|[1-9]/
+  if (next === '[') {
+    return "Array";
   }
+  if (valueCheck.test(next)) {
+    return "Value";
+  }
+  throw new Error(errors.typeError);
 }
 JsonUnit.prototype.getElementEnd = function () {
 
