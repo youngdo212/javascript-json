@@ -1,6 +1,6 @@
 var util = require('./utils');
 var log = util.log;
-var error = require('./errors');
+var errors = require('./errors');
 
 var parser = {
   parseJson: function (insertedData) {
@@ -19,8 +19,8 @@ JsonUnit.prototype.parseData = function () {
   if (this.parsingPointer >= this.dataEndPoint) {
     return this;
   }
-  // var parsingType = this.getNextType();
-  // this.parse[parsingType]();
+  var parsingType = this.getNextType();
+  this.parse[parsingType]();
   switch (this.getNextType()) {
     case "Array":
       this.parseArray();
@@ -31,6 +31,7 @@ JsonUnit.prototype.parseData = function () {
       this.parseValue();
       break;
   }
+  return this;
 }
 JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
@@ -51,11 +52,10 @@ JsonUnit.prototype.ignoreSpaces = function () {
   return this;
 }
 JsonUnit.prototype.getNextType = function () {
+  log(this.insertedData);
   switch (this.insertedData[this.parsingPointer]) {
     case '[':
       return "Array";
-    case '"':
-      return "String";
     case '"':
       return "String";
     case 't':
@@ -66,7 +66,6 @@ JsonUnit.prototype.getNextType = function () {
     default:
       throw new Error(errors.typeError);
   }
-
 }
 JsonUnit.prototype.getElementEnd = function () {
 

@@ -1,3 +1,3 @@
 module.exports = {
-  typeError = "type error"
+  typeError: "type error"
 };
