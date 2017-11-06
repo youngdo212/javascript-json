@@ -14,27 +14,32 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.parsedData = parsedData;
 }
 JsonUnit.prototype.parseData = function () {
-  console.log(this.parsingPointer);
   this.ignoreSpaces();
-  console.log(this.parsingPointer);
   if (this.parsingPointer >= this.dataEndPoint) {
     return this.parsedData;
   }
-  return this.parsedData;
-
-  // switch (getNextType()) {
-  //   case "Array":
-  //     var arrayEnd = getBlockEnd();
-  //     var innerBlock = new JsonUnit(arrayEnd);
-  //     var parsingElement = innerBlock.parseData();
-  //     this.parsingPointer += arrayEnd + 1;
-  //     this.parsedElements.push(parsingElement);
-  //     break;
-  //   case "String":
-  //   case "Number":
-  //   case "Bool":
-  //     break;
+  // var parsingType = this.getNextType();
+  // this.parse[parsingType]();
+  switch (this.getNextType()) {
+    case "Array":
+      this.parseArray();
+      break;
+    case "String":
+    case "Number":
+    case "Bool":
+      this.parseValue();
+      break;
+  }
 }
+JsonUnit.prototype.parseArray = function () {
+  var arrayEnd = getBlockEnd();
+  var innerBlock = new JsonUnit(arrayEnd);
+  var parsingElement = innerBlock.parseData();
+  this.parsingPointer += arrayEnd + 1;
+  this.parsedElements.push(parsingElement);
+  return this;
+}
+
 JsonUnit.prototype.ignoreSpaces = function () {
   while (this.insertedData[this.parsingPointer] === " ") {
     this.parsingPointer++;
