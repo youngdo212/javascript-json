@@ -1,13 +1,13 @@
 "use strict";
 
 var readline = require('./config/readline')();
-var common = require('./src/common');
+var messages = require('./src/messages');
 var parser = require('./src/jsonParser');
 var reader = require('./src/jsonReader');
 
 
 (function () {
-  common.messages.waitInsert();
+  messages.waitInsert();
   readline.prompt();
 
   readline.on('line', function (insert) {
@@ -17,14 +17,14 @@ var reader = require('./src/jsonReader');
     try {
       parsedData = parser.parseJson(insert);
       // dataCount = reader.countType(parsedData);
-      // common.messages.jsonCount(dataCount);
+      // messages.jsonCount(dataCount);
       console.log(parsedData);
     }
     catch (error) {
-      console.log(error);
+      messages.error(error);
     }
 
-    common.messages.waitInsert();
+    messages.waitInsert();
     readline.prompt();
   });
 })();
