@@ -89,17 +89,15 @@ JsonUnit.prototype.getStringEnd = function () {
 }
 
 JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
-  var num = parseInt(parsingData);
-  if (!isNaN(num)) {
-    return num;
-  } else if (parsingData === "true") {
-    return true;
-  } else if (parsingData === "false") {
-    return false;
-  }
+  var number = Number(insertedData.slice(startPoint, endPoint));
+  if (!isNaN(number)) return number;
+  throw new Error(errors.typeError);
 }
 JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
-
+  var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
+  if (parsingBool === "true") return true;
+  if (parsingBool === "false") return false;
+  throw new Error(errors.typeError);
 }
 JsonUnit.prototype.parseString = function (startPoint, endPoint) {
 
