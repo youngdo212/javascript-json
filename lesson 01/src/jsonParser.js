@@ -14,13 +14,16 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.dataEndPoint = dataEndPoint;
   this.parsedData = parsedData;
 }
+Object.defineProperty(JsonUnit.prototype, "parsingLetter", { get: function () { return this.insertedData[this.parsingPointer]; } })
 JsonUnit.prototype.parseData = function () {
   while (true) {
     this.ignoreSpaces();
     if (this.parsingPointer >= this.dataEndPoint) return this;
-    this["parse" + this.getNextType()]();
+    if (this.getNextType() === "Array") this.parseArray();
+    else this.parseValue();
   }
 }
+
 JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
   var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
@@ -65,11 +68,25 @@ JsonUnit.prototype.getBlockEnd = function () {
 }
 
 JsonUnit.prototype.getElementEnd = function () {
-  var letter = insertedData[parsingPointer];
+  var letter = this.insertedData[parsingPointer];
   var endPointer = (letter === '"') ? this.getStringEnd() : this.parsingPointer
 
   for (; endPointer <= this.dataEndPoint; endPointer++) {
-    if (insertedData[endPointer] === ']' || insertedData[endPointer] === ',') {
+    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
+      return endPointer;
+    }
+  }
+  throw new Error(errors.typeError);
+}
+
+JsonUnit.prototype.getStringEnd = function () {
+  var endPointer = this.insertedData[parsingPointer];
+  if (this.insertedData[this.parsingPointer]) {
+
+  }
+
+  for (; endPointer <= this.dataEndPoint; endPointer++) {
+    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
       return endPointer;
     }
   }
