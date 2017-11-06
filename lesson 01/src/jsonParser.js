@@ -34,7 +34,7 @@ JsonUnit.prototype.parseData = function () {
 
 JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
-  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
+  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer + 1, arrayEnd - 1, new Array);
   this.parsedData.push(innerBlock.parseData().parsedData);
   this.parsingPointer = arrayEnd + 1;
   this.parsingPointer = this.getElementEnd();
@@ -51,8 +51,6 @@ JsonUnit.prototype.parseValue = function (valueType) {
 
 JsonUnit.prototype.ignoreSpaces = function () {
   while (this.parsingLetter === " ") {
-    log(this.parsingLetter)
-    log(this.parsingPointer)
     this.parsingPointer++;
   }
   return this;
