@@ -1,5 +1,5 @@
 var constants = require('./constants');
-var characters = constants.characters;
+var chars = constants.characters;
 var states = constants.states;
 
 var parser = {
@@ -31,10 +31,10 @@ var parser = {
         var keyword = null;
         var type = null;
 
-        if (char === characters.true) {
+        if (char === chars.true) {
             keyword = 'true';
             type = 'boolean';
-        } else if (char === characters.false) {
+        } else if (char === chars.false) {
             keyword = 'false';
             type = 'boolean';
         } else {
@@ -90,7 +90,7 @@ var parser = {
             return -1;
         }
 
-        if (foundIndex > 0 && str[foundIndex - 1] === characters.backslash) {
+        if (foundIndex > 0 && str[foundIndex - 1] === chars.backslash) {
             var nextIndex = findIndexOfNextQuote(str.substr(foundIndex + 1), quote);
 
             if (nextIndex === -1) {
@@ -117,8 +117,8 @@ var parser = {
         return parsed;
     },
     getTypeOfObject: function (input) {
-        var indexOfBracket = input.indexOf(characters.bracketStart);
-        var indexOfBrace = input.indexOf(characters.braceStart);
+        var indexOfBracket = input.indexOf(chars.bracketStart);
+        var indexOfBrace = input.indexOf(chars.braceStart);
 
         var type = null;
 
@@ -144,7 +144,7 @@ var parser = {
         var endIndex = this.input.indexOf(endChar);
 
         for (var i = startIndex; i < endIndex; i++) {
-            if (this.input[i] !== characters.space) {
+            if (this.input[i] !== chars.space) {
                 return false;
             }
         }
@@ -153,7 +153,7 @@ var parser = {
     },
     validateRestOfInput: function() {
         for (var i = this.index; i < this.input.length; i++) {
-            if (this.input[i] !== characters.space) {
+            if (this.input[i] !== chars.space) {
                 throw Error('Syntax Error!!');
             }
         }
@@ -190,7 +190,7 @@ var parser = {
             }
 
             // make token (string)
-            if (characters.isQuote(thisChar)) {
+            if (chars.isQuote(thisChar)) {
                 token = this.getStringToken();
                 this.index = token.nextIndex;
 
@@ -198,15 +198,15 @@ var parser = {
                     propertyKey = token.value;
                     token = '';
                 }
-            } else if (characters.isKeyword(thisChar) ) {
+            } else if (chars.isKeyword(thisChar) ) {
                 // true, false, null
                 token = this.getKeywordToken();
                 this.index = token.nextIndex;
-            } else if (characters.isStartChar(thisChar) && this.state.name !== 'INITIAL') {
+            } else if (chars.isStartChar(thisChar) && this.state.name !== 'INITIAL') {
                 token = this.getObjectToken();
-            } else if (characters.isComponentOfNumber(thisChar)) {
+            } else if (chars.isComponentOfNumber(thisChar)) {
                 token += thisChar;
-            } else if (thisChar === characters.comma || characters.isEndChar(thisChar)) {
+            } else if (thisChar === chars.comma || chars.isEndChar(thisChar)) {
                 parsedToken = this.parseToken(token);
 
                 if (this.typeOfObject === 'array') {
