@@ -142,7 +142,7 @@ function checkArray(jsonString) {
   var beginIndex = -1;
   var quotationSwitch = false;
   var objectSwitch = false;
-  var arraySwitch = false;
+  var arrayCheck = 0;
   var checkedResult = {
     element: 0,
     strCount: 0,
@@ -162,28 +162,37 @@ function checkArray(jsonString) {
     }
 
     if (target === `]` && !objectSwitch) {
-      var { parsed: parsedArray } = checkArray(
-        manipulatedString.slice(beginIndex, i + 1)
-      );
+      arrayCheck -= 1;
 
-      checkedResult.parsed.push(parsedArray);
-      checkedResult.element += 1;
-      checkedResult.arrCount += 1;
+      if (arrayCheck === 0) {
+        var { parsed: parsedArray } = checkArray(
+          manipulatedString.slice(beginIndex, i + 1)
+        );
 
-      arraySwitch = false;
-      beginIndex = -1;
+        checkedResult.parsed.push(parsedArray);
+        checkedResult.element += 1;
+        checkedResult.arrCount += 1;
+
+        beginIndex = -1;
+        continue;
+      }
+
       continue;
-    } else if (arraySwitch) {
+    } else if (arrayCheck > 1) {
       continue;
     }
 
     if (target === "[" && !objectSwitch) {
-      if (arraySwitch) {
-        throw new ParseError(`User가 [ 이후에 [ 를 사용하였습니다`, `checkArray()`);
+      // if (arrayCheck > 1) {
+      //   throw new ParseError(`User가 [ 이후에 [ 를 사용하였습니다`, `checkArray()`);
+      // }
+
+      arrayCheck += 1;
+
+      if (arrayCheck === 1) {
+        beginIndex = i;
       }
 
-      arraySwitch = true;
-      beginIndex = i;
       continue;
     }
 
@@ -219,6 +228,7 @@ function checkArray(jsonString) {
       );
 
       beginIndex = -1;
+      continue;
     }
 
     if (target === `"`) {
@@ -337,6 +347,7 @@ function checkObject(jsonString) {
       isValue = false;
       beginIndex = -1;
       quotationCount = 0;
+      continue;
     }
 
     if (isValue && i === len - 1 && quotationCount !== 1) {
@@ -393,9 +404,10 @@ function checkObject(jsonString) {
 //   `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`
 // );
 
-// controller(`[ "a", [ "b" ], [ [ "c" ] ] ]`);
+controller(`[ "a", [ "b" ], [ [ "c" ] ] ]`);
+// controller(`[ [ "c" ] ]`);
 // controller(`[ { "a" : [ "b" , { "c": { "d" : "e" } } ] } ]`);
 // controller(`[ 012345 ]`);
-controller(`[ 1 23 ]`);
+// controller(`[ 1 23 ]`);
 // controller(`[ { "a" : 1 , "b" : [ 1, 2, 3 ] }, [ 4, 5, 6 ] ]`);
 // controller(`[ undefined ]`);
