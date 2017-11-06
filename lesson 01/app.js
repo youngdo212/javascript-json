@@ -15,8 +15,9 @@ var reader = require('./src/jsonReader');
     var dataCount;
 
     parsedData = parser.parseJson(insert);
-    dataCount = reader.countType(parsedData);
-    common.messages.jsonCount(dataCount);
+    // dataCount = reader.countType(parsedData);
+    // common.messages.jsonCount(dataCount);
+    console.log(parsedData);
 
     common.messages.waitInsert();
     readline.prompt();
