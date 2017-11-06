@@ -4,7 +4,7 @@ var log = util.log;
 var parser = {
   parseJson: function (insertedData) {
     var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, new Array);
-    return parsingJson.parseData();
+    return parsingJson.parseData().parsedData;
   },
 }
 JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
@@ -16,7 +16,7 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
 JsonUnit.prototype.parseData = function () {
   this.ignoreSpaces();
   if (this.parsingPointer >= this.dataEndPoint) {
-    return this.parsedData;
+    return this;
   }
   // var parsingType = this.getNextType();
   // this.parse[parsingType]();
@@ -32,11 +32,14 @@ JsonUnit.prototype.parseData = function () {
   }
 }
 JsonUnit.prototype.parseArray = function () {
-  var arrayEnd = getBlockEnd();
-  var innerBlock = new JsonUnit(arrayEnd);
-  var parsingElement = innerBlock.parseData();
+  var arrayEnd = this.getBlockEnd();
+  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer, arrayEnd, new Array);
+  this.parsedElements.push(innerBlock.parseData().parsedData);
   this.parsingPointer += arrayEnd + 1;
-  this.parsedElements.push(parsingElement);
+  this.parsingPointer = this.getElementEnd(); //Array도 하나의 Element이므로
+  return this;
+}
+JsonUnit.prototype.parseValue = function () {
   return this;
 }
 
