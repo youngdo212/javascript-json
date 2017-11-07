@@ -68,7 +68,13 @@ $node index.js
   - '[' => (parse 재귀호출) => WAITING_FOR_CONTINUE_OR_END
 
 - object
-  object의 경우에서 single quote 입력한 경우를 제외하고 동일함.
+  - ' ' => WAITING_FOR_INPUT_VALUE
+  - '-' => ENCOUNTER_SIGN
+  - '0' => ENCOUNTER_ZERO
+  - '1~9' => ECOUNTER_NATURE_NUMBER
+  - '\"' => (다음 쌍따옴표 찾아서 건너 뜀) => WAITING_FOR_CONTINUE_OR_END
+  - '{' => (parse 재귀호출) => WAITING_FOR_CONTINUE_OR_END
+  - '[' => (parse 재귀호출) => WAITING_FOR_CONTINUE_OR_END
 
 **3. WAITING_FOR_CONTINUE_OR_END**  
 : 콤마(',')를 만나 추가적인 값을 입력받거나 괄호를 닫는 문자('}', ']')를 만나서 파싱을 종료할 수 있다.
