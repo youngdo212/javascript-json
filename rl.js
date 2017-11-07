@@ -6,6 +6,6 @@ var rl = (function () {
         output: process.stdout
     });
     return rl;
-})();
+}());
 
 module.exports = rl;
