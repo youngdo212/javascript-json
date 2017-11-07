@@ -104,6 +104,8 @@ JsonUnit.prototype.getStringEnd = function () {
 }
 
 JsonUnit.prototype.getDelimiter = function () {
+  var endPointer = this.parsingPointer;
+
   for (; endPointer <= this.dataEndPoint; endPointer++) {
     if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
       return endPointer;
