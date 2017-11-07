@@ -103,6 +103,17 @@ JsonUnit.prototype.getStringEnd = function () {
   }
 }
 
+JsonUnit.prototype.getDelimiter = function () {
+  for (; endPointer <= this.dataEndPoint; endPointer++) {
+    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
+      return endPointer;
+    }
+    if (this.insertedData[endPointer] !== ' ') {
+      throw new Error(errors.blockError);
+    }
+  }
+  throw new Error(errors.blockError);
+}
 
 JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
   var number = Number(this.insertedData.slice(startPoint, endPoint));
