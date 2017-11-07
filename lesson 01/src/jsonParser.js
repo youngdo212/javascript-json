@@ -22,6 +22,9 @@ Object.defineProperty(JsonUnit.prototype, "parsingLetter",
 )
 
 JsonUnit.prototype.parseData = function () {
+  if (this.dataEndPoint < 1) {
+    throw new Error(errors.type);
+  }
   while (this.parsingPointer < this.insertedData.length) {
     this.ignoreSpaces();
     if (this.parsingPointer >= this.dataEndPoint) return this;
@@ -43,7 +46,7 @@ JsonUnit.prototype.parseArray = function () {
   if (this.parsingPointer === this.insertedData.length) {
     return this;
   }
-  this.parsingPointer = this.getDelimiter();
+  this.parsingPointer = this.getDelimiter() + 1;
   return this;
 }
 
