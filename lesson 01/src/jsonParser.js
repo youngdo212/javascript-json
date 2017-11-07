@@ -4,6 +4,7 @@ var errors = require('./errors');
 
 var parser = {
   parseJson: function (insertedData) {
+    debugger;
     var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, new Array);
     return parsingJson.parseData().parsedData;
   },
@@ -16,7 +17,7 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.parsedData = parsedData;
 }
 
-Object.defineProperty(JsonUnit.prototype, "parsingLetter", 
+Object.defineProperty(JsonUnit.prototype, "parsingLetter",
   { get: function () { return this.insertedData[this.parsingPointer]; } }
 )
 
@@ -37,7 +38,7 @@ JsonUnit.prototype.parseArray = function () {
   var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer + 1, arrayEnd - 1, new Array);
   this.parsedData.push(innerBlock.parseData().parsedData);
   this.parsingPointer = arrayEnd + 1;
-  this.parsingPointer = this.getElementEnd();
+  this.ignoreComma();
   return this;
 }
 
@@ -51,6 +52,14 @@ JsonUnit.prototype.parseValue = function (valueType) {
 
 JsonUnit.prototype.ignoreSpaces = function () {
   while (this.parsingLetter === " ") {
+    this.parsingPointer++;
+  }
+  return this;
+}
+
+JsonUnit.prototype.ignoreComma = function () {
+  this.ignoreSpaces();
+  if (this.parsingLetter === ",") {
     this.parsingPointer++;
   }
   return this;
@@ -112,8 +121,8 @@ JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
 
 JsonUnit.prototype.parseString = function (startPoint, endPoint) {
   var parsingString = "";
-  for(var i = 1; startPoint + i < endPoint ; i++){
-    if(this.insertedData[startPoint + i] === '"' || this.insertedData[startPoint + i] === '\\'){
+  for (var i = 1; startPoint + i < endPoint; i++) {
+    if (this.insertedData[startPoint + i] === '"' || this.insertedData[startPoint + i] === '\\') {
       throw new Error(errors.typeError);
     }
     parsingString += this.insertedData[startPoint + i];
@@ -122,9 +131,9 @@ JsonUnit.prototype.parseString = function (startPoint, endPoint) {
 }
 
 JsonUnit.prototype.exceptLastSpaces = function (startPoint, endPoint) {
-  while(this.insertedData[endPoint] === ' '){
+  while (this.insertedData[endPoint] === ' ') {
     endPoint--;
-    if(endPoint < startPoint) throw new Error(errors.typeError);
+    if (endPoint < startPoint) throw new Error(errors.typeError);
   }
   return endPoint;
 }
