@@ -53,7 +53,7 @@ JsonUnit.prototype.parseArray = function () {
 JsonUnit.prototype.parseValue = function (valueType) {
   var valueEnd = this.getElementEnd();
   var pureValueEnd = this.exceptLastSpaces(this.parsingPointer, valueEnd);
-  this.parsedData.push(this["parse" + valueType]());
+  this.parsedData.push(this["parse" + valueType](this.parsingPointer, pureValueEnd));
   this.parsingPointer = valueEnd + 1;
   return this;
 }
@@ -80,6 +80,7 @@ JsonUnit.prototype.getBlockEnd = function () {
   for (; endPointer <= this.dataEndPoint; endPointer++) {
     if (this.insertedData[endPointer] === '[') innerArrayCount++;
     if (this.insertedData[endPointer] === ']') innerArrayCount--;
+    if (this.insertedData[endPointer] === '"') endPointer = this.getStringEnd(endPointer);
     if (innerArrayCount === 0) {
       return endPointer;
     }
@@ -88,7 +89,7 @@ JsonUnit.prototype.getBlockEnd = function () {
 }
 
 JsonUnit.prototype.getElementEnd = function () {
-  var endPointer = (this.parsingLetter === '"') ? this.getStringEnd() : this.parsingPointer
+  var endPointer = (this.parsingLetter === '"') ? this.getStringEnd(this.parsingPointer) : this.parsingPointer
 
   for (; endPointer <= this.dataEndPoint; endPointer++) {
     if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
@@ -98,12 +99,13 @@ JsonUnit.prototype.getElementEnd = function () {
   throw new Error(errors.typeError);
 }
 
-JsonUnit.prototype.getStringEnd = function () {
-  var endPointer = this.parsingPointer + 1;
+JsonUnit.prototype.getStringEnd = function (endPointer) {
+  endPointer++;
   while (this.insertedData[endPointer] !== '"') {
     endPointer++;
     if (endPointer > this.dataEndPoint) throw new Error(errors.typeError);
   }
+  return endPointer;
 }
 
 JsonUnit.prototype.getDelimiter = function () {
@@ -135,7 +137,7 @@ JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
 
 JsonUnit.prototype.parseString = function (startPoint, endPoint) {
   var parsingString = "";
-  for (var i = 1; startPoint + i < endPoint; i++) {
+  for (var i = 1; startPoint + i < endPoint - 1; i++) {
     if (this.insertedData[startPoint + i] === '"' || this.insertedData[startPoint + i] === '\\') {
       throw new Error(errors.typeError);
     }
