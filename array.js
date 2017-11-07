@@ -5,7 +5,7 @@ const rl = readline.createInterface({
 
 const num = "0123456789";
 const endvalue = [" ", ",", "]", "}"];
-
+var count = { num: 0, str: 0, bol: 0, arr: 0, obj: 0 };
 function readStr(input, i) { //문자열과 다음 i 반환, 에러는 -1 반환
     var pos = i;
     for (; i < input.length; i++) {
@@ -18,7 +18,6 @@ function readStr(input, i) { //문자열과 다음 i 반환, 에러는 -1 반환
         }
     }
 }
-
 function readNum(input, i) { //숫자와 다음 i 반환 , 에러는 -1 반환
     var pos = i;
     for (; i < input.length; i++) {
@@ -47,11 +46,13 @@ function readBool(input, i) {//bool값과 다음 i 반환, 에러는 -1 반환
         }
     }
 }
-function token(answer) {
-    var temp = [], i, length = answer.length;
-    var count = { num: 0, str: 0, bol: 0 };
+function getArray(answer, start, nested) {
+    var temp = [], i = 0, length = answer.length;
     var pos1 = null, state = "READY";
-    for (i = 0; i < length; i++) {
+    if (start !== undefined) {
+        i = start;
+    }
+    for (; i < length; i++) {
         if (state === "READY") {
             if (answer[i] === "[") {
                 state = "READ";
@@ -95,11 +96,24 @@ function token(answer) {
                     temp.push(getbool[1]);
                 }
             }
+            else if (answer[i] === "[") {
+                var getin = getArray(answer, i, 1); //중첩값인가 인자를 보냄
+                temp.push(getin[0]);
+                i = getin[1];
+            }
+            else if (answer[i] === "]") {
+                count.arr++;
+                if (nested == 1) return [temp, i];
+                else return temp;
+            }
         }
     }
-    console.log(temp); console.log(count);
+    count.arr++;
+    return temp;
 }
 rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) {
-    token(answer);
+    var arr = getArray(answer);
+    console.log(arr);
+    console.log(count);
     rl.close();
 });
