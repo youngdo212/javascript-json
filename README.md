@@ -1,4 +1,5 @@
 # Json Parser
+이 프로젝트는 javascript built-in JSON.parse 함수를 직접 구현한 프로젝트 입니다. JSON format의 기본 type인 String, Number, Array, Object, null을 동일하게 지원하며 배열과 객체의 중첩구조도 지원합니다. 그러나 실제 JSON.parse함수와는 다르게, parse함수의 인자로 전달되는 문자열에 escaping character가 포함된 경우를 지원하지 않습니다. 본 프로젝트에서 구현한 parse함수는 함수 인자로 전달 받은 문자열에 대해 개별 문자 단위로 순회하며 미리 [정의된 상태](#상태(state)-정의)와 유효한 character set에 따라 문법 검사를 실행하며 [parser객체](#parser)에 존재하는 여러 tokenizing 메서드를 이용하여 문자열 형태의 token을 추출하고 type에 맞는 값으로 변환하여 반환될 객체의 프로퍼티 혹은 배열 원소로 추가해 나가며 parsing이 진행됩니다.
 
 ## Example
 - run
@@ -42,7 +43,7 @@ $node index.js
 ### states
 미리 정의해둔 state 객체들을 담고있는 배열. parser객체의 state 프로퍼티가 아래의 상태값 중 하나를 가진다. 아래 상태와 유효한 문자 셋으로 문법 검사를 실행한다.
 
-#### state 정의
+#### 상태(state) 정의
 **1. INITIAL**  
 : 입력 받기 전 초기 상태.
 
