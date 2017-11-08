@@ -1,0 +1,15 @@
+{
+  "name": "Eclatant",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "jest": "^21.2.1"
+  },
+  "scripts": {
+    "test": "jest --watch"
+  }
+}
