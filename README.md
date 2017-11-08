@@ -236,36 +236,38 @@ $node index.js
 https://github.com/shine1594/javascript-json/blob/testing/data.json 데이터 1000개를 담은 배열을 JSON.parse()함수와 직접 구현한 parse()로 각각 100번 실행하여 소요된 시간을 측정함. [참조](https://github.com/shine1594/javascript-json/blob/testing/index.js)
 
 - 실행 결과
+``` shell
 $node index.js
 thisParser: 207.560ms
 builtInParser: 94.431ms
-\*test2\*
+*test2*
 thisParser: 146.918ms
 builtInParser: 72.031ms
-\*test3\*
+*test3*
 thisParser: 141.177ms
 builtInParser: 29.255ms
-\*test4\*
+*test4*
 thisParser: 160.525ms
 builtInParser: 30.837ms
-\*test5\*
+*test5*
 thisParser: 121.279ms
 builtInParser: 27.000ms
-\*test6\*
+*test6*
 thisParser: 123.879ms
 builtInParser: 15.720ms
-\*test7\*
+*test7*
 thisParser: 134.878ms
 builtInParser: 17.012ms
-\*test8\*
+*test8*
 thisParser: 160.340ms
 builtInParser: 29.693ms
-\*test9\*
+*test9*
 thisParser: 137.853ms
 builtInParser: 13.843ms
-\*test10\*
+*test10*
 thisParser: 128.470ms
 builtInParser: 25.734ms
 ...
+```
 
 첫 2번 실행시 속도차이가 2배 정도나지만 테스트 횟수가 3회 이상인 경우 차이가 점점 많이 나고 평균적으로는 built-in pase()함수가 직접 구현한 parse()함수 보다 평균적으로 7~8배 정도 빠른 것으로 보인다. built-in parse()함수가 점점 빨라지는 것은 내부 구현을 보지 못했지만 아마도 메모제이션 패턴을 이용하여 로직을 최적화한 것 같다. 직접 구한한 parse함수에 가독성을 포기하고 재귀 호출 대신 state변화로 중첩구조를 처리한다면 buit-in parse함수와 성능 차이가 크지 않게 만들 수 있을지 않을까 생각된다.
