@@ -45,6 +45,10 @@ var jsonParser = (function () {
     throw new Error(errors.blockError, jsonData);
   }
 
+  var parseHash = function (jsonData) {
+    throw new Error(errors.blockError, jsonData);
+  }
+
   var parseValue = function (jsonData) {
     var dataType = getNextType(jsonData);
 
@@ -85,6 +89,11 @@ var jsonParser = (function () {
   var parseElement = function (jsonData, valueType) {
     var elementEnd = getElementEnd(jsonData);
     var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
+    console.log(jsonData)
+    console.log(valueType)
+    console.log(elementEnd)
+    console.log(pureElementEnd)
+
     jsonData.parsedData.push(parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd));
     jsonData.parsingPointer = elementEnd + 1;
   }
@@ -165,7 +174,7 @@ var jsonParser = (function () {
 
   var parseType = {
     Number: function (jsonData, startPoint, endPoint) {
-      var number = Number(insertedData.slice(startPoint, endPoint));
+      var number = Number(insertedData.slice(startPoint, endPoint + 1));
 
       if (!isNaN(number)) {
         return number;
@@ -175,7 +184,7 @@ var jsonParser = (function () {
     },
 
     Bool: function (jsonData, startPoint, endPoint) {
-      var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
+      var parsingBool = insertedData.slice(startPoint, endPoint + 1).toLowerCase();
 
       if (parsingBool === "true") return true;
       if (parsingBool === "false") return false;
@@ -186,7 +195,7 @@ var jsonParser = (function () {
     String: function (jsonData, startPoint, endPoint) {
       var parsingString = "";
 
-      for (var i = 1; startPoint + i < endPoint - 1; i++) {
+      for (var i = 1; startPoint + i < endPoint; i++) {
         if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
           throw new Error(errors.typeError);
         }
@@ -199,6 +208,8 @@ var jsonParser = (function () {
   }
 
   var exceptLastSpaces = function (jsonData, startPoint, endPoint) {
+    endPoint -= 1;
+
     while (insertedData[endPoint] === ' ') {
       endPoint--;
 
