@@ -3,10 +3,177 @@ var log = util.log;
 var errors = require('./errors');
 
 var jsonParser = {
+
   parse: function (insertedData) {
-    var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
-    return parsingJson.parseData();
+    var jsonData = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
+    return this.parseData(jsonData);
   },
+
+  parseData: function (data) {
+    if (data.insertedData.length === 1) {
+      throw new Error(errors.type);
+    }
+
+    while (data.parsingPointer < data.insertedData.length) {
+      this.ignoreSpaces(data);
+
+      if (data.parsingPointer >= data.dataEndPoint) {
+        return data.parsedData;
+      }
+
+      var dataType = this.getNextType(data);
+      if (dataType === "Array") {
+        this.parseArray(data);
+      } else {
+        this.parseValue(data, dataType);
+      }
+
+      if (data.parsingPointer === data.insertedData.length) {
+        return data.parsedData;
+      }
+    }
+
+    throw new Error(errors.blockError);
+  },
+
+  parseArray: function (data) {
+    var arrayEnd = this.getBlockEnd(data);
+    var innerData = new JsonUnit(data.insertedData, data.parsingPointer + 1, arrayEnd, []);
+    data.parsedData.push(this.parseData(innerData));
+    data.parsingPointer = arrayEnd + 1;
+
+    if (data.parsingPointer === data.insertedData.length) {
+      return;
+    }
+
+    data.parsingPointer = this.getDelimiter(data) + 1;
+  },
+
+  parseValue: function (data, valueType) {
+    var valueEnd = this.getElementEnd(data);
+    var pureValueEnd = this.exceptLastSpaces(data, data.parsingPointer, valueEnd);
+    data.parsedData.push(this["parse" + valueType](data, data.parsingPointer, pureValueEnd));
+    data.parsingPointer = valueEnd + 1;
+  },
+
+  ignoreSpaces: function (data) {
+    while (data.parsingLetter === " ") {
+      data.parsingPointer++;
+    }
+  },
+
+  getNextType: function (data) {
+    if (data.parsingLetter === '[') return "Array";
+    if (data.parsingLetter === '"') return "String";
+    if (/-|[1-9]/.test(data.parsingLetter)) return "Number";
+    if (/t|f/i.test(data.parsingLetter)) return "Bool";
+    throw new Error(errors.typeError);
+  },
+
+  getBlockEnd: function (data) {
+    var innerArrayCount = 0
+    var endPointer = data.parsingPointer;
+
+    for (; endPointer <= data.dataEndPoint; endPointer++) {
+      if (data.insertedData[endPointer] === '[') innerArrayCount++;
+      if (data.insertedData[endPointer] === ']') innerArrayCount--;
+      if (data.insertedData[endPointer] === '"') endPointer = this.getStringEnd(data, endPointer);
+      if (innerArrayCount === 0) {
+        return endPointer;
+      }
+    }
+
+    throw new Error(errors.blockError);
+  },
+
+  getElementEnd: function (data) {
+    var endPointer = (data.parsingLetter === '"') ? this.getStringEnd(data, data.parsingPointer) : data.parsingPointer
+
+    for (; endPointer <= data.dataEndPoint; endPointer++) {
+      if (data.insertedData[endPointer] === ']' || data.insertedData[endPointer] === ',') {
+        return endPointer;
+      }
+    }
+
+    throw new Error(errors.typeError);
+  },
+
+  getStringEnd: function (data, endPointer) {
+    endPointer += 1;
+
+    while (data.insertedData[endPointer] !== '"') {
+      endPointer++;
+
+      if (endPointer > data.dataEndPoint) {
+        throw new Error(errors.typeError);
+      }
+    }
+
+    return endPointer;
+  },
+
+  getDelimiter: function (data) {
+    var endPointer = data.parsingPointer;
+
+    for (; endPointer <= data.dataEndPoint; endPointer++) {
+
+      if (data.insertedData[endPointer] === ']' || data.insertedData[endPointer] === ',') {
+        return endPointer;
+      }
+
+      if (data.insertedData[endPointer] !== ' ') {
+        throw new Error(errors.blockError);
+      }
+    }
+
+    throw new Error(errors.blockError);
+  },
+
+  parseNumber: function (data, startPoint, endPoint) {
+    var number = Number(data.insertedData.slice(startPoint, endPoint));
+
+    if (!isNaN(number)) {
+      return number;
+    }
+
+    throw new Error(errors.typeError);
+  },
+
+  parseBool: function (data, startPoint, endPoint) {
+    var parsingBool = this.insertedData.slice(startPoint, endPoint).toLowerCase();
+
+    if (parsingBool === "true") return true;
+    if (parsingBool === "false") return false;
+
+    throw new Error(errors.typeError);
+  },
+
+  parseString: function (data, startPoint, endPoint) {
+    var parsingString = "";
+
+    for (var i = 1; startPoint + i < endPoint - 1; i++) {
+      if (data.insertedData[startPoint + i] === '"' || data.insertedData[startPoint + i] === '\\') {
+        throw new Error(errors.typeError);
+      }
+
+      parsingString += data.insertedData[startPoint + i];
+    }
+
+    return parsingString;
+  },
+
+  exceptLastSpaces: function (data, startPoint, endPoint) {
+    while (data.insertedData[endPoint] === ' ') {
+      endPoint--;
+
+      if (endPoint < startPoint) {
+        throw new Error(errors.typeError);
+      }
+    }
+
+    return endPoint;
+  },
+
 }
 
 JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
@@ -19,170 +186,5 @@ JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
 Object.defineProperty(JsonUnit.prototype, "parsingLetter",
   { get: function () { return this.insertedData[this.parsingPointer]; } }
 )
-
-JsonUnit.prototype.parseData = function () {
-  if (this.insertedData.length === 1) {
-    throw new Error(errors.type);
-  }
-
-  while (this.parsingPointer < this.insertedData.length) {
-    this.ignoreSpaces();
-
-    if (this.parsingPointer >= this.dataEndPoint) {
-      return this.parsedData;
-    }
-
-    var dataType = this.getNextType();
-    if (dataType === "Array") {
-      this.parseArray();
-    } else {
-      this.parseValue(dataType);
-    }
-
-    if (this.parsingPointer === this.insertedData.length) {
-      return this.parsedData;
-    }
-  }
-
-  throw new Error(errors.blockError);
-}
-
-JsonUnit.prototype.parseArray = function () {
-  var arrayEnd = this.getBlockEnd();
-  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer + 1, arrayEnd, []);
-  this.parsedData.push(innerBlock.parseData().parsedData);
-  this.parsingPointer = arrayEnd + 1;
-
-  if (this.parsingPointer === this.insertedData.length) {
-    return;
-  }
-
-  this.parsingPointer = this.getDelimiter() + 1;
-}
-
-JsonUnit.prototype.parseValue = function (valueType) {
-  var valueEnd = this.getElementEnd();
-  var pureValueEnd = this.exceptLastSpaces(this.parsingPointer, valueEnd);
-  this.parsedData.push(this["parse" + valueType](this.parsingPointer, pureValueEnd));
-  this.parsingPointer = valueEnd + 1;
-}
-
-JsonUnit.prototype.ignoreSpaces = function () {
-  while (this.parsingLetter === " ") {
-    this.parsingPointer++;
-  }
-}
-
-JsonUnit.prototype.getNextType = function () {
-  if (this.parsingLetter === '[') return "Array";
-  if (this.parsingLetter === '"') return "String";
-  if (/-|[1-9]/.test(this.parsingLetter)) return "Number";
-  if (/t|f/i.test(this.parsingLetter)) return "Bool";
-  throw new Error(errors.typeError);
-}
-
-JsonUnit.prototype.getBlockEnd = function () {
-  var innerArrayCount = 0
-  var endPointer = this.parsingPointer;
-
-  for (; endPointer <= this.dataEndPoint; endPointer++) {
-    if (this.insertedData[endPointer] === '[') innerArrayCount++;
-    if (this.insertedData[endPointer] === ']') innerArrayCount--;
-    if (this.insertedData[endPointer] === '"') endPointer = this.getStringEnd(endPointer);
-    if (innerArrayCount === 0) {
-      return endPointer;
-    }
-  }
-
-  throw new Error(errors.blockError);
-}
-
-JsonUnit.prototype.getElementEnd = function () {
-  var endPointer = (this.parsingLetter === '"') ? this.getStringEnd(this.parsingPointer) : this.parsingPointer
-
-  for (; endPointer <= this.dataEndPoint; endPointer++) {
-    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
-      return endPointer;
-    }
-  }
-
-  throw new Error(errors.typeError);
-}
-
-JsonUnit.prototype.getStringEnd = function (endPointer) {
-  endPointer += 1;
-
-  while (this.insertedData[endPointer] !== '"') {
-    endPointer++;
-
-    if (endPointer > this.dataEndPoint) {
-      throw new Error(errors.typeError);
-    }
-  }
-
-  return endPointer;
-}
-
-JsonUnit.prototype.getDelimiter = function () {
-  var endPointer = this.parsingPointer;
-
-  for (; endPointer <= this.dataEndPoint; endPointer++) {
-
-    if (this.insertedData[endPointer] === ']' || this.insertedData[endPointer] === ',') {
-      return endPointer;
-    }
-
-    if (this.insertedData[endPointer] !== ' ') {
-      throw new Error(errors.blockError);
-    }
-  }
-
-  throw new Error(errors.blockError);
-}
-
-JsonUnit.prototype.parseNumber = function (startPoint, endPoint) {
-  var number = Number(this.insertedData.slice(startPoint, endPoint));
-
-  if (!isNaN(number)) {
-    return number;
-  }
-
-  throw new Error(errors.typeError);
-}
-
-JsonUnit.prototype.parseBool = function (startPoint, endPoint) {
-  var parsingBool = this.insertedData.slice(startPoint, endPoint).toLowerCase();
-
-  if (parsingBool === "true") return true;
-  if (parsingBool === "false") return false;
-
-  throw new Error(errors.typeError);
-}
-
-JsonUnit.prototype.parseString = function (startPoint, endPoint) {
-  var parsingString = "";
-
-  for (var i = 1; startPoint + i < endPoint - 1; i++) {
-    if (this.insertedData[startPoint + i] === '"' || this.insertedData[startPoint + i] === '\\') {
-      throw new Error(errors.typeError);
-    }
-
-    parsingString += this.insertedData[startPoint + i];
-  }
-
-  return parsingString;
-}
-
-JsonUnit.prototype.exceptLastSpaces = function (startPoint, endPoint) {
-  while (this.insertedData[endPoint] === ' ') {
-    endPoint--;
-
-    if (endPoint < startPoint) {
-      throw new Error(errors.typeError);
-    }
-  }
-
-  return endPoint;
-}
 
 module.exports = jsonParser;
