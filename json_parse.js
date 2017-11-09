@@ -23,7 +23,7 @@ var json_parse = (function () {
         console.log(`총 ${total}개의 ${parentType} 데이터 중에 ${partial.join(", ")}가 포함되어 있습니다.`);
     };
 
-    function array() {
+    function arrayJSON() {
         var arr = [];
         if (ch === "[") {
             next("[");
@@ -33,7 +33,7 @@ var json_parse = (function () {
                 return arr;
             }
             while (ch) {
-                arr.push(value());
+                arr.push(valueJSON());
                 white();
                 if (ch === "]") {
                     next("]");
@@ -43,10 +43,10 @@ var json_parse = (function () {
                 white();
             }
         }
-        throw new Error("Bad array");
+        throw new Error("Bad arrayJSON");
     };
 
-    function object() {
+    function objectJSON() {
         var obj = {};
         if (ch === "{") {
             next("{");
@@ -56,10 +56,10 @@ var json_parse = (function () {
                 return obj;
             }
             while (ch) {
-                var key = string();
+                var key = stringJSON();
                 white();
                 next(":");
-                obj[key] = value();
+                obj[key] = valueJSON();
                 white();
                 if (ch === "}") {
                     next("}");
@@ -69,10 +69,10 @@ var json_parse = (function () {
                 white();
             }
         }
-        throw new Error("Bad object");
+        throw new Error("Bad objectJSON");
     };
 
-    function string() {
+    function stringJSON() {
         var str = "";
         if (ch === "\"") {
             next("\"");
@@ -86,10 +86,10 @@ var json_parse = (function () {
                 }
             }
         }
-        throw new Error("Bad string");
+        throw new Error("Bad stringJSON");
     };
 
-    function number() {
+    function numberJSON() {
         var num = "";
         if (ch === "-") {
             num = "-";
@@ -103,28 +103,28 @@ var json_parse = (function () {
             if (depth < 2) type.NUMBER++;
             return parseInt(num, 10);
         } else {
-            throw new Error("Bad number");
+            throw new Error("Bad numberJSON");
         }
     };
 
-    function value() {
+    function valueJSON() {
         white();
         switch (ch) {
             case "{":
             if (depth !== 0) type.OBJECT++;
                 depth++;
-                return object();
+                return objectJSON();
             case "[":
             if (depth !== 0) type.ARRAY++;
                 depth++;
-                return array();
+                return arrayJSON();
             case "\"":
                 if (depth < 2) type.STRING++;
-                return string();
+                return stringJSON();
             case "-":
-                return number();
+                return numberJSON();
             default:
-                return ch >= "0" && ch <= "9" ? number() : word();
+                return ch >= "0" && ch <= "9" ? numberJSON() : word();
         }
     };
 
@@ -184,7 +184,7 @@ var json_parse = (function () {
             ARRAY: 0
         };
         white();
-        var result = value();
+        var result = valueJSON();
         Array.isArray(result) ? printResult("배열") : printResult("객체");
         return result;
     };
