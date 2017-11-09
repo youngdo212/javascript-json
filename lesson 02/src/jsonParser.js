@@ -33,7 +33,7 @@ var jsonParser = (function () {
 
       var dataType = getNextType(jsonData);
       if (dataType === "Object" || dataType === "Array") {
-        parseBlock(jsonData);
+        parseBlock(jsonData, dataType);
       } else {
         parseValue(jsonData, dataType);
       }
@@ -54,7 +54,7 @@ var jsonParser = (function () {
       var blockEnd = getBlockEnd(jsonData, '{', '}');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
-    jsonData.parsedData.push(parseData(innerData));
+    putData(jsonData, parseData(innerData));
     jsonData.parsingPointer = blockEnd + 1;
 
     if (jsonData.parsingPointer === insertedData.length) {
@@ -62,6 +62,14 @@ var jsonParser = (function () {
     }
 
     jsonData.parsingPointer = getDelimiter(jsonData) + 1;
+  }
+
+  var putData = function (jsonData, puttingData) {
+    if (Array.isArray(jsonData.parsedData)) {
+      jsonData.parsedData.push(puttingData);
+    } else {
+      jsonData.parsedData["a"] = puttingData;
+    }
   }
 
   var parseValue = function (jsonData, valueType) {
@@ -106,7 +114,7 @@ var jsonParser = (function () {
     var endPointer = (jsonData.parsingLetter === '"') ? getStringEnd(jsonData, jsonData.parsingPointer) : jsonData.parsingPointer
 
     for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
-      if (insertedData[endPointer] === ']' || insertedData[endPointer] === ',') {
+      if (insertedData[endPointer] === ']' || insertedData[endPointer] === '}' || insertedData[endPointer] === ',') {
         return endPointer;
       }
     }
@@ -133,7 +141,7 @@ var jsonParser = (function () {
 
     for (; delimiterPointer <= jsonData.dataEndPoint; delimiterPointer++) {
 
-      if (insertedData[delimiterPointer] === ']' || insertedData[delimiterPointer] === ',') {
+      if (insertedData[delimiterPointer] === ']' || insertedData[delimiterPointer] === '}' || insertedData[delimiterPointer] === ',') {
         return delimiterPointer;
       }
 
