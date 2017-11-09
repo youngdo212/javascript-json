@@ -46,18 +46,33 @@ var jsonParser = (function () {
   }
 
   var parseHash = function (jsonData) {
-    throw new Error(errors.blockError, jsonData);
-  }
-
-  var parseValue = function (jsonData) {
     var dataType = getNextType(jsonData);
-
-    if (dataType === "Object" || dataType === "Array") {
-      parseBlock(jsonData, dataType);
-    } else {
-      parseElement(jsonData, dataType);
+    if (dataType !== "String") {
+      throw new Error(errors.typeError, jsonData);
     }
 
+    keyEnd = getStringEnd(jsonData, jsonData.parsingPointer);
+    key = parseType["String"](jsonData, jsonData.parsingPointer, keyEnd);
+    getColon(jsonData);
+    ignoreSpaces(jsonData);
+    parseValue(jsonData, key);
+  }
+
+  var parseValue = function (jsonData, hashKey) {
+    var dataType = getNextType(jsonData);
+    var parsedValue;
+
+    if (dataType === "Object" || dataType === "Array") {
+      parsedValue = parseBlock(jsonData, dataType);
+    } else {
+      parsedValue = parseElement(jsonData, dataType);
+    }
+
+    if (hashKey === undefined) {
+      jsonData.parsedData.push(puttingData);
+    } else {
+      jsonData.parsedData[hashKey] = puttingData;
+    }
   }
 
   var parseBlock = function (jsonData, dataType) {
@@ -68,34 +83,24 @@ var jsonParser = (function () {
       var blockEnd = getBlockEnd(jsonData, '{', '}');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
-    putData(jsonData, parseData(innerData));
     jsonData.parsingPointer = blockEnd + 1;
 
     if (jsonData.parsingPointer === insertedData.length) {
-      return;
+      return innerData;
     }
 
     jsonData.parsingPointer = getDelimiter(jsonData) + 1;
-  }
-
-  var putData = function (jsonData, puttingData) {
-    if (Array.isArray(jsonData.parsedData)) {
-      jsonData.parsedData.push(puttingData);
-    } else {
-      jsonData.parsedData["a"] = puttingData;
-    }
+    return innerData;
   }
 
   var parseElement = function (jsonData, valueType) {
     var elementEnd = getElementEnd(jsonData);
     var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
-    console.log(jsonData)
-    console.log(valueType)
-    console.log(elementEnd)
-    console.log(pureElementEnd)
+    var parsedElement;
 
-    jsonData.parsedData.push(parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd));
     jsonData.parsingPointer = elementEnd + 1;
+    parsedElement = parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd);
+    return parsedElement;
   }
 
   var ignoreSpaces = function (jsonData) {
