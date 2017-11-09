@@ -109,8 +109,8 @@ var jsonParser = {
     throw new Error(errors.typeError);
   },
 
-  getStringEnd: function (data, endPointer) {
-    endPointer += 1;
+  getStringEnd: function (data, startPoint) {
+    var endPointer = startPoint + 1;
 
     while (data.insertedData[endPointer] !== '"') {
       endPointer++;
@@ -124,15 +124,15 @@ var jsonParser = {
   },
 
   getDelimiter: function (data) {
-    var endPointer = data.parsingPointer;
+    var delimiterPointer = data.parsingPointer;
 
-    for (; endPointer <= data.dataEndPoint; endPointer++) {
+    for (; delimiterPointer <= data.dataEndPoint; delimiterPointer++) {
 
-      if (data.insertedData[endPointer] === ']' || data.insertedData[endPointer] === ',') {
-        return endPointer;
+      if (data.insertedData[delimiterPointer] === ']' || data.insertedData[delimiterPointer] === ',') {
+        return delimiterPointer;
       }
 
-      if (data.insertedData[endPointer] !== ' ') {
+      if (data.insertedData[delimiterPointer] !== ' ') {
         throw new Error(errors.blockError);
       }
     }
