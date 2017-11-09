@@ -5,7 +5,7 @@ var errors = require('./errors');
 var jsonParser = {
   parse: function (insertedData) {
     var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
-    return parsingJson.parseData().parsedData;
+    return parsingJson.parseData();
   },
 }
 
@@ -29,7 +29,7 @@ JsonUnit.prototype.parseData = function () {
     this.ignoreSpaces();
 
     if (this.parsingPointer >= this.dataEndPoint) {
-      return this;
+      return this.parsedData;
     }
 
     var dataType = this.getNextType();
@@ -40,7 +40,7 @@ JsonUnit.prototype.parseData = function () {
     }
 
     if (this.parsingPointer === this.insertedData.length) {
-      return this;
+      return this.parsedData;
     }
   }
 
