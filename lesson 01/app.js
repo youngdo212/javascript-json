@@ -15,7 +15,7 @@ var reader = require('./src/jsonReader');
     var dataCount;
 
     try {
-      parsedData = parser.parseJson(insert);
+      parsedData = parser.parse(insert);
       // dataCount = reader.countType(parsedData);
       // messages.jsonCount(dataCount);
       console.log(parsedData);

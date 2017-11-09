@@ -3,7 +3,7 @@ var log = util.log;
 var errors = require('./errors');
 
 var jsonParser = {
-  parseJson: function (insertedData) {
+  parse: function (insertedData) {
     var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
     return parsingJson.parseData().parsedData;
   },
