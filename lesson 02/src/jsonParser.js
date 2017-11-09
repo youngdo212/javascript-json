@@ -47,10 +47,23 @@ var jsonParser = (function () {
   }
 
   var parseArray = function (jsonData) {
-    var arrayEnd = getBlockEnd(jsonData);
-    var innerData = new JsonData(jsonData.parsingPointer + 1, arrayEnd, []);
+    var blockEnd = getBlockEnd(jsonData);
+    var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
     jsonData.parsedData.push(parseData(innerData));
-    jsonData.parsingPointer = arrayEnd + 1;
+    jsonData.parsingPointer = blockEnd + 1;
+
+    if (jsonData.parsingPointer === insertedData.length) {
+      return;
+    }
+
+    jsonData.parsingPointer = getDelimiter(jsonData) + 1;
+  }
+
+  var parseObject = function (jsonData) {
+    var blockEnd = getBlockEnd(jsonData);
+    var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
+    jsonData.parsedData.push(parseData(innerData));
+    jsonData.parsingPointer = blockEnd + 1;
 
     if (jsonData.parsingPointer === insertedData.length) {
       return;
