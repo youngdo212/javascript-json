@@ -53,7 +53,8 @@ var jsonParser = (function () {
 
     keyEnd = getStringEnd(jsonData, jsonData.parsingPointer);
     key = parseType["String"](jsonData, jsonData.parsingPointer, keyEnd);
-    getColon(jsonData);
+    jsonData.parsingPointer = keyEnd + 1;
+    jsonData.parsingPointer = getColon(jsonData) + 1;
     ignoreSpaces(jsonData);
     parseValue(jsonData, key);
   }
@@ -99,8 +100,8 @@ var jsonParser = (function () {
     var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
     var parsedElement;
 
-    jsonData.parsingPointer = elementEnd + 1;
     parsedElement = parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd);
+    jsonData.parsingPointer = elementEnd + 1;
     return parsedElement;
   }
 
@@ -171,6 +172,25 @@ var jsonParser = (function () {
       }
 
       if (insertedData[delimiterPointer] !== ' ') {
+        throw new Error(errors.blockError);
+      }
+    }
+
+    throw new Error(errors.blockError);
+  }
+
+  var getColon = function (jsonData) {
+    ignoreSpaces(jsonData);
+    var colonPointer = jsonData.parsingPointer;
+    console.log(colonPointer)
+
+    for (; colonPointer <= jsonData.dataEndPoint; colonPointer++) {
+
+      if (insertedData[colonPointer] === ':') {
+        return colonPointer;
+      }
+
+      if (insertedData[colonPointer] !== ' ') {
         throw new Error(errors.blockError);
       }
     }
