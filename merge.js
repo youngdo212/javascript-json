@@ -9,17 +9,22 @@ var count = { num: 0, str: 0, bol: 0, arr: 0, obj: 0 };
 function printError(token, position) {
     console.log("Unexpected token ", token, "at position ", position);
 }
+function tokenizer(input, i, to, str) {
+
+}
 function readStr(input, i) { //문자열과 다음 i 반환, 에러는 -1 반환
     var pos = i;
     for (; i < input.length; i++) {
         if (input[i] === '"') {
             return [i, input.slice(pos, i)];
         }
-        else if (input[i] === "'") {
-            printError(input[i], i);
-            return -1; //process.exit();
-        }
+        // else if (input[i] === "'") {
+        //     printError(input[i], i);
+        //     return -1; //process.exit();
+        // }
     }
+    console.log("Unexpected end of JSON input");
+    process.exit();
 }
 function readNum(input, i) { //숫자와 다음 i 반환 , 에러는 -1 반환
     var pos = i;
