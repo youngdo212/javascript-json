@@ -47,7 +47,7 @@ var jsonParser = (function () {
   }
 
   var parseArray = function (jsonData) {
-    var blockEnd = getBlockEnd(jsonData);
+    var blockEnd = getBlockEnd(jsonData, '[', ']');
     var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
     jsonData.parsedData.push(parseData(innerData));
     jsonData.parsingPointer = blockEnd + 1;
@@ -60,7 +60,7 @@ var jsonParser = (function () {
   }
 
   var parseObject = function (jsonData) {
-    var blockEnd = getBlockEnd(jsonData);
+    var blockEnd = getBlockEnd(jsonData, '{', '}');
     var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     jsonData.parsedData.push(parseData(innerData));
     jsonData.parsingPointer = blockEnd + 1;
@@ -93,15 +93,15 @@ var jsonParser = (function () {
     throw new Error(errors.typeError);
   }
 
-  var getBlockEnd = function (jsonData) {
-    var innerArrayCount = 0
+  var getBlockEnd = function (jsonData, blockStartLetter, blockEndLetter) {
+    var innerBlockCount = 0
     var endPointer = jsonData.parsingPointer;
 
     for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
-      if (insertedData[endPointer] === '[') innerArrayCount++;
-      if (insertedData[endPointer] === ']') innerArrayCount--;
+      if (insertedData[endPointer] === blockStartLetter) innerBlockCount++;
+      if (insertedData[endPointer] === blockEndLetter) innerBlockCount--;
       if (insertedData[endPointer] === '"') endPointer = getStringEnd(jsonData, endPointer);
-      if (innerArrayCount === 0) {
+      if (innerBlockCount === 0) {
         return endPointer;
       }
     }
