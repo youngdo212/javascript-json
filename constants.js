@@ -15,12 +15,19 @@ var characters = {
     minus: '-',
     true: 't',
     false: 'f',
+    null: 'n',
     exponent: 'e',
-    isNumber: function(char) {
-        return this.numbers.indexOf(char) !== -1;
+    isKeyword: function(char) {
+        return char === this.true || char === this.false || char === this.null;
     },
-    isSignCharacter: function(char) {
-        return (char === this.plus || char === this.minus);
+    isStartChar: function(char) {
+        return char === this.bracketStart || char === this.braceStart;
+    },
+    isEndChar: function(char) {
+        return char === this.bracketEnd || char === this.braceEnd;
+    },
+    isComponentOfNumber: function(char) {
+        return (this.numbers.indexOf(char) !== -1) || char === this.plus || char === this.minus || char === this.dot || char === this.exponent;
     },
     isQuote: function(char) {
         return (char === this.singleQuote || char === this.doubleQuote);
@@ -32,67 +39,114 @@ var characters = {
 
 var states = [
     {
-        name: 'INITIAL',
-        validCharacters: [' ', '[', ]
+        name: 'INITIAL', // 0
+        validCharacters: {
+            array: [' ', '[', ],
+            object: [' ', '{', ]
+        },
+        nextState: {
+            array: [0, 1],
+            object: [0, 3]
+        }
     },
     {
-        name: 'WATING_INPUT',
-        validCharacters: [' ', ',', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"', ']' ]
+        name: 'WAITING_FOR_INPUT_VALUE', // 1
+        validCharacters: {
+            array: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', 'n', 'u', '\'', '\"', '{', '[' ],
+            object: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'f', 'n', 'u', '\"', '{', '[' ]
+        },
+        nextState: {
+            array: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2, 2],
+            object: [1, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2]
+        }
     },
     {
-        name: 'WATING_ADDITIONAL_INPUT',
-        validCharacters: [' ', ',', ']']
+        name: 'WAITING_FOR_CONTINUE_OR_END', // 2
+        validCharacters: {
+            array: [' ', ',', ']'],
+            object: [' ', ',', '}']
+        },
+        nextState: {
+            array: [2, 1, 13],
+            object: [2, 3, 13]
+        }
     },
     {
-        name: 'ENCOUNTER_SIGN',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        name: 'WAITING_FOR_INPUT_KEY', // 3
+        validCharacters: [' ', '\"'],
+        nextState: [3, 4]
     },
     {
-        name: 'ENCOUNTER_ZERO',
-        validCharacters: [' ', '.', 'e', ',', ']']
+        name: 'ENCOUNTER_KEY', // 4
+        validCharacters: [' ', ':'],
+        nextState: [4, 1]
     },
     {
-        name: 'ENCOUNTER_COMMA',
-        validCharacters: [' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\'', '\"']
+        name: 'ENCOUNTER_SIGN', // 5
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+        nextState: [6, 7, 7, 7, 7, 7, 7, 7, 7, 7]
     },
     {
-        name: 'ENCOUNTER_DOT',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        name: 'ENCOUNTER_ZERO', // 6
+        validCharacters: {
+            array: [',', ' ', '.', 'e', 'E', ']'],
+            object: [',', ' ', '.', 'e', 'E', '}']
+        },
+        nextState: {
+            array: [1, 2, 8, 10, 10, 13],
+            object: [3, 2, 8, 10, 10, 13]
+        }
     },
     {
-        name: 'ENCOUNTER_FRACTIONAL_PARTS',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', ',', ']']
+        name: 'ENCOUNTER_NATURE_NUMBER', // 7
+        validCharacters: {
+            array: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', '.', ' ', ',', ']'],
+            object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', '.', ' ', ',', '}']
+        },
+        nextState: {
+            array: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 1, 13],
+            object: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 2, 3, 13]
+        }
     },
     {
-        name: 'ENCOUNTER_NATURE_NUMBER',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', ' ', '.', ',', ']']
+        name: 'ENCOUNTER_DOT', // 8
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+        nextState: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
     },
     {
-        name: 'ENCOUNTER_EXPONENT_SYMBOL',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-']
+        name: 'ENCOUNTER_FRACTIONAL_PARTS', // 9
+        validCharacters: {
+            array: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', ' ', ',', ']'],
+            object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', ' ', ',', '}']
+        },
+        nextState: {
+            array: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 1, 13],
+            object: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 2, 3, 13]
+        }
     },
     {
-        name: 'ENCOUNTER_SIGN_OF_EXPONENT',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        name: 'ENCOUNTER_EXPONENT_SYMBOL', // 10
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-'],
+        nextState: [12, 12, 12 ,12 ,12 ,12 ,12, 12, 12, 12, 11, 11]
     },
     {
-        name: 'ENCOUNTER_EXPONENT_VALUE',
-        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', ']']
+        name: 'ENCOUNTER_SIGN_OF_EXPONENT', // 11
+        validCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+        nextState: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12]
     },
     {
-        name: 'ENCOUNTER_SINGLE_QUOTE'
+        name: 'ENCOUNTER_EXPONENT_VALUE', // 12
+        validCharacters: {
+            array: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', ']'],
+            object: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ',', '}']
+        },
+        nextState: {
+            array: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 1, 13],
+            object: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 2, 3, 13]
+        }
     },
     {
-        name: 'ENCOUNTER_DOUBLE_QUOTE'
-    },
-    {
-        name: 'ENCOUNTER_BOOLEAN_TRUE'
-    },
-    {
-        name: 'ENCOUNTER_BOOLEAN_FALSE'
-    },
-    {
-        name: 'END'
+        name: 'END' // 13
     }
 ];
 
@@ -103,6 +157,41 @@ states.getStateByName = function(name) {
         }
     }
 };
+
+states.forEach(function(state) {
+    state.isNotValidCharacter = function (type, char) {
+        if (!this.validCharacters) {
+            return undefined;
+        }
+
+        var validCharacters = null;
+
+        if (this.validCharacters instanceof Array) {
+            validCharacters = this.validCharacters;
+        } else {
+            validCharacters = this.validCharacters[type];
+        }
+
+        return validCharacters.indexOf(char) === -1;
+    };
+
+    state.getNextState = function(type, char) {
+        var index = -1;
+
+        if (typeof nextState === 'number') {
+            return states[nextState];
+        }
+
+        if (this.validCharacters instanceof Array) {
+            index = this.validCharacters.indexOf(char);
+            return states[this.nextState[index]];
+        }
+
+        index = this.validCharacters[type].indexOf(char);
+
+        return states[this.nextState[type][index]];
+    };
+});
 
 module.exports.characters = characters;
 module.exports.states = states;
