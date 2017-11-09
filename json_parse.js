@@ -7,19 +7,8 @@ var json_parse = (function () {
     var at;
     var ch;
     var type;
+    var depth;
 
-    function checkType(element) {
-        if (typeof (element) === "boolean")
-            type.부울++;
-        else if (Number.isInteger(element))
-            type.숫자++;
-        else if (Object.prototype.toString.apply(element) === "[object Object]")
-            type.객체++;
-        else if (Array.isArray(element))
-            type.배열++;
-        else
-            type.문자열++;
-    };
 
     function printResult(parentType) {
         var partial = [];
@@ -32,20 +21,6 @@ var json_parse = (function () {
             partial.push(key + " " + value + "개");
         });
         console.log(`총 ${total}개의 ${parentType} 데이터 중에 ${partial.join(", ")}가 포함되어 있습니다.`);
-    };
-
-    function arrayParse(array) {
-        array.forEach(function (element) {
-            checkType(element);
-        });
-        printResult("배열");
-    };
-
-    function objectParse(object) {
-        Object.keys(object).forEach(function (key) {
-            checkType(object[key]);
-        });
-        printResult("객체");
     };
 
     function array() {
@@ -125,6 +100,7 @@ var json_parse = (function () {
             next(ch);
         }
         if (isFinite(num)) {
+            if (depth < 2) type.NUMBER++;
             return parseInt(num, 10);
         } else {
             throw new Error("Bad number");
@@ -135,10 +111,15 @@ var json_parse = (function () {
         white();
         switch (ch) {
             case "{":
+            if (depth !== 0) type.OBJECT++;
+                depth++;
                 return object();
             case "[":
+            if (depth !== 0) type.ARRAY++;
+                depth++;
                 return array();
             case "\"":
+                if (depth < 2) type.STRING++;
                 return string();
             case "-":
                 return number();
@@ -154,6 +135,7 @@ var json_parse = (function () {
                 next("r");
                 next("u");
                 next("e");
+                if (depth < 2) type.BOOLEAN++;
                 return true;
             case "f":
                 next("f");
@@ -161,6 +143,7 @@ var json_parse = (function () {
                 next("l");
                 next("s");
                 next("e");
+                if (depth < 2) type.BOOLEAN++;
                 return false;
             case "n":
                 next("n");
@@ -192,16 +175,17 @@ var json_parse = (function () {
         text = source;
         ch = " ";
         at = 0;
+        depth = 0;
         type = {
-            문자열: 0,
-            숫자: 0,
-            부울: 0,
-            객체: 0,
-            배열: 0
+            STRING: 0,
+            NUMBER: 0,
+            BOOLEAN: 0,
+            OBJECT: 0,
+            ARRAY: 0
         };
         white();
         var result = value();
-        Array.isArray(result) ? arrayParse(result) : objectParse(result);
+        Array.isArray(result) ? printResult("배열") : printResult("객체");
         return result;
     };
 }());
