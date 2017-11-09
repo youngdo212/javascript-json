@@ -32,8 +32,8 @@ var jsonParser = (function () {
       }
 
       var dataType = getNextType(jsonData);
-      if (dataType === "Array") {
-        parseArray(jsonData);
+      if (dataType === "Object" || dataType === "Array") {
+        parseBlock(jsonData);
       } else {
         parseValue(jsonData, dataType);
       }
@@ -46,22 +46,14 @@ var jsonParser = (function () {
     throw new Error(errors.blockError, jsonData);
   }
 
-  var parseArray = function (jsonData) {
-    var blockEnd = getBlockEnd(jsonData, '[', ']');
-    var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
-    jsonData.parsedData.push(parseData(innerData));
-    jsonData.parsingPointer = blockEnd + 1;
-
-    if (jsonData.parsingPointer === insertedData.length) {
-      return;
+  var parseBlock = function (jsonData, dataType) {
+    if (dataType === "Array") {
+      var blockEnd = getBlockEnd(jsonData, '[', ']');
+      var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
+    } else {
+      var blockEnd = getBlockEnd(jsonData, '{', '}');
+      var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
-
-    jsonData.parsingPointer = getDelimiter(jsonData) + 1;
-  }
-
-  var parseObject = function (jsonData) {
-    var blockEnd = getBlockEnd(jsonData, '{', '}');
-    var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     jsonData.parsedData.push(parseData(innerData));
     jsonData.parsingPointer = blockEnd + 1;
 
@@ -87,6 +79,7 @@ var jsonParser = (function () {
 
   var getNextType = function (jsonData) {
     if (jsonData.parsingLetter === '[') return "Array";
+    if (jsonData.parsingLetter === '{') return "Object";
     if (jsonData.parsingLetter === '"') return "String";
     if (/-|[1-9]/.test(jsonData.parsingLetter)) return "Number";
     if (/t|f/i.test(jsonData.parsingLetter)) return "Bool";
