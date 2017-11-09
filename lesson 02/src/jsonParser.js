@@ -31,11 +31,10 @@ var jsonParser = (function () {
         return jsonData.parsedData;
       }
 
-      var dataType = getNextType(jsonData);
-      if (dataType === "Object" || dataType === "Array") {
-        parseBlock(jsonData, dataType);
+      if (Array.isArray(jsonData.parsedData)) {
+        parseValue(jsonData);
       } else {
-        parseElement(jsonData, dataType);
+        parseHash(jsonData);
       }
 
       if (jsonData.parsingPointer === insertedData.length) {
@@ -44,6 +43,17 @@ var jsonParser = (function () {
     }
 
     throw new Error(errors.blockError, jsonData);
+  }
+
+  var parseValue = function (jsonData) {
+    var dataType = getNextType(jsonData);
+
+    if (dataType === "Object" || dataType === "Array") {
+      parseBlock(jsonData, dataType);
+    } else {
+      parseElement(jsonData, dataType);
+    }
+
   }
 
   var parseBlock = function (jsonData, dataType) {
