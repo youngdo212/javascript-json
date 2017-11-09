@@ -2,93 +2,92 @@ var util = require('./utils');
 var log = util.log;
 var errors = require('./errors');
 
-var JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
-  this.insertedData = insertedData;
-  this.parsingPointer = parsingPointer;
-  this.dataEndPoint = dataEndPoint;
-  this.parsedData = parsedData;
-}
-
-Object.defineProperty(JsonData.prototype, "parsingLetter",
-  { get: function () { return this.insertedData[this.parsingPointer]; } }
-);
-
 var jsonParser = (function () {
+  var JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
+    this.insertedData = insertedData;
+    this.parsingPointer = parsingPointer;
+    this.dataEndPoint = dataEndPoint;
+    this.parsedData = parsedData;
+  }
+
+  Object.defineProperty(JsonData.prototype, "parsingLetter",
+    { get: function () { return this.insertedData[this.parsingPointer]; } }
+  );
 
   var parse = function (insertedData) {
     var jsonData = new JsonData(insertedData, 0, insertedData.length - 1, []);
     return parseData(jsonData);
   }
 
-  var parseData = function (data) {
-    if (data.insertedData.length === 1) {
+  var parseData = function (jsonData) {
+    if (jsonData.insertedData.length === 1) {
       throw new Error(errors.type);
     }
 
-    while (data.parsingPointer < data.insertedData.length) {
-      ignoreSpaces(data);
+    while (jsonData.parsingPointer < jsonData.insertedData.length) {
+      ignoreSpaces(jsonData);
 
-      if (data.parsingPointer >= data.dataEndPoint) {
-        return data.parsedData;
+      if (jsonData.parsingPointer >= jsonData.dataEndPoint) {
+        return jsonData.parsedData;
       }
 
-      var dataType = getNextType(data);
+      var dataType = getNextType(jsonData);
       if (dataType === "Array") {
-        parseArray(data);
+        parseArray(jsonData);
       } else {
-        parseValue(data, dataType);
+        parseValue(jsonData, dataType);
       }
 
-      if (data.parsingPointer === data.insertedData.length) {
-        return data.parsedData;
+      if (jsonData.parsingPointer === jsonData.insertedData.length) {
+        return jsonData.parsedData;
       }
     }
 
     throw new Error(errors.blockError);
   }
 
-  var parseArray = function (data) {
-    var arrayEnd = getBlockEnd(data);
-    var innerData = new JsonData(data.insertedData, data.parsingPointer + 1, arrayEnd, []);
-    data.parsedData.push(parseData(innerData));
-    data.parsingPointer = arrayEnd + 1;
+  var parseArray = function (jsonData) {
+    var arrayEnd = getBlockEnd(jsonData);
+    var innerData = new JsonData(jsonData.insertedData, jsonData.parsingPointer + 1, arrayEnd, []);
+    jsonData.parsedData.push(parseData(innerData));
+    jsonData.parsingPointer = arrayEnd + 1;
 
-    if (data.parsingPointer === data.insertedData.length) {
+    if (jsonData.parsingPointer === jsonData.insertedData.length) {
       return;
     }
 
-    data.parsingPointer = getDelimiter(data) + 1;
+    jsonData.parsingPointer = getDelimiter(jsonData) + 1;
   }
 
-  var parseValue = function (data, valueType) {
-    var valueEnd = getElementEnd(data);
-    var pureValueEnd = exceptLastSpaces(data, data.parsingPointer, valueEnd);
-    data.parsedData.push(parseType[valueType](data, data.parsingPointer, pureValueEnd));
-    data.parsingPointer = valueEnd + 1;
+  var parseValue = function (jsonData, valueType) {
+    var valueEnd = getElementEnd(jsonData);
+    var pureValueEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, valueEnd);
+    jsonData.parsedData.push(parseType[valueType](jsonData, jsonData.parsingPointer, pureValueEnd));
+    jsonData.parsingPointer = valueEnd + 1;
   }
 
-  var ignoreSpaces = function (data) {
-    while (data.parsingLetter === " ") {
-      data.parsingPointer++;
+  var ignoreSpaces = function (jsonData) {
+    while (jsonData.parsingLetter === " ") {
+      jsonData.parsingPointer++;
     }
   }
 
-  var getNextType = function (data) {
-    if (data.parsingLetter === '[') return "Array";
-    if (data.parsingLetter === '"') return "String";
-    if (/-|[1-9]/.test(data.parsingLetter)) return "Number";
-    if (/t|f/i.test(data.parsingLetter)) return "Bool";
+  var getNextType = function (jsonData) {
+    if (jsonData.parsingLetter === '[') return "Array";
+    if (jsonData.parsingLetter === '"') return "String";
+    if (/-|[1-9]/.test(jsonData.parsingLetter)) return "Number";
+    if (/t|f/i.test(jsonData.parsingLetter)) return "Bool";
     throw new Error(errors.typeError);
   }
 
-  var getBlockEnd = function (data) {
+  var getBlockEnd = function (jsonData) {
     var innerArrayCount = 0
-    var endPointer = data.parsingPointer;
+    var endPointer = jsonData.parsingPointer;
 
-    for (; endPointer <= data.dataEndPoint; endPointer++) {
-      if (data.insertedData[endPointer] === '[') innerArrayCount++;
-      if (data.insertedData[endPointer] === ']') innerArrayCount--;
-      if (data.insertedData[endPointer] === '"') endPointer = getStringEnd(data, endPointer);
+    for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
+      if (jsonData.insertedData[endPointer] === '[') innerArrayCount++;
+      if (jsonData.insertedData[endPointer] === ']') innerArrayCount--;
+      if (jsonData.insertedData[endPointer] === '"') endPointer = getStringEnd(jsonData, endPointer);
       if (innerArrayCount === 0) {
         return endPointer;
       }
@@ -97,11 +96,11 @@ var jsonParser = (function () {
     throw new Error(errors.blockError);
   }
 
-  var getElementEnd = function (data) {
-    var endPointer = (data.parsingLetter === '"') ? getStringEnd(data, data.parsingPointer) : data.parsingPointer
+  var getElementEnd = function (jsonData) {
+    var endPointer = (jsonData.parsingLetter === '"') ? getStringEnd(jsonData, jsonData.parsingPointer) : jsonData.parsingPointer
 
-    for (; endPointer <= data.dataEndPoint; endPointer++) {
-      if (data.insertedData[endPointer] === ']' || data.insertedData[endPointer] === ',') {
+    for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
+      if (jsonData.insertedData[endPointer] === ']' || jsonData.insertedData[endPointer] === ',') {
         return endPointer;
       }
     }
@@ -109,13 +108,13 @@ var jsonParser = (function () {
     throw new Error(errors.typeError);
   }
 
-  var getStringEnd = function (data, startPoint) {
+  var getStringEnd = function (jsonData, startPoint) {
     var endPointer = startPoint + 1;
 
-    while (data.insertedData[endPointer] !== '"') {
+    while (jsonData.insertedData[endPointer] !== '"') {
       endPointer++;
 
-      if (endPointer > data.dataEndPoint) {
+      if (endPointer > jsonData.dataEndPoint) {
         throw new Error(errors.typeError);
       }
     }
@@ -123,16 +122,16 @@ var jsonParser = (function () {
     return endPointer;
   }
 
-  var getDelimiter = function (data) {
-    var delimiterPointer = data.parsingPointer;
+  var getDelimiter = function (jsonData) {
+    var delimiterPointer = jsonData.parsingPointer;
 
-    for (; delimiterPointer <= data.dataEndPoint; delimiterPointer++) {
+    for (; delimiterPointer <= jsonData.dataEndPoint; delimiterPointer++) {
 
-      if (data.insertedData[delimiterPointer] === ']' || data.insertedData[delimiterPointer] === ',') {
+      if (jsonData.insertedData[delimiterPointer] === ']' || jsonData.insertedData[delimiterPointer] === ',') {
         return delimiterPointer;
       }
 
-      if (data.insertedData[delimiterPointer] !== ' ') {
+      if (jsonData.insertedData[delimiterPointer] !== ' ') {
         throw new Error(errors.blockError);
       }
     }
@@ -141,8 +140,8 @@ var jsonParser = (function () {
   }
 
   var parseType = {
-    Number: function (data, startPoint, endPoint) {
-      var number = Number(data.insertedData.slice(startPoint, endPoint));
+    Number: function (jsonData, startPoint, endPoint) {
+      var number = Number(jsonData.insertedData.slice(startPoint, endPoint));
 
       if (!isNaN(number)) {
         return number;
@@ -151,7 +150,7 @@ var jsonParser = (function () {
       throw new Error(errors.typeError);
     },
 
-    Bool: function (data, startPoint, endPoint) {
+    Bool: function (jsonData, startPoint, endPoint) {
       var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
 
       if (parsingBool === "true") return true;
@@ -160,23 +159,23 @@ var jsonParser = (function () {
       throw new Error(errors.typeError);
     },
 
-    String: function (data, startPoint, endPoint) {
+    String: function (jsonData, startPoint, endPoint) {
       var parsingString = "";
 
       for (var i = 1; startPoint + i < endPoint - 1; i++) {
-        if (data.insertedData[startPoint + i] === '"' || data.insertedData[startPoint + i] === '\\') {
+        if (jsonData.insertedData[startPoint + i] === '"' || jsonData.insertedData[startPoint + i] === '\\') {
           throw new Error(errors.typeError);
         }
 
-        parsingString += data.insertedData[startPoint + i];
+        parsingString += jsonData.insertedData[startPoint + i];
       }
 
       return parsingString;
     }
   }
 
-  var exceptLastSpaces = function (data, startPoint, endPoint) {
-    while (data.insertedData[endPoint] === ' ') {
+  var exceptLastSpaces = function (jsonData, startPoint, endPoint) {
+    while (jsonData.insertedData[endPoint] === ' ') {
       endPoint--;
 
       if (endPoint < startPoint) {
