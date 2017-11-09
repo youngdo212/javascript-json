@@ -2,7 +2,7 @@ var util = require('./utils');
 var log = util.log;
 var errors = require('./errors');
 
-JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
+var JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
   this.insertedData = insertedData;
   this.parsingPointer = parsingPointer;
   this.dataEndPoint = dataEndPoint;
@@ -13,30 +13,30 @@ Object.defineProperty(JsonData.prototype, "parsingLetter",
   { get: function () { return this.insertedData[this.parsingPointer]; } }
 );
 
-var jsonParser = {
+var jsonParser = (function () {
 
-  parse: function (insertedData) {
+  var parse = function (insertedData) {
     var jsonData = new JsonData(insertedData, 0, insertedData.length - 1, []);
-    return this.parseData(jsonData);
-  },
+    return parseData(jsonData);
+  }
 
-  parseData: function (data) {
+  var parseData = function (data) {
     if (data.insertedData.length === 1) {
       throw new Error(errors.type);
     }
 
     while (data.parsingPointer < data.insertedData.length) {
-      this.ignoreSpaces(data);
+      ignoreSpaces(data);
 
       if (data.parsingPointer >= data.dataEndPoint) {
         return data.parsedData;
       }
 
-      var dataType = this.getNextType(data);
+      var dataType = getNextType(data);
       if (dataType === "Array") {
-        this.parseArray(data);
+        parseArray(data);
       } else {
-        this.parseValue(data, dataType);
+        parseValue(data, dataType);
       }
 
       if (data.parsingPointer === data.insertedData.length) {
@@ -45,60 +45,60 @@ var jsonParser = {
     }
 
     throw new Error(errors.blockError);
-  },
+  }
 
-  parseArray: function (data) {
-    var arrayEnd = this.getBlockEnd(data);
+  var parseArray = function (data) {
+    var arrayEnd = getBlockEnd(data);
     var innerData = new JsonData(data.insertedData, data.parsingPointer + 1, arrayEnd, []);
-    data.parsedData.push(this.parseData(innerData));
+    data.parsedData.push(parseData(innerData));
     data.parsingPointer = arrayEnd + 1;
 
     if (data.parsingPointer === data.insertedData.length) {
       return;
     }
 
-    data.parsingPointer = this.getDelimiter(data) + 1;
-  },
+    data.parsingPointer = getDelimiter(data) + 1;
+  }
 
-  parseValue: function (data, valueType) {
-    var valueEnd = this.getElementEnd(data);
-    var pureValueEnd = this.exceptLastSpaces(data, data.parsingPointer, valueEnd);
-    data.parsedData.push(this["parse" + valueType](data, data.parsingPointer, pureValueEnd));
+  var parseValue = function (data, valueType) {
+    var valueEnd = getElementEnd(data);
+    var pureValueEnd = exceptLastSpaces(data, data.parsingPointer, valueEnd);
+    data.parsedData.push(parseType[valueType](data, data.parsingPointer, pureValueEnd));
     data.parsingPointer = valueEnd + 1;
-  },
+  }
 
-  ignoreSpaces: function (data) {
+  var ignoreSpaces = function (data) {
     while (data.parsingLetter === " ") {
       data.parsingPointer++;
     }
-  },
+  }
 
-  getNextType: function (data) {
+  var getNextType = function (data) {
     if (data.parsingLetter === '[') return "Array";
     if (data.parsingLetter === '"') return "String";
     if (/-|[1-9]/.test(data.parsingLetter)) return "Number";
     if (/t|f/i.test(data.parsingLetter)) return "Bool";
     throw new Error(errors.typeError);
-  },
+  }
 
-  getBlockEnd: function (data) {
+  var getBlockEnd = function (data) {
     var innerArrayCount = 0
     var endPointer = data.parsingPointer;
 
     for (; endPointer <= data.dataEndPoint; endPointer++) {
       if (data.insertedData[endPointer] === '[') innerArrayCount++;
       if (data.insertedData[endPointer] === ']') innerArrayCount--;
-      if (data.insertedData[endPointer] === '"') endPointer = this.getStringEnd(data, endPointer);
+      if (data.insertedData[endPointer] === '"') endPointer = getStringEnd(data, endPointer);
       if (innerArrayCount === 0) {
         return endPointer;
       }
     }
 
     throw new Error(errors.blockError);
-  },
+  }
 
-  getElementEnd: function (data) {
-    var endPointer = (data.parsingLetter === '"') ? this.getStringEnd(data, data.parsingPointer) : data.parsingPointer
+  var getElementEnd = function (data) {
+    var endPointer = (data.parsingLetter === '"') ? getStringEnd(data, data.parsingPointer) : data.parsingPointer
 
     for (; endPointer <= data.dataEndPoint; endPointer++) {
       if (data.insertedData[endPointer] === ']' || data.insertedData[endPointer] === ',') {
@@ -107,9 +107,9 @@ var jsonParser = {
     }
 
     throw new Error(errors.typeError);
-  },
+  }
 
-  getStringEnd: function (data, startPoint) {
+  var getStringEnd = function (data, startPoint) {
     var endPointer = startPoint + 1;
 
     while (data.insertedData[endPointer] !== '"') {
@@ -121,9 +121,9 @@ var jsonParser = {
     }
 
     return endPointer;
-  },
+  }
 
-  getDelimiter: function (data) {
+  var getDelimiter = function (data) {
     var delimiterPointer = data.parsingPointer;
 
     for (; delimiterPointer <= data.dataEndPoint; delimiterPointer++) {
@@ -138,42 +138,44 @@ var jsonParser = {
     }
 
     throw new Error(errors.blockError);
-  },
+  }
 
-  parseNumber: function (data, startPoint, endPoint) {
-    var number = Number(data.insertedData.slice(startPoint, endPoint));
+  var parseType = {
+    Number: function (data, startPoint, endPoint) {
+      var number = Number(data.insertedData.slice(startPoint, endPoint));
 
-    if (!isNaN(number)) {
-      return number;
-    }
-
-    throw new Error(errors.typeError);
-  },
-
-  parseBool: function (data, startPoint, endPoint) {
-    var parsingBool = this.insertedData.slice(startPoint, endPoint).toLowerCase();
-
-    if (parsingBool === "true") return true;
-    if (parsingBool === "false") return false;
-
-    throw new Error(errors.typeError);
-  },
-
-  parseString: function (data, startPoint, endPoint) {
-    var parsingString = "";
-
-    for (var i = 1; startPoint + i < endPoint - 1; i++) {
-      if (data.insertedData[startPoint + i] === '"' || data.insertedData[startPoint + i] === '\\') {
-        throw new Error(errors.typeError);
+      if (!isNaN(number)) {
+        return number;
       }
 
-      parsingString += data.insertedData[startPoint + i];
+      throw new Error(errors.typeError);
+    },
+
+    Bool: function (data, startPoint, endPoint) {
+      var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
+
+      if (parsingBool === "true") return true;
+      if (parsingBool === "false") return false;
+
+      throw new Error(errors.typeError);
+    },
+
+    String: function (data, startPoint, endPoint) {
+      var parsingString = "";
+
+      for (var i = 1; startPoint + i < endPoint - 1; i++) {
+        if (data.insertedData[startPoint + i] === '"' || data.insertedData[startPoint + i] === '\\') {
+          throw new Error(errors.typeError);
+        }
+
+        parsingString += data.insertedData[startPoint + i];
+      }
+
+      return parsingString;
     }
+  }
 
-    return parsingString;
-  },
-
-  exceptLastSpaces: function (data, startPoint, endPoint) {
+  var exceptLastSpaces = function (data, startPoint, endPoint) {
     while (data.insertedData[endPoint] === ' ') {
       endPoint--;
 
@@ -183,8 +185,12 @@ var jsonParser = {
     }
 
     return endPoint;
-  },
+  }
 
-}
+  return {
+    parse
+  }
+
+})();
 
 module.exports = jsonParser;
