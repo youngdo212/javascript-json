@@ -149,7 +149,7 @@ var jsonParser = (function () {
     },
 
     Bool: function (jsonData, startPoint, endPoint) {
-      var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
+      var parsingBool = jsonData.insertedData.slice(startPoint, endPoint).toLowerCase();
 
       if (parsingBool === "true") return true;
       if (parsingBool === "false") return false;

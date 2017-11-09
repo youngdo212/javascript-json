@@ -1,7 +1,9 @@
 var countType = function (parsedArray) {
-  var dataCount = { array: 0, string: 0, number: 0, bool: 0 };
-  parsedArray.forEach(function (data) {
-    dataCount[data]++;
+  var dataCount = { string: 0, number: 0, boolean: 0 };
+  parsedArray[0].forEach(function (data) {
+    dataCount[typeof data]++;
   })
   return dataCount;
 }
+
+module.exports = countType;
