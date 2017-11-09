@@ -2,10 +2,9 @@ var util = require('./utils');
 var log = util.log;
 var errors = require('./errors');
 
-var parser = {
+var jsonParser = {
   parseJson: function (insertedData) {
-    debugger;
-    var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, new Array);
+    var parsingJson = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
     return parsingJson.parseData().parsedData;
   },
 }
@@ -40,14 +39,13 @@ JsonUnit.prototype.parseData = function () {
 
 JsonUnit.prototype.parseArray = function () {
   var arrayEnd = this.getBlockEnd();
-  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer + 1, arrayEnd, new Array);
+  var innerBlock = new JsonUnit(this.insertedData, this.parsingPointer + 1, arrayEnd, []);
   this.parsedData.push(innerBlock.parseData().parsedData);
   this.parsingPointer = arrayEnd + 1;
   if (this.parsingPointer === this.insertedData.length) {
-    return this;
+    return;
   }
   this.parsingPointer = this.getDelimiter() + 1;
-  return this;
 }
 
 JsonUnit.prototype.parseValue = function (valueType) {
@@ -55,14 +53,12 @@ JsonUnit.prototype.parseValue = function (valueType) {
   var pureValueEnd = this.exceptLastSpaces(this.parsingPointer, valueEnd);
   this.parsedData.push(this["parse" + valueType](this.parsingPointer, pureValueEnd));
   this.parsingPointer = valueEnd + 1;
-  return this;
 }
 
 JsonUnit.prototype.ignoreSpaces = function () {
   while (this.parsingLetter === " ") {
     this.parsingPointer++;
   }
-  return this;
 }
 
 JsonUnit.prototype.getNextType = function () {
@@ -154,4 +150,4 @@ JsonUnit.prototype.exceptLastSpaces = function (startPoint, endPoint) {
   return endPoint;
 }
 
-module.exports = parser;
+module.exports = jsonParser;
