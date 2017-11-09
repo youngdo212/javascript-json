@@ -1,5 +1,3 @@
-var util = require('./utils');
-var log = util.log;
 var errors = require('./errors');
 
 var jsonParser = (function () {
