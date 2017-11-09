@@ -150,5 +150,4 @@ JsonUnit.prototype.exceptLastSpaces = function (startPoint, endPoint) {
   return endPoint;
 }
 
-
 module.exports = jsonParser;
