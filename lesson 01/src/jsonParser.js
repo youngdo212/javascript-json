@@ -2,10 +2,21 @@ var util = require('./utils');
 var log = util.log;
 var errors = require('./errors');
 
+JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
+  this.insertedData = insertedData;
+  this.parsingPointer = parsingPointer;
+  this.dataEndPoint = dataEndPoint;
+  this.parsedData = parsedData;
+}
+
+Object.defineProperty(JsonData.prototype, "parsingLetter",
+  { get: function () { return this.insertedData[this.parsingPointer]; } }
+);
+
 var jsonParser = {
 
   parse: function (insertedData) {
-    var jsonData = new JsonUnit(insertedData, 0, insertedData.length - 1, []);
+    var jsonData = new JsonData(insertedData, 0, insertedData.length - 1, []);
     return this.parseData(jsonData);
   },
 
@@ -38,7 +49,7 @@ var jsonParser = {
 
   parseArray: function (data) {
     var arrayEnd = this.getBlockEnd(data);
-    var innerData = new JsonUnit(data.insertedData, data.parsingPointer + 1, arrayEnd, []);
+    var innerData = new JsonData(data.insertedData, data.parsingPointer + 1, arrayEnd, []);
     data.parsedData.push(this.parseData(innerData));
     data.parsingPointer = arrayEnd + 1;
 
@@ -175,16 +186,5 @@ var jsonParser = {
   },
 
 }
-
-JsonUnit = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
-  this.insertedData = insertedData;
-  this.parsingPointer = parsingPointer;
-  this.dataEndPoint = dataEndPoint;
-  this.parsedData = parsedData;
-}
-
-Object.defineProperty(JsonUnit.prototype, "parsingLetter",
-  { get: function () { return this.insertedData[this.parsingPointer]; } }
-)
 
 module.exports = jsonParser;
