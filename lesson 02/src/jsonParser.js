@@ -50,7 +50,7 @@ var jsonParser = (function () {
     if (dataType === "Array") {
       var blockEnd = getBlockEnd(jsonData, '[', ']');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
-    } else {
+    } else if (dataType === "Object") {
       var blockEnd = getBlockEnd(jsonData, '{', '}');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
