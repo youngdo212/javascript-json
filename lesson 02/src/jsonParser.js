@@ -69,9 +69,9 @@ var jsonParser = (function () {
     }
 
     if (hashKey === undefined) {
-      jsonData.parsedData.push(puttingData);
+      jsonData.parsedData.push(parsedValue);
     } else {
-      jsonData.parsedData[hashKey] = puttingData;
+      jsonData.parsedData[hashKey] = parsedValue;
     }
   }
 
@@ -83,14 +83,15 @@ var jsonParser = (function () {
       var blockEnd = getBlockEnd(jsonData, '{', '}');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
+    var parsedBlock = parseData(innerData)
     jsonData.parsingPointer = blockEnd + 1;
 
     if (jsonData.parsingPointer === insertedData.length) {
-      return innerData;
+      return parsedBlock;
     }
 
     jsonData.parsingPointer = getDelimiter(jsonData) + 1;
-    return innerData;
+    return parsedBlock;
   }
 
   var parseElement = function (jsonData, valueType) {
