@@ -1,28 +1,30 @@
 var errors = require('./errors');
 
 var jsonParser = (function () {
-  var JsonData = function (insertedData, parsingPointer, dataEndPoint, parsedData) {
-    this.insertedData = insertedData;
+  var insertedData = "";
+
+  var JsonData = function (parsingPointer, dataEndPoint, parsedData) {
     this.parsingPointer = parsingPointer;
     this.dataEndPoint = dataEndPoint;
     this.parsedData = parsedData;
   }
 
   Object.defineProperty(JsonData.prototype, "parsingLetter",
-    { get: function () { return this.insertedData[this.parsingPointer]; } }
+    { get: function () { return insertedData[this.parsingPointer]; } }
   );
 
-  var parse = function (insertedData) {
-    var jsonData = new JsonData(insertedData, 0, insertedData.length - 1, []);
+  var parse = function (insert) {
+    insertedData = insert;
+    var jsonData = new JsonData(0, insertedData.length - 1, []);
     return parseData(jsonData);
   }
 
   var parseData = function (jsonData) {
-    if (jsonData.insertedData.length === 1) {
+    if (insertedData.length === 1) {
       throw new Error(errors.type);
     }
 
-    while (jsonData.parsingPointer < jsonData.insertedData.length) {
+    while (jsonData.parsingPointer < insertedData.length) {
       ignoreSpaces(jsonData);
 
       if (jsonData.parsingPointer >= jsonData.dataEndPoint) {
@@ -36,21 +38,21 @@ var jsonParser = (function () {
         parseValue(jsonData, dataType);
       }
 
-      if (jsonData.parsingPointer === jsonData.insertedData.length) {
+      if (jsonData.parsingPointer === insertedData.length) {
         return jsonData.parsedData;
       }
     }
 
-    throw new Error(errors.blockError);
+    throw new Error(errors.blockError, jsonData);
   }
 
   var parseArray = function (jsonData) {
     var arrayEnd = getBlockEnd(jsonData);
-    var innerData = new JsonData(jsonData.insertedData, jsonData.parsingPointer + 1, arrayEnd, []);
+    var innerData = new JsonData(jsonData.parsingPointer + 1, arrayEnd, []);
     jsonData.parsedData.push(parseData(innerData));
     jsonData.parsingPointer = arrayEnd + 1;
 
-    if (jsonData.parsingPointer === jsonData.insertedData.length) {
+    if (jsonData.parsingPointer === insertedData.length) {
       return;
     }
 
@@ -83,9 +85,9 @@ var jsonParser = (function () {
     var endPointer = jsonData.parsingPointer;
 
     for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
-      if (jsonData.insertedData[endPointer] === '[') innerArrayCount++;
-      if (jsonData.insertedData[endPointer] === ']') innerArrayCount--;
-      if (jsonData.insertedData[endPointer] === '"') endPointer = getStringEnd(jsonData, endPointer);
+      if (insertedData[endPointer] === '[') innerArrayCount++;
+      if (insertedData[endPointer] === ']') innerArrayCount--;
+      if (insertedData[endPointer] === '"') endPointer = getStringEnd(jsonData, endPointer);
       if (innerArrayCount === 0) {
         return endPointer;
       }
@@ -98,7 +100,7 @@ var jsonParser = (function () {
     var endPointer = (jsonData.parsingLetter === '"') ? getStringEnd(jsonData, jsonData.parsingPointer) : jsonData.parsingPointer
 
     for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
-      if (jsonData.insertedData[endPointer] === ']' || jsonData.insertedData[endPointer] === ',') {
+      if (insertedData[endPointer] === ']' || insertedData[endPointer] === ',') {
         return endPointer;
       }
     }
@@ -109,7 +111,7 @@ var jsonParser = (function () {
   var getStringEnd = function (jsonData, startPoint) {
     var endPointer = startPoint + 1;
 
-    while (jsonData.insertedData[endPointer] !== '"') {
+    while (insertedData[endPointer] !== '"') {
       endPointer++;
 
       if (endPointer > jsonData.dataEndPoint) {
@@ -125,11 +127,11 @@ var jsonParser = (function () {
 
     for (; delimiterPointer <= jsonData.dataEndPoint; delimiterPointer++) {
 
-      if (jsonData.insertedData[delimiterPointer] === ']' || jsonData.insertedData[delimiterPointer] === ',') {
+      if (insertedData[delimiterPointer] === ']' || insertedData[delimiterPointer] === ',') {
         return delimiterPointer;
       }
 
-      if (jsonData.insertedData[delimiterPointer] !== ' ') {
+      if (insertedData[delimiterPointer] !== ' ') {
         throw new Error(errors.blockError);
       }
     }
@@ -139,7 +141,7 @@ var jsonParser = (function () {
 
   var parseType = {
     Number: function (jsonData, startPoint, endPoint) {
-      var number = Number(jsonData.insertedData.slice(startPoint, endPoint));
+      var number = Number(insertedData.slice(startPoint, endPoint));
 
       if (!isNaN(number)) {
         return number;
@@ -149,7 +151,7 @@ var jsonParser = (function () {
     },
 
     Bool: function (jsonData, startPoint, endPoint) {
-      var parsingBool = jsonData.insertedData.slice(startPoint, endPoint).toLowerCase();
+      var parsingBool = insertedData.slice(startPoint, endPoint).toLowerCase();
 
       if (parsingBool === "true") return true;
       if (parsingBool === "false") return false;
@@ -161,11 +163,11 @@ var jsonParser = (function () {
       var parsingString = "";
 
       for (var i = 1; startPoint + i < endPoint - 1; i++) {
-        if (jsonData.insertedData[startPoint + i] === '"' || jsonData.insertedData[startPoint + i] === '\\') {
+        if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
           throw new Error(errors.typeError);
         }
 
-        parsingString += jsonData.insertedData[startPoint + i];
+        parsingString += insertedData[startPoint + i];
       }
 
       return parsingString;
@@ -173,7 +175,7 @@ var jsonParser = (function () {
   }
 
   var exceptLastSpaces = function (jsonData, startPoint, endPoint) {
-    while (jsonData.insertedData[endPoint] === ' ') {
+    while (insertedData[endPoint] === ' ') {
       endPoint--;
 
       if (endPoint < startPoint) {
