@@ -35,7 +35,7 @@ var jsonParser = (function () {
       if (dataType === "Object" || dataType === "Array") {
         parseBlock(jsonData, dataType);
       } else {
-        parseValue(jsonData, dataType);
+        parseElement(jsonData, dataType);
       }
 
       if (jsonData.parsingPointer === insertedData.length) {
@@ -72,11 +72,11 @@ var jsonParser = (function () {
     }
   }
 
-  var parseValue = function (jsonData, valueType) {
-    var valueEnd = getElementEnd(jsonData);
-    var pureValueEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, valueEnd);
-    jsonData.parsedData.push(parseType[valueType](jsonData, jsonData.parsingPointer, pureValueEnd));
-    jsonData.parsingPointer = valueEnd + 1;
+  var parseElement = function (jsonData, valueType) {
+    var elementEnd = getElementEnd(jsonData);
+    var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
+    jsonData.parsedData.push(parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd));
+    jsonData.parsingPointer = elementEnd + 1;
   }
 
   var ignoreSpaces = function (jsonData) {
