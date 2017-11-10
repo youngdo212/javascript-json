@@ -5,7 +5,7 @@ var json_stringify = (function () {
 
     var gap = '    ';
     var mind = '';
-    var tab;
+    var tab = '';
     var enter;
 
     function checkType(element, key) {
