@@ -15,8 +15,10 @@ var jsonReader = (function () {
     parsedData.forEach(function (parsedElement) {
       if (Array.isArray(parsedElement)) {
         parsedText += readType.array();
+        dataCount.array++;
       } else {
         parsedText += readType[parsedElement]();
+        dataCount[parsedElement]++;
       }
     });
 
@@ -37,14 +39,15 @@ var jsonReader = (function () {
     object: function () {
 
     },
-    array: function () {
+    array: function (parsedData) {
       var parsedText = "";
-      parsedText += addDepthTaps()
-      parsedText += "[\n";
+      parsedText += addDepthTaps() + "]\n";
+
       depth++;
-      getArrayInner()
-      parsedText += addDepthTaps()
-      parsedText += "]\n"
+      parsedText += getArrayInner(parsedData)
+
+      parsedText += addDepthTaps() + "]\n";
+
       return parsedText;
     },
   }
