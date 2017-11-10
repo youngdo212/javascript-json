@@ -10,17 +10,19 @@ var jsonReader = (function () {
   }
 
   var getArrayInner = function (parsedData) {
-    parsedData.forEach(function () {
-
-    });
     var parsedText = "";
-    parsedText += "[\n";
-    depth++;
 
-    parsedText += addDepthTaps()
-    parsedText += "]\n"
+    parsedData.forEach(function (parsedElement) {
+      if (Array.isArray(parsedElement)) {
+        parsedText += readType.array();
+      } else {
+        parsedText += readType[parsedElement]();
+      }
+    });
+
     return parsedText;
   }
+
 
   var readType = {
     string: function () {
@@ -36,7 +38,14 @@ var jsonReader = (function () {
 
     },
     array: function () {
-
+      var parsedText = "";
+      parsedText += addDepthTaps()
+      parsedText += "[\n";
+      depth++;
+      getArrayInner()
+      parsedText += addDepthTaps()
+      parsedText += "]\n"
+      return parsedText;
     },
   }
 
