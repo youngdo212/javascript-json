@@ -23,139 +23,140 @@ var json_parse = (function () {
         console.log(`총 ${total}개의 ${parentType} 데이터 중에 ${partial.join(", ")}가 포함되어 있습니다.`);
     };
 
-    function arrayJSON() {
+    function getArray() {
         var arr = [];
-        if (ch === "[") {
-            next("[");
-            white();
+        if (ch !== "[") {
+            throw new Error("Bad getArray");
+        }
+        getNext("[");
+        isWhite();
+        if (ch === "]") {
+            getNext("]");
+            return arr;
+        }
+        while (ch) {
+            arr.push(getValue());
+            isWhite();
             if (ch === "]") {
-                next("]");
+                getNext("]");
                 return arr;
             }
-            while (ch) {
-                arr.push(valueJSON());
-                white();
-                if (ch === "]") {
-                    next("]");
-                    return arr;
-                }
-                next(",");
-                white();
-            }
+            getNext(",");
+            isWhite();
         }
-        throw new Error("Bad arrayJSON");
     };
 
-    function objectJSON() {
+    function getObject() {
         var obj = {};
-        if (ch === "{") {
-            next("{");
-            white();
+        if (ch !== "{") {
+            throw new Error("Bad getObject");
+        }
+        getNext("{");
+        isWhite();
+        if (ch === "}") {
+            getNext("}");
+            return obj;
+        }
+        while (ch) {
+            var key = getString();
+            isWhite();
+            getNext(":");
+            obj[key] = getValue();
+            isWhite();
             if (ch === "}") {
-                next("}");
+                getNext("}");
                 return obj;
             }
-            while (ch) {
-                var key = stringJSON();
-                white();
-                next(":");
-                obj[key] = valueJSON();
-                white();
-                if (ch === "}") {
-                    next("}");
-                    return obj;
-                }
-                next(",");
-                white();
-            }
+            getNext(",");
+            isWhite();
         }
-        throw new Error("Bad objectJSON");
     };
 
-    function stringJSON() {
+    function getString() {
         var str = "";
-        if (ch === "\"") {
-            next("\"");
-            white();
-            while (ch) {
-                str += ch;
-                next(ch);
-                if (ch === "\"") {
-                    next("\"");
-                    return str;
-                }
+        if (ch !== "\"") {
+            throw new Error("Bad getString");
+        }
+        getNext("\"");
+        isWhite();
+        while (ch) {
+            str += ch;
+            getNext(ch);
+            if (ch === "\"") {
+                getNext("\"");
+                return str;
             }
         }
-        throw new Error("Bad stringJSON");
     };
 
-    function numberJSON() {
+    function getNumber() {
         var num = "";
         if (ch === "-") {
             num = "-";
-            next("-");
+            getNext("-");
         }
         while ("0" <= ch && ch <= "9") {
             num += ch;
-            next(ch);
+            getNext(ch);
         }
         if (isFinite(num)) {
             if (depth < 2) type.NUMBER++;
             return parseInt(num, 10);
         } else {
-            throw new Error("Bad numberJSON");
+            throw new Error("Bad getNumber");
         }
     };
 
-    function valueJSON() {
-        white();
+    function getValue() {
+        isWhite();
         switch (ch) {
             case "{":
-            if (depth !== 0) type.OBJECT++;
+                if (depth !== 0) type.OBJECT++;
                 depth++;
-                return objectJSON();
+                return getObject();
             case "[":
-            if (depth !== 0) type.ARRAY++;
+                if (depth !== 0) type.ARRAY++;
                 depth++;
-                return arrayJSON();
+                return getArray();
             case "\"":
                 if (depth < 2) type.STRING++;
-                return stringJSON();
+                return getString();
             case "-":
-                return numberJSON();
+                return getNumber();
             default:
-                return ch >= "0" && ch <= "9" ? numberJSON() : word();
+                return ch >= "0" && ch <= "9" ? getNumber() : getWord();
         }
     };
 
-    function word() {
+    function getWord() {
         switch (ch) {
             case "t":
-                next("t");
-                next("r");
-                next("u");
-                next("e");
+                getNext("t");
+                getNext("r");
+                getNext("u");
+                getNext("e");
                 if (depth < 2) type.BOOLEAN++;
                 return true;
             case "f":
-                next("f");
-                next("a");
-                next("l");
-                next("s");
-                next("e");
+                getNext("f");
+                getNext("a");
+                getNext("l");
+                getNext("s");
+                getNext("e");
                 if (depth < 2) type.BOOLEAN++;
                 return false;
             case "n":
-                next("n");
-                next("u");
-                next("l");
-                next("l");
+                getNext("n");
+                getNext("u");
+                getNext("l");
+                getNext("l");
                 return null;
+            default:
+                throw new Error("Bad word");
         }
-        throw new Error("Bad word");
     };
 
-    function next(c) {
+    function getNext(c) {
         if (c && c !== ch) {
             throw new Error("Bad next");
         }
@@ -165,9 +166,9 @@ var json_parse = (function () {
         return ch;
     };
 
-    function white() {
+    function isWhite() {
         if (ch && ch === " ") {
-            next();
+            getNext();
         }
     };
 
@@ -183,8 +184,8 @@ var json_parse = (function () {
             OBJECT: 0,
             ARRAY: 0
         };
-        white();
-        var result = valueJSON();
+        isWhite();
+        var result = getValue();
         Array.isArray(result) ? printResult("배열") : printResult("객체");
         return result;
     };
