@@ -182,7 +182,6 @@ var jsonParser = (function () {
   var getColon = function (jsonData) {
     ignoreSpaces(jsonData);
     var colonPointer = jsonData.parsingPointer;
-    console.log(colonPointer)
 
     for (; colonPointer <= jsonData.dataEndPoint; colonPointer++) {
 
