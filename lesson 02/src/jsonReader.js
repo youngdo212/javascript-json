@@ -5,11 +5,14 @@ var jsonReader = (function () {
 
   var display = function (parsedData) {
     depth = 0, line = 0;
-    var parsedText = getArray(parsedData);
+    var parsedText = getArrayInner(parsedData);
     displayText(parsedText)
   }
 
-  var getArray = function (parsedData) {
+  var getArrayInner = function (parsedData) {
+    parsedData.forEach(function () {
+
+    });
     var parsedText = "";
     parsedText += "[\n";
     depth++;
@@ -17,6 +20,24 @@ var jsonReader = (function () {
     parsedText += addDepthTaps()
     parsedText += "]\n"
     return parsedText;
+  }
+
+  var readType = {
+    string: function () {
+
+    },
+    number: function () {
+
+    },
+    boolean: function () {
+
+    },
+    object: function () {
+
+    },
+    array: function () {
+
+    },
   }
 
   var countArray = function (parsedArray) {
