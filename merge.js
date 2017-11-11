@@ -279,5 +279,21 @@ rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) 
         console.log("\n", result);
         console.log("\n", count);
     }
+    printCount(result);
     rl.close();
 });
+
+function printCount(input) {
+    var count = { number: 0, string: 0, boolean: 0, array: 0, object: 0, null: 0 };
+    var length = 0;
+    for (prop in input) {
+        value = input[prop];
+        if (value === null) count.null++;
+        else if (value instanceof Array)
+            count.array++;
+        else count[typeof (value)]++;
+        length++;
+    }
+    console.log("총 ", length, "개의 데이터가 있습니다.");
+    console.log(count);
+}
