@@ -30,9 +30,9 @@ function jsonParser(answer, start, nested, on) {
                 state = "READ_NEXT";
             }
             else if (answer[i] === " ") continue;
-            else return print.Error(input[i], i);//console.log('시작오류 "{", "["로 시작해야함 : ', answer[i], " i : ", i);
+            else return print.Error(input[i], i);
         }
-        ///////////////////////////READ_KEY
+
         else if (state == "READ_KEY") {
             if (answer[i] === '"') {
                 var getstr = tokenizer.readStr(answer, i + 1);
@@ -50,7 +50,7 @@ function jsonParser(answer, start, nested, on) {
                 return print.Error(answer[i], i);
             }
         }
-        ///////////////////////////READ_COLON
+
         else if (state == "READ_COLON") {
             if (answer[i] === " ") { continue; }
             else if (answer[i] === ":") {
@@ -58,7 +58,7 @@ function jsonParser(answer, start, nested, on) {
             }
             else return print.Error(answer[i], i);
         }
-        ///////////////////////////READ_VALUE
+
         else if (state === "READ_VALUE") {
             if (answer[i] === "'") {
                 print.Error(answer[i], i);
@@ -132,8 +132,8 @@ function jsonParser(answer, start, nested, on) {
                 else return temp;
             }
         }
-        ///////////////////////////READ_NEXT
-        else if (state === "READ_NEXT") { //값 입력이 끝난후 종료 혹은 재입력
+
+        else if (state === "READ_NEXT") {
             if (answer[i] === " ") continue;
             else if (answer[i] === ",") {
                 on === 'array' ? state = "READ_VALUE" : state = "READ_KEY";
@@ -155,7 +155,6 @@ function jsonParser(answer, start, nested, on) {
     if (depth > 0) { console.log("Unexpected end of JSON input ", i); process.exit() }
     on === 'array' ? count.arr++ : count.obj++;
     return temp;
-
 }
 rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) {
     var result;
@@ -172,6 +171,5 @@ rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) 
         console.log("\n", count);
         print.Count(result);
     }
-
     rl.close();
 });

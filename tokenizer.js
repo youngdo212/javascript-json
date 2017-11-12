@@ -44,5 +44,4 @@ var tokenizer = {
         process.exit();
     }
 };
-
 module.exports = tokenizer;
