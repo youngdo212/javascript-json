@@ -11,12 +11,6 @@ var jsonReader = (function () {
     return readData;
   }
 
-  function readValue(parsedElement) {
-    var parsedText = "";
-    parsedText += parsedElement;
-    return parsedText;
-  }
-
   function readObject(innerData) {
     var parsedText = "";
 
@@ -63,8 +57,6 @@ var jsonReader = (function () {
     var parsedText = "";
 
     for (key in innerData) {
-      console.log(key)
-
       var parsedElement = innerData[key];
 
       if (parsedText !== "") {
@@ -73,7 +65,6 @@ var jsonReader = (function () {
 
       parsedText += getDepthTaps(depth);
       parsedText += '"' + key + '" : ';
-
       parsedText += getBlockInner(parsedElement);
     }
 
@@ -93,13 +84,13 @@ var jsonReader = (function () {
         parsedText += readArray(parsedElement);
         break;
       case "[object String]":
-        parsedText += readValue('"' + parsedElement + '"');
+        parsedText += '"' + parsedElement + '"';
         break;
       case "[object Number]":
-        parsedText += readValue(parsedElement);
+        parsedText += parsedElement;
         break;
       case "[object Boolean]":
-        parsedText += readValue(parsedElement);
+        parsedText += parsedElement;
         break;
     }
     return parsedText;
