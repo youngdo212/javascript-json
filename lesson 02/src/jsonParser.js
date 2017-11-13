@@ -20,10 +20,6 @@ var jsonParser = (function () {
   }
 
   var parseData = function (jsonData) {
-    if (insertedData.length === 1) {
-      throw new Error(errors.type);
-    }
-
     while (jsonData.parsingPointer < insertedData.length) {
       ignoreSpaces(jsonData);
 
@@ -84,6 +80,7 @@ var jsonParser = (function () {
       var blockEnd = getBlockEnd(jsonData, '{', '}');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, {});
     }
+
     var parsedBlock = parseData(innerData)
     jsonData.parsingPointer = blockEnd + 1;
 
@@ -102,6 +99,7 @@ var jsonParser = (function () {
 
     parsedElement = parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd);
     jsonData.parsingPointer = elementEnd + 1;
+
     return parsedElement;
   }
 
