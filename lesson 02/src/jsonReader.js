@@ -1,30 +1,30 @@
 var jsonReader = (function () {
   var dataCount = { array: 0, object: 0, string: 0, number: 0, boolean: 0 };
-  var depth = 0;
+  var depth;
+  var parsedText;
 
   var display = function (parsedData) {
-    depth = 0;
-    var parsedText = getArrayInner(parsedData);
+    depth = 0, parsedText = "";
+    getArrayInner(parsedData);
     console.log(parsedText);
     return dataCount;
   }
 
   var getArrayInner = function (innerData) {
-    var parsedText = "";
     var lastIndex = innerData.length - 1;
 
     for (var i = 0; i < innerData.length; i++) {
       var parsedElement = innerData[i];
 
       if (Array.isArray(parsedElement)) {
-        parsedText += readType.array(parsedElement);
+        readType.array(parsedElement);
         dataCount.array++;
       } else if (typeof parsedElement === "object") {
-        parsedText += readType[typeof parsedElement](parsedElement);
+        readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       } else {
-        parsedText += getDepthTaps(depth);
-        parsedText += readType[typeof parsedElement](parsedElement);
+        addDepthTaps(depth);
+        readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
 
@@ -33,57 +33,44 @@ var jsonReader = (function () {
       }
       parsedText += "\n"
     }
-
-    return parsedText;
   }
 
   var readType = {
     string: function (parsedElement) {
-      var parsedText = '';
       parsedText += '"' + parsedElement + '"';
-      return parsedText;
     },
 
     number: function (parsedElement) {
-      var parsedText = "";
       parsedText += parsedElement;
-      return parsedText;
     },
 
     boolean: function (parsedElement) {
-      var parsedText = "";
       parsedText += parsedElement;
-      return parsedText;
     },
 
     object: function (innerData) {
-      var parsedText = "";
-
-      parsedText += getDepthTaps(depth) + "{\n";
+      parsedText += "{\n"
+      addDepthTaps(depth)
       depth++;
-      parsedText += getObjectInner(innerData)
+      getObjectInner(innerData)
       depth--;
-      parsedText += "\n" + getDepthTaps(depth) + "}";
-
-      return parsedText;
+      parsedText += "\n"
+      addDepthTaps(depth)
+      parsedText += "}";
     },
 
     array: function (innerData) {
-      var parsedText = "";
-
-      parsedText += getDepthTaps(depth) + "[\n";
+      addDepthTaps(depth)
+      parsedText += "[\n";
       depth++;
       parsedText += getArrayInner(innerData)
       depth--;
-      parsedText += getDepthTaps(depth) + "]";
-
-      return parsedText;
+      addDepthTaps(depth)
+      parsedText += "]";
     },
   }
 
   var getObjectInner = function (innerData) {
-    var parsedText = "";
-
     for (key in innerData) {
       var parsedElement = innerData[key];
 
@@ -91,27 +78,23 @@ var jsonReader = (function () {
         parsedText += ",\n";
       }
 
-      parsedText += getDepthTaps(depth);
+      addDepthTaps(depth);
       parsedText += '"' + key + '" : ';
 
       if (Array.isArray(parsedElement)) {
-        parsedText += readType.array(parsedElement);
+        readType.array(parsedElement);
         dataCount.array++;
       } else {
-        parsedText += readType[typeof parsedElement](parsedElement);
+        readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
     }
-
-    return parsedText;
   }
 
-  var getDepthTaps = function (depth) {
-    var taps = "";
+  var addDepthTaps = function (depth) {
     for (var i = 0; i < depth; i++) {
-      taps += "  "
+      parsedText += "  "
     }
-    return taps;
   }
 
   return display;
