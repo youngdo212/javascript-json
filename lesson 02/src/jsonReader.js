@@ -11,52 +11,49 @@ var jsonReader = (function () {
     return readData;
   }
 
-  var readType = {
-    string: function (parsedElement) {
-      return this.value('"' + parsedElement + '"');
-    },
-
-    number: function (parsedElement) {
-      return this.value(parsedElement);
-    },
-
-    boolean: function (parsedElement) {
-      return this.value(parsedElement);
-    },
-
-    value: function (parsedElement) {
-      var parsedText = "";
-      parsedText += parsedElement;
-      return parsedText;
-    },
-
-    object: function (innerData) {
-      var parsedText = "";
-
-      parsedText += getDepthTaps(depth) + "{\n";
-      depth++;
-      parsedText += getObjectInner(innerData)
-      depth--;
-      parsedText += "\n" + getDepthTaps(depth) + "}";
-
-      return parsedText;
-    },
-
-    array: function (innerData) {
-      var parsedText = "";
-
-      parsedText += getDepthTaps(depth) + "[\n";
-      depth++;
-      parsedText += getArrayInner(innerData)
-      depth--;
-      parsedText += getDepthTaps(depth) + "]";
-
-      return parsedText;
-    },
+  function string(parsedElement) {
+    return this.value('"' + parsedElement + '"');
   }
 
+  function number(parsedElement) {
+    return this.value(parsedElement);
+  }
 
-  var getArrayInner = function (innerData) {
+  function boolean(parsedElement) {
+    return this.value(parsedElement);
+  }
+
+  function value(parsedElement) {
+    var parsedText = "";
+    parsedText += parsedElement;
+    return parsedText;
+  }
+
+  function object(innerData) {
+    var parsedText = "";
+
+    parsedText += getDepthTaps(depth) + "{\n";
+    depth++;
+    parsedText += getObjectInner(innerData)
+    depth--;
+    parsedText += "\n" + getDepthTaps(depth) + "}";
+
+    return parsedText;
+  }
+
+  function array(innerData) {
+    var parsedText = "";
+
+    parsedText += getDepthTaps(depth) + "[\n";
+    depth++;
+    parsedText += getArrayInner(innerData)
+    depth--;
+    parsedText += getDepthTaps(depth) + "]";
+
+    return parsedText;
+  }
+
+  function getArrayInner(innerData) {
     var parsedText = "";
     var lastIndex = innerData.length - 1;
 
@@ -84,7 +81,7 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-  var getObjectInner = function (innerData) {
+  function getObjectInner(innerData) {
     var parsedText = "";
 
     for (key in innerData) {
@@ -97,6 +94,7 @@ var jsonReader = (function () {
       parsedText += getDepthTaps(depth);
       parsedText += '"' + key + '" : ';
 
+      console.log(Object.prototype.toString.call(parsedElement))
       if (Array.isArray(parsedElement)) {
         parsedText += readType.array(parsedElement);
         dataCount.array++;
@@ -109,7 +107,7 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-  var getDepthTaps = function (depth) {
+  function getDepthTaps(depth) {
     var taps = "";
     for (var i = 0; i < depth; i++) {
       taps += "  "
