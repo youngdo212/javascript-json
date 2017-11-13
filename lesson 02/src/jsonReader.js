@@ -47,20 +47,38 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-  var readObject = function () {
+  var readObject = function (innerData) {
     var parsedText = "";
 
-    parsedText += getDepthTaps(depth) + "[\n";
+    parsedText += getDepthTaps(depth) + "{\n";
     depth++;
     parsedText += getObjectInner(innerData)
     depth--;
-    parsedText += getDepthTaps(depth) + "]";
+    parsedText += getDepthTaps(depth) + "}";
 
     return parsedText;
   }
 
-  var getObjectInner = function () {
+  var getObjectInner = function (innerData) {
+    var parsedText = "";
 
+    for (key in innerData) {
+      var parsedElement = innerData[key];
+      parsedText += key + ": ";
+
+      if (Array.isArray(parsedElement)) {
+        parsedText += readArray(parsedElement);
+        dataCount.array++;
+      } else if (parsedElement instanceof Object) {
+        parsedText += readObject(parsedElement);
+        dataCount.object++;
+      } else {
+        parsedText += parsedElement;
+        dataCount[typeof parsedElement]++;
+      }
+    }
+
+    return parsedText;
   }
 
   var getDepthTaps = function (depth) {
