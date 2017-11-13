@@ -1,9 +1,10 @@
 var errors = require('./errors');
+var polyfill = require('./polyfill');
 
 var jsonParser = (function () {
   var insertedData = "";
 
-  var JsonData = function (parsingPointer, dataEndPoint, parsedData) {
+  function JsonData(parsingPointer, dataEndPoint, parsedData) {
     this.parsingPointer = parsingPointer;
     this.dataEndPoint = dataEndPoint;
     this.parsedData = parsedData;
@@ -13,13 +14,13 @@ var jsonParser = (function () {
     { get: function () { return insertedData[this.parsingPointer]; } }
   );
 
-  var parse = function (insert) {
+  function parse(insert) {
     insertedData = insert;
     var jsonData = new JsonData(0, insertedData.length - 1, []);
     return parseData(jsonData);
   }
 
-  var parseData = function (jsonData) {
+  function parseData(jsonData) {
     while (jsonData.parsingPointer < insertedData.length) {
       ignoreSpaces(jsonData);
 
@@ -41,7 +42,7 @@ var jsonParser = (function () {
     throw new Error(errors.blockError, jsonData);
   }
 
-  var parseHash = function (jsonData) {
+  function parseHash(jsonData) {
     var dataType = getNextType(jsonData);
     if (dataType !== "String") {
       throw new Error(errors.typeError, jsonData);
@@ -55,7 +56,7 @@ var jsonParser = (function () {
     parseValue(jsonData, key);
   }
 
-  var parseValue = function (jsonData, hashKey) {
+  function parseValue(jsonData, hashKey) {
     var dataType = getNextType(jsonData);
     var parsedValue;
 
@@ -72,7 +73,7 @@ var jsonParser = (function () {
     }
   }
 
-  var parseBlock = function (jsonData, dataType) {
+  function parseBlock(jsonData, dataType) {
     if (dataType === "Array") {
       var blockEnd = getBlockEnd(jsonData, '[', ']');
       var innerData = new JsonData(jsonData.parsingPointer + 1, blockEnd, []);
@@ -92,7 +93,7 @@ var jsonParser = (function () {
     return parsedBlock;
   }
 
-  var parseElement = function (jsonData, valueType) {
+  function parseElement(jsonData, valueType) {
     var elementEnd = getElementEnd(jsonData);
     var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
     var parsedElement;
@@ -103,13 +104,13 @@ var jsonParser = (function () {
     return parsedElement;
   }
 
-  var ignoreSpaces = function (jsonData) {
+  function ignoreSpaces(jsonData) {
     while (jsonData.parsingLetter === " ") {
       jsonData.parsingPointer++;
     }
   }
 
-  var getNextType = function (jsonData) {
+  function getNextType(jsonData) {
     if (jsonData.parsingLetter === '[') return "Array";
     if (jsonData.parsingLetter === '{') return "Object";
     if (jsonData.parsingLetter === '"') return "String";
@@ -118,7 +119,7 @@ var jsonParser = (function () {
     throw new Error(errors.typeError);
   }
 
-  var getBlockEnd = function (jsonData, blockStartLetter, blockEndLetter) {
+  function getBlockEnd(jsonData, blockStartLetter, blockEndLetter) {
     var innerBlockCount = 0
     var endPointer = jsonData.parsingPointer;
 
@@ -134,7 +135,7 @@ var jsonParser = (function () {
     throw new Error(errors.blockError);
   }
 
-  var getElementEnd = function (jsonData) {
+  function getElementEnd(jsonData) {
     var endPointer = (jsonData.parsingLetter === '"') ? getStringEnd(jsonData, jsonData.parsingPointer) : jsonData.parsingPointer
 
     for (; endPointer <= jsonData.dataEndPoint; endPointer++) {
@@ -146,7 +147,7 @@ var jsonParser = (function () {
     throw new Error(errors.typeError);
   }
 
-  var getStringEnd = function (jsonData, startPoint) {
+  function getStringEnd(jsonData, startPoint) {
     var endPointer = startPoint + 1;
 
     while (insertedData[endPointer] !== '"') {
@@ -160,7 +161,7 @@ var jsonParser = (function () {
     return endPointer;
   }
 
-  var getDelimiter = function (jsonData) {
+  function getDelimiter(jsonData) {
     var delimiterPointer = jsonData.parsingPointer;
 
     for (; delimiterPointer <= jsonData.dataEndPoint; delimiterPointer++) {
@@ -177,7 +178,7 @@ var jsonParser = (function () {
     throw new Error(errors.blockError);
   }
 
-  var getColon = function (jsonData) {
+  function getColon(jsonData) {
     ignoreSpaces(jsonData);
     var colonPointer = jsonData.parsingPointer;
 
@@ -230,7 +231,7 @@ var jsonParser = (function () {
     }
   }
 
-  var exceptLastSpaces = function (jsonData, startPoint, endPoint) {
+  function exceptLastSpaces(jsonData, startPoint, endPoint) {
     endPoint -= 1;
 
     while (insertedData[endPoint] === ' ') {
