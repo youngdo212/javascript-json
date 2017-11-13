@@ -11,7 +11,6 @@ var jsonReader = (function () {
 
   var getArrayInner = function (innerData) {
     var parsedText = "";
-    // console.log(innerData)
 
     for (var i = 0; i < innerData.length; i++) {
       var parsedElement = innerData[i];
@@ -21,9 +20,10 @@ var jsonReader = (function () {
         dataCount.array++;
       } else if (parsedElement instanceof Object) {
         parsedText += readObject(parsedElement);
-        dataCount.array++;
+        dataCount.object++;
       } else {
         parsedText += parsedElement;
+        dataCount[typeof parsedElement]++;
       }
 
       if (i != innerData.length - 1) {
@@ -52,28 +52,12 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-  var countArray = function (parsedArray) {
-    parsedArray.forEach(function (data) {
-      if (data) {
-
-      } else if (data) {
-        countObject()
-      } else {
-        dataCount[typeof data]++;
-      }
-    })
-  }
-
   var getDepthTaps = function (depth) {
     var taps = "";
     for (var i = 0; i < depth; i++) {
       taps += "  "
     }
     return taps;
-  }
-
-  var countObject = function (parsedObject) {
-
   }
 
   return display;
