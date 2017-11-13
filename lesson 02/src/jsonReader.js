@@ -13,7 +13,9 @@ var jsonReader = (function () {
     var parsedText = "";
     // console.log(innerData)
 
-    innerData.forEach(function (parsedElement) {
+    for (var i = 0; i < innerData.length; i++) {
+      var parsedElement = innerData[i];
+
       if (Array.isArray(parsedElement)) {
         parsedText += readType.array(parsedElement);
         dataCount.array++;
@@ -21,7 +23,12 @@ var jsonReader = (function () {
         parsedText += readType[parsedElement]();
         dataCount[parsedElement]++;
       }
-    });
+
+      if (i != innerData.length - 1) {
+        parsedText += ", "
+      }
+      parsedText += "\n"
+    }
 
     return parsedText;
   }
@@ -42,19 +49,13 @@ var jsonReader = (function () {
     },
     array: function (innerData) {
       var parsedText = "";
-      console.log(innerData)
-
-      if (innerData.length === 0) {
-        return getDepthTaps(depth) + "[]" + "\n";
-      }
 
       parsedText += getDepthTaps(depth) + "[\n";
 
       depth++;
       parsedText += getArrayInner(innerData)
       depth--;
-
-      parsedText += getDepthTaps(depth) + "]\n";
+      parsedText += getDepthTaps(depth) + "]";
 
       return parsedText;
     },
