@@ -5,9 +5,11 @@ var messages = {
   waitInsert: function () {
     log('Please insert json data');
   },
+  jsonData: function (count) {
+    log(count);
+  },
   jsonCount: function (count) {
-    sumCount = count.string + count.number + count.bool;
-    log(`총 ${sumCount}개의 데이터 중에 문자열 ${count.string}개, \n숫자 ${count.number}개, 부울 ${count.boolean}개가 포함되어 있습니다.`);
+    log(count);
   },
   error: function (errorMassage) {
     log(errorMassage);

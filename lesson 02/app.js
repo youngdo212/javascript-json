@@ -12,13 +12,13 @@ var reader = require('./src/jsonReader');
 
   readline.on('line', function (insert) {
     var parsedData;
-    var dataCount;
+    var readData;
 
     try {
       parsedData = parser.parse(insert);
-      // console.log(parsedData);
-      dataCount = reader(parsedData);
-      // messages.jsonCount(dataCount);
+      readData = reader(parsedData);
+      messages.jsonCount(readData.count);
+      messages.jsonData(readData.data);
     }
     catch (error) {
       messages.error(error);

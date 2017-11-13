@@ -3,10 +3,12 @@ var jsonReader = (function () {
   var depth = 0;
 
   var display = function (parsedData) {
+    var readData = {};
+
     depth = 0;
-    var parsedText = getArrayInner(parsedData);
-    console.log(parsedText);
-    return dataCount;
+    readData.data = getArrayInner(parsedData);
+    readData.count = dataCount;
+    return readData;
   }
 
   var getArrayInner = function (innerData) {
