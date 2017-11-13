@@ -19,7 +19,11 @@ var jsonReader = (function () {
       if (Array.isArray(parsedElement)) {
         parsedText += readType.array(parsedElement);
         dataCount.array++;
+      } else if (typeof parsedElement === "object") {
+        parsedText += readType[typeof parsedElement](parsedElement);
+        dataCount[typeof parsedElement]++;
       } else {
+        parsedText += getDepthTaps(depth);
         parsedText += readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
@@ -59,7 +63,7 @@ var jsonReader = (function () {
       depth++;
       parsedText += getObjectInner(innerData)
       depth--;
-      parsedText += getDepthTaps(depth) + "}";
+      parsedText += "\n" + getDepthTaps(depth) + "}";
 
       return parsedText;
     },
@@ -82,7 +86,13 @@ var jsonReader = (function () {
 
     for (key in innerData) {
       var parsedElement = innerData[key];
-      parsedText += key + ": ";
+
+      if (parsedText !== "") {
+        parsedText += ",\n";
+      }
+
+      parsedText += getDepthTaps(depth);
+      parsedText += '"' + key + '" : ';
 
       if (Array.isArray(parsedElement)) {
         parsedText += readType.array(parsedElement);
@@ -91,11 +101,6 @@ var jsonReader = (function () {
         parsedText += readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
-
-      if (i != innerData.length - 1) {
-        parsedText += ", "
-      }
-      parsedText += "\n"
     }
 
     return parsedText;
