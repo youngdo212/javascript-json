@@ -4,55 +4,27 @@ var jsonReader = (function () {
 
   var display = function (parsedData) {
     var readData = {};
-
     depth = 0;
+
     readData.data = getArrayInner(parsedData);
     readData.count = dataCount;
     return readData;
   }
 
-  var getArrayInner = function (innerData) {
-    var parsedText = "";
-    var lastIndex = innerData.length - 1;
-
-    for (var i = 0; i < innerData.length; i++) {
-      var parsedElement = innerData[i];
-
-      if (Array.isArray(parsedElement)) {
-        parsedText += readType.array(parsedElement);
-        dataCount.array++;
-      } else if (typeof parsedElement === "object") {
-        parsedText += readType[typeof parsedElement](parsedElement);
-        dataCount[typeof parsedElement]++;
-      } else {
-        parsedText += getDepthTaps(depth);
-        parsedText += readType[typeof parsedElement](parsedElement);
-        dataCount[typeof parsedElement]++;
-      }
-
-      if (i != lastIndex) {
-        parsedText += ", "
-      }
-      parsedText += "\n"
-    }
-
-    return parsedText;
-  }
-
   var readType = {
     string: function (parsedElement) {
-      var parsedText = '';
-      parsedText += '"' + parsedElement + '"';
-      return parsedText;
+      return this.value('"' + parsedElement + '"');
     },
 
     number: function (parsedElement) {
-      var parsedText = "";
-      parsedText += parsedElement;
-      return parsedText;
+      return this.value(parsedElement);
     },
 
     boolean: function (parsedElement) {
+      return this.value(parsedElement);
+    },
+
+    value: function (parsedElement) {
       var parsedText = "";
       parsedText += parsedElement;
       return parsedText;
@@ -81,6 +53,35 @@ var jsonReader = (function () {
 
       return parsedText;
     },
+  }
+
+
+  var getArrayInner = function (innerData) {
+    var parsedText = "";
+    var lastIndex = innerData.length - 1;
+
+    for (var i = 0; i < innerData.length; i++) {
+      var parsedElement = innerData[i];
+
+      if (Array.isArray(parsedElement)) {
+        parsedText += readType.array(parsedElement);
+        dataCount.array++;
+      } else if (typeof parsedElement === "object") {
+        parsedText += readType[typeof parsedElement](parsedElement);
+        dataCount[typeof parsedElement]++;
+      } else {
+        parsedText += getDepthTaps(depth);
+        parsedText += readType[typeof parsedElement](parsedElement);
+        dataCount[typeof parsedElement]++;
+      }
+
+      if (i != lastIndex) {
+        parsedText += ", "
+      }
+      parsedText += "\n"
+    }
+
+    return parsedText;
   }
 
   var getObjectInner = function (innerData) {
