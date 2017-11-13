@@ -63,6 +63,8 @@ var jsonReader = (function () {
     var parsedText = "";
 
     for (key in innerData) {
+      console.log(key)
+
       var parsedElement = innerData[key];
 
       if (parsedText !== "") {

@@ -111,6 +111,40 @@ var jsonParser = (function () {
     return parsedElement;
   }
 
+
+  function parseNumber(jsonData, startPoint, endPoint) {
+    var number = Number(insertedData.slice(startPoint, endPoint + 1));
+
+    if (!isNaN(number)) {
+      return number;
+    }
+
+    throw new Error(errors.typeError);
+  }
+
+  function parseBool(jsonData, startPoint, endPoint) {
+    var parsingBool = insertedData.slice(startPoint, endPoint + 1).toLowerCase();
+
+    if (parsingBool === "true") return true;
+    if (parsingBool === "false") return false;
+
+    throw new Error(errors.typeError);
+  }
+
+  function parseString(jsonData, startPoint, endPoint) {
+    var parsingString = "";
+
+    for (var i = 1; startPoint + i < endPoint; i++) {
+      if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
+        throw new Error(errors.typeError);
+      }
+
+      parsingString += insertedData[startPoint + i];
+    }
+
+    return parsingString;
+  }
+
   function ignoreSpaces(jsonData) {
     while (jsonData.parsingLetter === " ") {
       jsonData.parsingPointer++;
@@ -201,39 +235,6 @@ var jsonParser = (function () {
     }
 
     throw new Error(errors.blockError);
-  }
-
-  function parseNumber(jsonData, startPoint, endPoint) {
-    var number = Number(insertedData.slice(startPoint, endPoint + 1));
-
-    if (!isNaN(number)) {
-      return number;
-    }
-
-    throw new Error(errors.typeError);
-  }
-
-  function parseBool(jsonData, startPoint, endPoint) {
-    var parsingBool = insertedData.slice(startPoint, endPoint + 1).toLowerCase();
-
-    if (parsingBool === "true") return true;
-    if (parsingBool === "false") return false;
-
-    throw new Error(errors.typeError);
-  }
-
-  function parseString(jsonData, startPoint, endPoint) {
-    var parsingString = "";
-
-    for (var i = 1; startPoint + i < endPoint; i++) {
-      if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
-        throw new Error(errors.typeError);
-      }
-
-      parsingString += insertedData[startPoint + i];
-    }
-
-    return parsingString;
   }
 
   function ignoreLastSpaces(jsonData, startPoint, endPoint) {
