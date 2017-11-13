@@ -35,11 +35,6 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-
-  var readObject = function () {
-
-  }
-
   var readArray = function (innerData) {
     var parsedText = "";
 
@@ -50,6 +45,22 @@ var jsonReader = (function () {
     parsedText += getDepthTaps(depth) + "]";
 
     return parsedText;
+  }
+
+  var readObject = function () {
+    var parsedText = "";
+
+    parsedText += getDepthTaps(depth) + "[\n";
+    depth++;
+    parsedText += getObjectInner(innerData)
+    depth--;
+    parsedText += getDepthTaps(depth) + "]";
+
+    return parsedText;
+  }
+
+  var getObjectInner = function () {
+
   }
 
   var getDepthTaps = function (depth) {
