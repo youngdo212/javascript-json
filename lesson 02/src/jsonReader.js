@@ -16,13 +16,10 @@ var jsonReader = (function () {
       var parsedElement = innerData[i];
 
       if (Array.isArray(parsedElement)) {
-        parsedText += readArray(parsedElement);
+        parsedText += readType.array(parsedElement);
         dataCount.array++;
-      } else if (parsedElement instanceof Object) {
-        parsedText += readObject(parsedElement);
-        dataCount.object++;
       } else {
-        parsedText += parsedElement;
+        parsedText += readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
 
@@ -35,28 +32,44 @@ var jsonReader = (function () {
     return parsedText;
   }
 
-  var readArray = function (innerData) {
-    var parsedText = "";
+  var readType = {
+    string: function (parsedElement) {
+      var parsedText = "";
+      parsedText += parsedElement;
+    },
 
-    parsedText += getDepthTaps(depth) + "[\n";
-    depth++;
-    parsedText += getArrayInner(innerData)
-    depth--;
-    parsedText += getDepthTaps(depth) + "]";
+    number: function (parsedElement) {
+      var parsedText = "";
+      parsedText += parsedElement;
+    },
 
-    return parsedText;
-  }
+    boolean: function (parsedElement) {
+      var parsedText = "";
+      parsedText += parsedElement;
+    },
 
-  var readObject = function (innerData) {
-    var parsedText = "";
+    object: function (innerData) {
+      var parsedText = "";
 
-    parsedText += getDepthTaps(depth) + "{\n";
-    depth++;
-    parsedText += getObjectInner(innerData)
-    depth--;
-    parsedText += getDepthTaps(depth) + "}";
+      parsedText += getDepthTaps(depth) + "{\n";
+      depth++;
+      parsedText += getObjectInner(innerData)
+      depth--;
+      parsedText += getDepthTaps(depth) + "}";
 
-    return parsedText;
+      return parsedText;
+    },
+    array: function (innerData) {
+      var parsedText = "";
+
+      parsedText += getDepthTaps(depth) + "[\n";
+      depth++;
+      parsedText += getArrayInner(innerData)
+      depth--;
+      parsedText += getDepthTaps(depth) + "]";
+
+      return parsedText;
+    },
   }
 
   var getObjectInner = function (innerData) {
