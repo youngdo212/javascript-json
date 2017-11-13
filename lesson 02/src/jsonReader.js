@@ -11,6 +11,7 @@ var jsonReader = (function () {
 
   var getArrayInner = function (innerData) {
     var parsedText = "";
+    var lastIndex = innerData.length - 1;
 
     for (var i = 0; i < innerData.length; i++) {
       var parsedElement = innerData[i];
@@ -23,7 +24,7 @@ var jsonReader = (function () {
         dataCount[typeof parsedElement]++;
       }
 
-      if (i != innerData.length - 1) {
+      if (i != lastIndex) {
         parsedText += ", "
       }
       parsedText += "\n"
@@ -34,18 +35,21 @@ var jsonReader = (function () {
 
   var readType = {
     string: function (parsedElement) {
-      var parsedText = "";
-      parsedText += parsedElement;
+      var parsedText = '';
+      parsedText += '"' + parsedElement + '"';
+      return parsedText;
     },
 
     number: function (parsedElement) {
       var parsedText = "";
       parsedText += parsedElement;
+      return parsedText;
     },
 
     boolean: function (parsedElement) {
       var parsedText = "";
       parsedText += parsedElement;
+      return parsedText;
     },
 
     object: function (innerData) {
@@ -59,6 +63,7 @@ var jsonReader = (function () {
 
       return parsedText;
     },
+
     array: function (innerData) {
       var parsedText = "";
 
@@ -80,15 +85,17 @@ var jsonReader = (function () {
       parsedText += key + ": ";
 
       if (Array.isArray(parsedElement)) {
-        parsedText += readArray(parsedElement);
+        parsedText += readType.array(parsedElement);
         dataCount.array++;
-      } else if (parsedElement instanceof Object) {
-        parsedText += readObject(parsedElement);
-        dataCount.object++;
       } else {
-        parsedText += parsedElement;
+        parsedText += readType[typeof parsedElement](parsedElement);
         dataCount[typeof parsedElement]++;
       }
+
+      if (i != innerData.length - 1) {
+        parsedText += ", "
+      }
+      parsedText += "\n"
     }
 
     return parsedText;
