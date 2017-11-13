@@ -49,7 +49,7 @@ var jsonParser = (function () {
     }
 
     keyEnd = getStringEnd(jsonData, jsonData.parsingPointer);
-    key = parseType["String"](jsonData, jsonData.parsingPointer, keyEnd);
+    key = parseString(jsonData, jsonData.parsingPointer, keyEnd);
     jsonData.parsingPointer = keyEnd + 1;
     jsonData.parsingPointer = getColon(jsonData) + 1;
     ignoreSpaces(jsonData);
@@ -95,10 +95,17 @@ var jsonParser = (function () {
 
   function parseElement(jsonData, valueType) {
     var elementEnd = getElementEnd(jsonData);
-    var pureElementEnd = exceptLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
+    var pureElementEnd = ignoreLastSpaces(jsonData, jsonData.parsingPointer, elementEnd);
     var parsedElement;
 
-    parsedElement = parseType[valueType](jsonData, jsonData.parsingPointer, pureElementEnd);
+    if (valueType === "String") {
+      parsedElement = parseString(jsonData, jsonData.parsingPointer, pureElementEnd);
+    } else if (valueType === "Number") {
+      parsedElement = parseNumber(jsonData, jsonData.parsingPointer, pureElementEnd);
+    } else {
+      parsedElement = parseBool(jsonData, jsonData.parsingPointer, pureElementEnd);
+    }
+
     jsonData.parsingPointer = elementEnd + 1;
 
     return parsedElement;
@@ -196,42 +203,40 @@ var jsonParser = (function () {
     throw new Error(errors.blockError);
   }
 
-  var parseType = {
-    Number: function (jsonData, startPoint, endPoint) {
-      var number = Number(insertedData.slice(startPoint, endPoint + 1));
+  function parseNumber(jsonData, startPoint, endPoint) {
+    var number = Number(insertedData.slice(startPoint, endPoint + 1));
 
-      if (!isNaN(number)) {
-        return number;
-      }
-
-      throw new Error(errors.typeError);
-    },
-
-    Bool: function (jsonData, startPoint, endPoint) {
-      var parsingBool = insertedData.slice(startPoint, endPoint + 1).toLowerCase();
-
-      if (parsingBool === "true") return true;
-      if (parsingBool === "false") return false;
-
-      throw new Error(errors.typeError);
-    },
-
-    String: function (jsonData, startPoint, endPoint) {
-      var parsingString = "";
-
-      for (var i = 1; startPoint + i < endPoint; i++) {
-        if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
-          throw new Error(errors.typeError);
-        }
-
-        parsingString += insertedData[startPoint + i];
-      }
-
-      return parsingString;
+    if (!isNaN(number)) {
+      return number;
     }
+
+    throw new Error(errors.typeError);
   }
 
-  function exceptLastSpaces(jsonData, startPoint, endPoint) {
+  function parseBool(jsonData, startPoint, endPoint) {
+    var parsingBool = insertedData.slice(startPoint, endPoint + 1).toLowerCase();
+
+    if (parsingBool === "true") return true;
+    if (parsingBool === "false") return false;
+
+    throw new Error(errors.typeError);
+  }
+
+  function parseString(jsonData, startPoint, endPoint) {
+    var parsingString = "";
+
+    for (var i = 1; startPoint + i < endPoint; i++) {
+      if (insertedData[startPoint + i] === '"' || insertedData[startPoint + i] === '\\') {
+        throw new Error(errors.typeError);
+      }
+
+      parsingString += insertedData[startPoint + i];
+    }
+
+    return parsingString;
+  }
+
+  function ignoreLastSpaces(jsonData, startPoint, endPoint) {
     endPoint -= 1;
 
     while (insertedData[endPoint] === ' ') {
