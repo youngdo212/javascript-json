@@ -17,11 +17,13 @@ var jsonReader = (function () {
       var parsedElement = innerData[i];
 
       if (Array.isArray(parsedElement)) {
-        parsedText += readType.array(parsedElement);
+        parsedText += readArray(parsedElement);
+        dataCount.array++;
+      } else if (parsedElement instanceof Object) {
+        parsedText += readObject(parsedElement);
         dataCount.array++;
       } else {
-        parsedText += readType[parsedElement]();
-        dataCount[parsedElement]++;
+        parsedText += parsedElement;
       }
 
       if (i != innerData.length - 1) {
@@ -34,31 +36,20 @@ var jsonReader = (function () {
   }
 
 
-  var readType = {
-    string: function () {
+  var readObject = function () {
 
-    },
-    number: function () {
+  }
 
-    },
-    boolean: function () {
+  var readArray = function (innerData) {
+    var parsedText = "";
 
-    },
-    object: function () {
+    parsedText += getDepthTaps(depth) + "[\n";
+    depth++;
+    parsedText += getArrayInner(innerData)
+    depth--;
+    parsedText += getDepthTaps(depth) + "]";
 
-    },
-    array: function (innerData) {
-      var parsedText = "";
-
-      parsedText += getDepthTaps(depth) + "[\n";
-
-      depth++;
-      parsedText += getArrayInner(innerData)
-      depth--;
-      parsedText += getDepthTaps(depth) + "]";
-
-      return parsedText;
-    },
+    return parsedText;
   }
 
   var countArray = function (parsedArray) {
