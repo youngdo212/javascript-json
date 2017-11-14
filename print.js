@@ -1,8 +1,25 @@
+//var jsonState = require('./merge.js');
 var print = {
     Error: function (token, position) {
         console.log("Unexpected token ", token, "at position ", position);
     },
-
+    out: function (input, get) {
+        var depth;
+        var output = "";
+        get === undefined ? depth = 0 : depth = get;
+        for (var i = 0; i < depth; i++) {
+            output += "  ";
+        }
+        for (prop in input) {
+            if (typeof input[prop] !== 'object') {
+                console.log(output + '\x1b[33m' + input[prop] + '\x1b[0m');
+            }
+            else {
+                ++depth;
+                this.out(input[prop], depth);
+            }
+        }
+    },
     Count: function (input) {
         var output, output2;
         var count = { string: 0, number: 0, boolean: 0, object: 0, array: 0, null: 0 };
@@ -30,3 +47,5 @@ var print = {
     }
 }
 module.exports = print;
+
+//print.out([10, "jk", [1, [2, 3], 4, 5], 4, "314", 99, "crong", false]);

@@ -4,7 +4,6 @@ var tokenizer = {
     endvalue: [" ", ",", "]", "}"],
     readStr: function (input, i) {//문자열과 다음 i 반환, 에러는 -1 반환
         var pos = i;
-        console.log("input : ", input);
         for (; i < input.length; i++) {
             if (input.value[i] === '"') {
                 return [i, input.value.slice(pos, i)];
