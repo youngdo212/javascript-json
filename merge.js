@@ -12,152 +12,172 @@ var jsonState = {
     depth: 0,
     count: { num: 0, str: 0, bol: 0, arr: 0, obj: 0 },
 }
-function jsonParser(start, nested, on) {
-    var temp, i = 0, state = "READY", key = null;
+function jsonParser(on) {
+    var temp, state = "READY", key = null;
     on === 'array' ? temp = [] : temp = {};
-    if (start !== undefined) i = start;
-    for (; i < jsonState.length; i++) {
-        //        var pos = jsonState.value[i];
+    //if (start !== undefined) i = start;
+    for (; jsonState.i < jsonState.length; jsonState.i++) {
+        console.log("i : ", jsonState.i, " ", jsonState.value[jsonState.i]);
+        var pos = jsonState.value[jsonState.i];
         if (state === "READY") {
-            if (jsonState.value[i] === "[" && on === "array") {
+            if (pos === "[" && on === "array") {
                 jsonState.depth++;
                 state = "READ_VALUE";
             }
-            else if (jsonState.value[i] === "{" && on === 'object') {
+            else if (pos === "{" && on === 'object') {
                 jsonState.depth++;
                 state = "READ_KEY";
             }
-            else if (jsonState.value[i] === "{" && on === 'array') {
+            else if (pos === "{" && on === 'array') {
                 jsonState.depth++;
-                var getin = jsonParser(i, 1, 'object');
-                temp.push(getin[0]);
-                i = getin[1];
+                //var getin = jsonParser('object');
+                temp.push(jsonParser('object'));
+                //temp.push(getin[0]);
+                //i = getin[1];
                 state = "READ_NEXT";
             }
-            else if (jsonState.value[i] === " ") continue;
-            else return print.Error(jsonState.value[i], i);
+            else if (pos === " ") continue;
+            else return print.Error(pos, jsonState.i);
         }
 
         else if (state == "READ_KEY") {
-            if (jsonState.value[i] === '"') {
-                var getstr = tokenizer.readStr(jsonState, i + 1);
+            if (pos === '"') {
+                //var getstr = tokenizer.readStr(jsonState, i + 1);
+                jsonState.i++; //맞나
+                var getstr = tokenizer.readStr(jsonState);
                 if (getstr === -1) {
-                    return print.Error(jsonState.value[i], i);
+                    //return print.Error(pos, i);
+                    return print.Error(pos, jsonState.i);
                 }
                 else {
-                    i = getstr[0];
-                    key = getstr[1];
+                    //i = getstr[0];
+                    //key = getstr[1];
+                    key = getstr;
                     state = "READ_COLON";
                 }
             }
-            else if (jsonState.value[i] === " ") continue;
+            else if (pos === " ") continue;
             else {
-                return print.Error(jsonState.value[i], i);
+                return print.Error(pos, jsonState.i);
             }
         }
 
         else if (state == "READ_COLON") {
-            if (jsonState.value[i] === " ") { continue; }
-            else if (jsonState.value[i] === ":") {
+            if (pos === " ") { continue; }
+            else if (pos === ":") {
                 state = "READ_VALUE";
             }
-            else return print.Error(jsonState.value[i], i);
+            else return print.Error(pos, jsonState.i);
         }
 
         else if (state === "READ_VALUE") {
-            if (jsonState.value[i] === "'") {
-                print.Error(jsonState.value[i], i);
+            if (pos === "'") {
+                print.Error(pos, jsonState.i);
             }
-            else if (tokenizer.num.indexOf(jsonState.value[i]) !== -1) { //숫자가 들어옴
-                var getnum = tokenizer.readNum(jsonState, i); //잘못된 숫자면 false를 반환
+            else if (tokenizer.num.indexOf(pos) !== -1) { //숫자가 들어옴
+                //var getnum = tokenizer.readNum(jsonState, i); //잘못된 숫자면 false를 반환
+                var getnum = tokenizer.readNum(jsonState);
                 if (getnum === -1) {
                     return console.log("숫자 읽기 에러 종료!");
                 }
                 else {
-                    i = getnum[0] - 1;
-                    on === "array" ? temp.push(getnum[1]) : temp[key] = getnum[1];
+                    // i = getnum[0] - 1;
+                    // on === "array" ? temp.push(getnum[1]) : temp[key] = getnum[1];
+                    jsonState.i--;
+                    on === "array" ? temp.push(getnum) : temp[key] = getnum;
                     state = "READ_NEXT"; jsonState.count.num++;
                 }
             }
-            else if (jsonState.value[i] === '"') { //문자열 읽기 시작
-                var getstr = tokenizer.readStr(jsonState, i + 1);
+            else if (pos === '"') { //문자열 읽기 시작
+                jsonState.i++;
+                var getstr = tokenizer.readStr(jsonState);
                 if (getstr === -1) {
                     return console.log("문자 읽기 에러 종료!");
                 }
                 else {
-                    i = getstr[0];
-                    on === "array" ? temp.push(getstr[1]) : temp[key] = getstr[1];
+                    //i = getstr[0];
+                    //on === "array" ? temp.push(getstr[1]) : temp[key] = getstr[1];
+                    on === "array" ? temp.push(getstr) : temp[key] = getstr;
                     state = "READ_NEXT", jsonState.count.str++;
                 }
             }
-            else if (jsonState.value[i] === "t" || jsonState.value[i] === "f") {
-                var getbool = tokenizer.readBool(jsonState, i);
+            else if (pos === "t" || pos === "f") {
+                var getbool = tokenizer.readBool(jsonState);
                 if (getbool === -1) {
                     return console.log("t/f 읽기 에러 종료!");
                 }
                 else {
-                    i = getbool[0] - 1;
-                    on === "array" ? temp.push(getbool[1]) : temp[key] = getbool[1];
+                    // i = getbool[0] - 1;
+                    // on === "array" ? temp.push(getbool[1]) : temp[key] = getbool[1];
+                    jsonState.i--;
+                    on === "array" ? temp.push(getbool) : temp[key] = getbool;
                     state = "READ_NEXT", jsonState.count.bol++;
                 }
             }
-            else if (jsonState.value[i] === "[") {
+            else if (pos === "[") {
                 if (on === "array") {
                     jsonState.depth++;
-                    var getin = jsonParser(i, 1, "array");
-                    temp.push(getin[0]);
-                    i = getin[1];
+                    // var getin = jsonParser(i, 1, "array");
+                    // temp.push(getin[0]);
+                    // i = getin[1];
+                    temp.push(jsonParser("array"));
                     state = "READ_NEXT";
                 }
                 else if (on === "object") {
                     jsonState.depth++;
-                    var getin = jsonParser(i, 1, "array");
-                    temp[key] = getin[0];
-                    i = getin[1];
+                    // var getin = jsonParser(i, 1, "array");
+                    // temp[key] = getin[0];
+                    // i = getin[1];
+                    temp[key] = jsonParser("array");
                     state = "READ_NEXT";
                 }
             }
-            else if (jsonState.value[i] === "]" && on === "array") {
+            else if (pos === "]" && on === "array") {
                 jsonState.depth--;
                 jsonState.count.arr++;
-                if (nested == 1) return [temp, i];
-                else return temp;
+                // if (nested == 1) return [temp, i];
+                // else return temp;
+                return temp;
             }
-            else if (jsonState.value[i] === "{") {
+            else if (pos === "{") {
                 jsonState.depth++;
-                var getin = jsonParser(i, 1, "object");
-                on === "array" ? temp.push(getin[0]) : temp[key] = getin[0];
-                i = getin[1];
+                // var getin = jsonParser(i, 1, "object");
+                // on === "array" ? temp.push(getin[0]) : temp[key] = getin[0];
+                // i = getin[1];
+                on === "array" ? temp.push(jsonParser("object")) : temp[key] = jsonParser("object");
                 state = "READ_NEXT";
             }
-            else if (jsonState.value[i] === "}" && on === "object") {
+            else if (pos === "}" && on === "object") {
                 jsonState.depth--;
                 jsonState.count.obj++;
-                if (nested == 1) return [temp, i];
-                else return temp;
+                // if (nested == 1) return [temp, i];
+                // else return temp;
+                return temp;
             }
         }
 
         else if (state === "READ_NEXT") {
-            if (jsonState.value[i] === " ") continue;
-            else if (jsonState.value[i] === ",") {
+            if (pos === " ") continue;
+            else if (pos === ",") {
                 on === 'array' ? state = "READ_VALUE" : state = "READ_KEY";
                 continue;
             }
-            else if (jsonState.value[i] === "]" && on === 'array') {
+            else if (pos === "]" && on === 'array') {
                 jsonState.depth--; jsonState.count.arr++;
-                if (nested == 1) return [temp, i];
-                else return temp;
+                // if (nested == 1) return [temp, i];
+                // else return temp;
+                return temp;
             }
-            else if (jsonState.value[i] === "}" && on === 'object') {
+            else if (pos === "}" && on === 'object') {
                 jsonState.depth--; jsonState.count.obj++;
-                if (nested == 1) return [temp, i];
-                else return temp;
+                // if (nested == 1) return [temp, i];
+                // else return temp;
+                return temp;
             }
-            else return print.Error(jsonState.value[i], i);
+            else return print.Error(pos, jsonState.i);
         }
     }
-    if (jsonState.depth > 0) { console.log("Unexpected end of JSON input ", i); process.exit() }
+    if (jsonState.depth > 0) { console.log("1 Unexpected end of JSON input ", jsonState.i); process.exit() }
     on === 'array' ? jsonState.count.arr++ : jsonState.count.obj++;
     return temp;
 }
@@ -167,11 +187,11 @@ rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) 
     var result;
     if (answer[0] === "[") {
         result = [];
-        result = jsonParser(0, 0, "array");
+        result = jsonParser("array");
     }
     else if (answer[0] === "{") {
         result = {};
-        result = jsonParser(0, 0, "object");
+        result = jsonParser("object");
     }
     if (result !== undefined) {
         console.log("\n", result);

@@ -2,45 +2,48 @@ var print = require('./print.js');
 var tokenizer = {
     num: "0123456789",
     endvalue: [" ", ",", "]", "}"],
-    readStr: function (input, i) {//문자열과 다음 i 반환, 에러는 -1 반환
-        var pos = i;
-        for (; i < input.length; i++) {
-            if (input.value[i] === '"') {
-                return [i, input.value.slice(pos, i)];
+    //i를 전역객체에 넣음 -> 입,반환 i를 없애서 nested 문제해결
+    readStr: function (input) {//문자열과 다음 i 반환, 에러는 -1 반환
+        var pos = input.i;
+        for (; input.i < input.length; input.i++) {
+            if (input.value[input.i] === '"') {
+                return input.value.slice(pos, input.i);
             }
         }
-        console.log("Unexpected end of JSON input");
+        console.log("문자열 Unexpected end of JSON input");
         process.exit();
     },
-    readNum: function (input, i) { //숫자와 다음 i 반환 , 에러는 -1 반환
-        var pos = i;
-        for (; i < input.length; i++) {
-            if (this.endvalue.indexOf(input.value[i]) !== -1) {
-                return [i, Number(input.value.slice(pos, i))];
+    readNum: function (input) { //숫자와 다음 i 반환 , 에러는 -1 반환
+        var pos = input.i;
+        for (; input.i < input.length; input.i++) {
+            if (this.endvalue.indexOf(input.value[input.i]) !== -1) {
+                return Number(input.value.slice(pos, input.i));
             }
-            else if (this.num.indexOf(input.value[i]) !== -1) { }
+            else if (this.num.indexOf(input.value[input.i]) !== -1) { }
             else {
-                print.Error(input.value[i], i);
+                print.Error(input.value[input.i], input.i);
                 return -1;
             }
         }
-        console.log("Unexpected end of JSON input");
+        console.log("숫자 Unexpected end of JSON input");
         process.exit();
     },
-    readBool: function (input, i) {//bool값과 다음 i 반환, 에러는 -1 반환
-        var pos = i;
-        for (; i < input.length; i++) {
-            if (this.endvalue.indexOf(input.value[i]) !== -1) {
-                tmp = input.value.slice(pos, i);
-                if (tmp === 'true') return [i, true];
-                else if (tmp === 'false') return [i, false];
+    readBool: function (input) {//bool값과 다음 i 반환, 에러는 -1 반환
+        var pos = input.i;
+        for (; input.i < input.length; input.i++) {
+            if (this.endvalue.indexOf(input.value[input.i]) !== -1) {
+                tmp = input.value.slice(pos, input.i);
+                //if (tmp === 'true') return [i, true];
+                //else if (tmp === 'false') return [i, false];
+                if (tmp === 'true') return true;
+                else if (tmp === 'false') return false;
                 else {
-                    print.Error(tmp, i);
+                    print.Error(tmp, input.i);
                     return -1;
                 }
             }
         }
-        console.log("Unexpected end of JSON input");
+        console.log("불 Unexpected end of JSON input");
         process.exit();
     }
 };
