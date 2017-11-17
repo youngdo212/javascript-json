@@ -2,7 +2,6 @@ var print = require('./print.js');
 var tokenizer = {
     num: "0123456789",
     endvalue: [" ", ",", "]", "}"],
-    //i를 전역객체에 넣음 -> 입,반환 i를 없애서 nested 문제해결
     readStr: function (input) {//문자열과 다음 i 반환, 에러는 -1 반환
         var pos = input.i;
         for (; input.i < input.length; input.i++) {
@@ -33,8 +32,6 @@ var tokenizer = {
         for (; input.i < input.length; input.i++) {
             if (this.endvalue.indexOf(input.value[input.i]) !== -1) {
                 tmp = input.value.slice(pos, input.i);
-                //if (tmp === 'true') return [i, true];
-                //else if (tmp === 'false') return [i, false];
                 if (tmp === 'true') return true;
                 else if (tmp === 'false') return false;
                 else {
