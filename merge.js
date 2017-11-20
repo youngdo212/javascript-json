@@ -1,5 +1,5 @@
-const readline = require('readline');
-const rl = readline.createInterface({
+var readline = require('readline');
+var rl = readline.createInterface({
     input: process.stdin, output: process.stdout
 });
 var tokenizer = require('./tokenizer.js');
@@ -13,13 +13,13 @@ var jsonState = {
     count: { num: 0, str: 0, bol: 0, arr: 0, obj: 0 },
 }
 
-const State = { READY: 0, READ: 1, READ_KEY: 2, READ_COLON: 3, READ_VALUE: 4, READ_NEXT_ARRAY: 5, READ_NEXT_OBJECT: 6 }
-
+var State = { READY: 0, READ: 1, READ_KEY: 2, READ_COLON: 3, READ_VALUE: 4, READ_NEXT_ARRAY: 5, READ_NEXT_OBJECT: 6 }
+//var State = ["READY","READ","READ_KEY","READ_COLON","READ_VALUE","READ_NEXT_ARRAY","READ_NEXT_OBJECT"];
 var readState = {
     READ: function () {
         var pos = jsonState.value[jsonState.i];
         if (pos === "[") {
-            jsonState.depth++; //줄이자
+            jsonState.depth++; //줄일 수 있나?
             return State.READ_VALUE;
         }
         else if (pos === "{") {
@@ -106,19 +106,19 @@ var readState = {
             }
         }
         else if (pos === "[") {
-            if (type === "array") {
-                jsonState.depth++;
-                return [jsonParser("array"), state];
-            }
-            else if (type === "object") {
-                jsonState.depth++;
-                return [jsonParser("array"), state];
-            }
+            jsonState.depth++;
+            return [jsonParser("array"), state];
         }
-        else if (pos === "]" && type === "array") {
-            jsonState.depth--;
-            jsonState.count.arr++;
-            return temp;
+        else if (pos === "]") {
+            if (type === "array") {
+                jsonState.depth--;
+                jsonState.count.arr++;
+                return temp;
+            }
+            else {
+                console.log("error!");
+                process.exit();
+            }
         }
         else if (pos === "{") {
             jsonState.depth++;
