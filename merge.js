@@ -1,279 +1,227 @@
-const readline = require('readline');
-const rl = readline.createInterface({
+var readline = require('readline');
+var rl = readline.createInterface({
     input: process.stdin, output: process.stdout
 });
+var tokenizer = require('./tokenizer.js');
+var print = require('./print.js');
 
-const num = "0123456789";
-const endvalue = [" ", ",", "]", "}"];
-var count = { num: 0, str: 0, bol: 0, arr: 0, obj: 0 };
-function printError(token, position) {
-    console.log("Unexpected token ", token, "at position ", position);
+var jsonState = {
+    i: 0,
+    value: null,
+    length: null,
+    depth: 0,
+    count: { num: 0, str: 0, bol: 0, arr: 0, obj: 0 },
 }
-function tokenizer(input, i, to, str) {
 
-}
-function readStr(input, i) { //문자열과 다음 i 반환, 에러는 -1 반환
-    var pos = i;
-    for (; i < input.length; i++) {
-        if (input[i] === '"') {
-            return [i, input.slice(pos, i)];
+//var State = { READY: 0, READ: 1, READ_KEY: 2, READ_COLON: 3, READ_VALUE: 4, READ_NEXT_ARRAY: 5, READ_NEXT_OBJECT: 6 }
+var State = ["READY", "READ", "READ_KEY", "READ_COLON", "READ_VALUE", "READ_NEXT_ARRAY", "READ_NEXT_OBJECT"];
+var readState = {
+    READ: function () {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === "[") {
+            jsonState.depth++; //줄일 수 있나?
+            return "READ_VALUE";
         }
-        // else if (input[i] === "'") {
-        //     printError(input[i], i);
-        //     return -1; //process.exit();
-        // }
-    }
-    console.log("Unexpected end of JSON input");
-    process.exit();
-}
-function readNum(input, i) { //숫자와 다음 i 반환 , 에러는 -1 반환
-    var pos = i;
-    for (; i < input.length; i++) {
-        if (endvalue.indexOf(input[i]) !== -1) {
-            return [i, Number(input.slice(pos, i))];
+        else if (pos === "{") {
+            jsonState.depth++;
+            return "READ_KEY";
         }
-        else if (num.indexOf(input[i]) !== -1) { }
+        else return print.Error(pos, jsonState.i);
+    },
+
+    READ_KEY: function () {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === '"') {
+            jsonState.i++;
+            var getstr = tokenizer.readStr(jsonState);
+            if (getstr === -1) {
+                print.Error(pos, jsonState.i);
+                process.exit();
+            }
+            else {
+                return [getstr, "READ_COLON"];
+            }
+        }
         else {
-            printError(input[i], i);
-            return -1;
+            print.Error(pos, jsonState.i);
+            process.exit();
         }
+    },
+    READ_COLON: function () {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === ":") {
+            return "READ_VALUE";
+        }
+        else {
+            print.Error(pos, jsonState.i);
+            process.exit();
+        }
+
+    },
+
+    READ_VALUE: function (type) { //너무 길다..
+        var pos = jsonState.value[jsonState.i];
+        var state;
+        type === "array" ? state = "READ_NEXT_ARRAY" : state = "READ_NEXT_OBJECT";
+
+        if (pos === "'") {
+            print.Error(pos, jsonState.i);
+            process.exit();
+        }
+        else if (tokenizer.num.indexOf(pos) !== -1) { //숫자가 들어옴
+            var getnum = tokenizer.readNum(jsonState);//잘못된 숫자면 false를 반환
+            if (getnum === -1) {
+                console.log("숫자 읽기 에러 종료!");
+                process.exit();
+            }
+            else {
+                jsonState.i--;
+                jsonState.count.num++;
+                return [getnum, state];
+
+            }
+        }
+        else if (pos === '"') { //문자열 읽기 시작
+            jsonState.i++;
+            var getstr = tokenizer.readStr(jsonState);
+            if (getstr === -1) {
+                console.log("문자 읽기 에러 종료!");
+                process.exit();
+            }
+            else {
+                jsonState.count.str++;
+                return [getstr, state];
+            }
+        }
+        else if (pos === "t" || pos === "f") {
+            var getbool = tokenizer.readBool(jsonState);
+            if (getbool === -1) {
+                console.log("t/f 읽기 에러 종료!");
+                process.exit();
+            }
+            else {
+                jsonState.i--;
+                jsonState.count.bol++;
+                return [getbool, state];
+            }
+        }
+        else if (pos === "[") {
+            jsonState.depth++;
+            return [jsonParser("array"), state];
+        }
+        else if (pos === "]") {
+            if (type === "array") {
+                jsonState.depth--;
+                jsonState.count.arr++;
+                return temp;
+            }
+            else {
+                console.log("error!");
+                process.exit();
+            }
+        }
+        else if (pos === "{") {
+            jsonState.depth++;
+            return [jsonParser("object"), state];
+        }
+        else if (pos === "}" && type === "object") {
+            jsonState.depth--;
+            jsonState.count.obj++;
+            return temp;
+        }
+    },
+
+    READ_NEXT_ARRAY: function () {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === ",") {
+            return "READ_VALUE";
+        }
+        else if (pos === "]") {
+            jsonState.depth--; jsonState.count.arr++;
+            return "end";
+        }
+        else return print.Error(pos, jsonState.i);
+    },
+    READ_NEXT_OBJECT: function () {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === ",") {
+            return "READ_KEY";
+        }
+        else if (pos === "}") {
+            jsonState.depth--; jsonState.count.obj++;
+            return "end";
+        }
+        else return print.Error(pos, jsonState.i);
     }
 }
-function readBool(input, i) {//bool값과 다음 i 반환, 에러는 -1 반환
-    var pos = i;
-    for (; i < input.length; i++) {
-        if (endvalue.indexOf(input[i]) !== -1) {
-            tmp = input.slice(pos, i);
-            if (tmp === 'true') return [i, true];
-            else if (tmp === 'false') return [i, false];
-            else {
-                printError(tmp, i);
-                return -1;
-            }
+
+
+function jsonParser(type) {
+    var temp;
+    var state = "READY";
+    var key = null;
+
+    type === 'array' ? temp = [] : temp = {};
+
+    for (; jsonState.i < jsonState.length; jsonState.i++) {
+        var pos = jsonState.value[jsonState.i];
+        if (pos === " ") continue;
+        switch (state) {
+            case "READY":
+                state = readState.READ();
+                break;
+
+            case "READ_KEY":
+                var get = readState.READ_KEY(); //foreach 등으로 뺄수잇나?
+                key = get[0];
+                state = get[1];
+                break;
+
+            case "READ_COLON":
+                state = readState.READ_COLON();
+                break;
+
+            case "READ_VALUE":
+                var get = readState.READ_VALUE(type);
+                type === "array" ? temp.push(get[0]) : temp[key] = get[0];
+                state = get[1];
+                break;
+
+            case "READ_NEXT_ARRAY":
+                var get = readState.READ_NEXT_ARRAY();
+                if (get === "end") return temp;
+                else state = get;
+                break;
+
+            case "READ_NEXT_OBJECT":
+                var get = readState.READ_NEXT_OBJECT();
+                if (get === "end") return temp;
+                else state = get;
+                break;
         }
     }
-}
-function getObject(answer, start, nested) {
-    var temp = {}, i = 0, length = answer.length;
-    var depth = 0, state = "READY", key;
-    if (start != undefined) i = start;
-    for (; i < length; i++) {
-        if (state === "READY") {
-            if (answer[i] === "{") {
-                depth++;
-                state = "READ_KEY";
-            }
-        }
-        else if (state == "READ_KEY") {
-            if (answer[i] === '"') {
-                var getstr = readStr(answer, i + 1);
-                if (getstr === -1) {
-                    return console.log("문자 읽기중 에러 종료!");
-                }
-                else {
-                    i = getstr[0];
-                    key = getstr[1];
-                    state = "READ_COLON";
-                }
-            }
-            else if (answer[i] === " ") continue;
-            else {
-                return printError(answer[i], i);
-            }
-        }
-        else if (state == "READ_COLON") {
-            if (answer[i] === " ") { continue; }
-            else if (answer[i] === ":") {
-                state = "READ_VALUE";
-            }
-            else return printError(answer[i], i);
-        }
-        else if (state === "READ_VALUE") {
-            if (answer[i] === "'") {
-                printError(answer[i], i);
 
-            }
-            else if (answer[i] === "[") {
-                depth++;
-                var getin = getArray(answer, i, 1);
-                temp[key] = getin[0];
-                i = getin[1];
-                state = "READ_NEXT";
-
-            }
-            else if (num.indexOf(answer[i]) !== -1) { //숫자가 들어옴
-                var getnum = readNum(answer, i); //잘못된 숫자면 false를 반환
-                if (getnum === -1) {
-                    return console.log("숫자 읽기 에러 종료!");
-                }
-                else {
-                    i = getnum[0] - 1;
-                    temp[key] = getnum[1];
-                    state = "READ_NEXT"; count.num++;
-                }
-            }
-            else if (answer[i] === '"') { //문자열 읽기 시작
-                var getstr = readStr(answer, i + 1);
-                if (getstr === -1) {
-                    return console.log("문자 읽기 에러 종료!");
-                }
-                else {
-                    i = getstr[0];
-                    state = "READ_NEXT", count.str++;
-                    temp[key] = getstr[1];
-                }
-            }
-            else if (answer[i] === "t" || answer[i] === "f") {
-                var getbool = readBool(answer, i);
-                if (getbool === -1) {
-                    return console.log("true,false 읽기 에러 종료!");
-                }
-                else {
-
-                    i = getbool[0] - 1;
-                    state = "READ_NEXT", count.bol++;
-                    temp[key] = getbool[1];
-                }
-            }
-            else if (answer[i] === "{") {
-                depth++;
-                var getin = getObject(answer, i, 1);
-                state = "READ_NEXT";
-                temp[key] = getin[0];
-                i = getin[1];
-            }
-            else if (answer[i] === "}") {
-                depth--;
-                count.obj++;
-                if (nested == 1) return [temp, i];
-                else return temp;
-            }
-        }
-        else if (state === "READ_NEXT") {
-            if (answer[i] === " ") continue;
-            else if (answer[i] === ",") state = "READ_KEY";
-            else if (answer[i] === "}") {
-                depth--;
-                count.obj++;
-                if (nested == 1) return [temp, i];
-                else return temp;
-            }
-            else return printError(answer[i], i);
-        }
-    }
-    count.obj++;
+    if (jsonState.depth > 0) { console.log("Unexpected end of JSON input ", jsonState.i); process.exit() }
+    type === 'array' ? jsonState.count.arr++ : jsonState.count.obj++;
     return temp;
 }
 
-function getArray(answer, start, nested) {
-    var temp = [], i = 0, depth = 0, length = answer.length;
-    var state = "READY";
-    if (start !== undefined) {
-        i = start;
-    }
-    for (; i < length; i++) {
-        if (state === "READY") {
-            if (answer[i] === "[") {
-                depth++;
-                state = "READ";
-            }
-            else if (answer[i] === "{") {
-                depth++;
-                var getin = getObject(answer, i, 1);
-                temp.push(getin[0]);
-                i = getin[1];
-                state = "READ_NEXT";
-            }
-            else if (answer[i] === " ") continue;
-            else return console.log('시작오류 "{", "["로 시작해야함 : ', answer[i]);
-        }
-        else if (state === "READ") {
-            if (answer[i] === "'") {
-                console.log("Unexpected token ", answer[i], "at position ", i);
-            }
-            else if (num.indexOf(answer[i]) !== -1) { //숫자가 들어옴
-                var getnum = readNum(answer, i); //잘못된 숫자면 false를 반환
-                if (getnum === -1) {
-                    return console.log("숫자 읽기 에러 종료!");
-                }
-                else {
-                    i = getnum[0] - 1; temp.push(getnum[1]);
-                    state = "READ_NEXT"; count.num++;
-                }
-            }
-            else if (answer[i] === '"') { //문자열읽기 시작
-                var getstr = readStr(answer, i + 1);
-                if (getstr === -1) {
-                    return console.log("문자 읽기 에러 종료!");
-                }
-                else {
-                    i = getstr[0];
-                    state = "READ_NEXT", count.str++;
-                    temp.push(getstr[1]);
-                }
-            }
-            else if (answer[i] === "t" || answer[i] === "f") {
-                var getbool = readBool(answer, i);
-                if (getbool === -1) {
-                    return console.log("true,false 읽기 에러 종료!");
-                }
-                else {
-                    i = getbool[0] - 1;
-                    state = "READ_NEXT", count.bol++;
-                    temp.push(getbool[1]);
-                }
-            }
-            else if (answer[i] === "[") {
-                depth++;
-                var getin = getArray(answer, i, 1); //중첩값인가 인자를 보냄
-                temp.push(getin[0]);
-                i = getin[1];
-            }
-            else if (answer[i] === "]") {
-                depth--;
-                count.arr++;
-                if (nested == 1) return [temp, i];
-                else return temp;
-            }
-            else if (answer[i] === "{") {
-                depth++;
-                var getin = getObject(answer, i, 1);
-                temp.push(getin[0]);
-                i = getin[1];
-                state = "READ_NEXT";
-            }
-        }
-        else if (state === "READ_NEXT") { //값 입력이 끝난후 종료 혹은 재입력
-            if (answer[i] === " ") continue;
-            else if (answer[i] === ",") {
-                state = "READ";
-            }
-            else if (answer[i] === "]") {
-                depth--;
-                count.arr++;
-                if (nested == 1) return [temp, i];
-                else return temp;
-            }
-            else return printError(answer[i], i);
-        }
-    }
-    count.arr++;
-    if (depth !== 0) { console.log("Unexpected end of JSON input"); process.exit() }
-    return [temp, i];
-}
 rl.question("분석할 JSON 데이터를 입력하세요 : ", function (answer) {
+    jsonState.value = answer;
+    jsonState.length = jsonState.value.length;
     var result;
     if (answer[0] === "[") {
         result = [];
-        result = getArray(answer);
+        result = jsonParser("array");
     }
     else if (answer[0] === "{") {
         result = {};
-        result = getObject(answer);
+        result = jsonParser("object");
     }
     if (result !== undefined) {
         console.log("\n", result);
-        console.log("\n", count);
+        //console.log("\n", jsonState.count);
+        print.Count(result);
     }
     rl.close();
 });
