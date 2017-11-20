@@ -13,18 +13,18 @@ var jsonState = {
     count: { num: 0, str: 0, bol: 0, arr: 0, obj: 0 },
 }
 
-var State = { READY: 0, READ: 1, READ_KEY: 2, READ_COLON: 3, READ_VALUE: 4, READ_NEXT_ARRAY: 5, READ_NEXT_OBJECT: 6 }
-//var State = ["READY","READ","READ_KEY","READ_COLON","READ_VALUE","READ_NEXT_ARRAY","READ_NEXT_OBJECT"];
+//var State = { READY: 0, READ: 1, READ_KEY: 2, READ_COLON: 3, READ_VALUE: 4, READ_NEXT_ARRAY: 5, READ_NEXT_OBJECT: 6 }
+var State = ["READY", "READ", "READ_KEY", "READ_COLON", "READ_VALUE", "READ_NEXT_ARRAY", "READ_NEXT_OBJECT"];
 var readState = {
     READ: function () {
         var pos = jsonState.value[jsonState.i];
         if (pos === "[") {
             jsonState.depth++; //줄일 수 있나?
-            return State.READ_VALUE;
+            return "READ_VALUE";
         }
         else if (pos === "{") {
             jsonState.depth++;
-            return State.READ_KEY;
+            return "READ_KEY";
         }
         else return print.Error(pos, jsonState.i);
     },
@@ -39,7 +39,7 @@ var readState = {
                 process.exit();
             }
             else {
-                return [getstr, State.READ_COLON];
+                return [getstr, "READ_COLON"];
             }
         }
         else {
@@ -50,7 +50,7 @@ var readState = {
     READ_COLON: function () {
         var pos = jsonState.value[jsonState.i];
         if (pos === ":") {
-            return State.READ_VALUE;
+            return "READ_VALUE";
         }
         else {
             print.Error(pos, jsonState.i);
@@ -62,7 +62,7 @@ var readState = {
     READ_VALUE: function (type) { //너무 길다..
         var pos = jsonState.value[jsonState.i];
         var state;
-        type === "array" ? state = State.READ_NEXT_ARRAY : state = State.READ_NEXT_OBJECT;
+        type === "array" ? state = "READ_NEXT_ARRAY" : state = "READ_NEXT_OBJECT";
 
         if (pos === "'") {
             print.Error(pos, jsonState.i);
@@ -134,7 +134,7 @@ var readState = {
     READ_NEXT_ARRAY: function () {
         var pos = jsonState.value[jsonState.i];
         if (pos === ",") {
-            return State.READ_VALUE;
+            return "READ_VALUE";
         }
         else if (pos === "]") {
             jsonState.depth--; jsonState.count.arr++;
@@ -145,7 +145,7 @@ var readState = {
     READ_NEXT_OBJECT: function () {
         var pos = jsonState.value[jsonState.i];
         if (pos === ",") {
-            return State.READ_KEY;
+            return "READ_KEY";
         }
         else if (pos === "}") {
             jsonState.depth--; jsonState.count.obj++;
@@ -158,7 +158,7 @@ var readState = {
 
 function jsonParser(type) {
     var temp;
-    var state = State.READY;
+    var state = "READY";
     var key = null;
 
     type === 'array' ? temp = [] : temp = {};
@@ -167,33 +167,33 @@ function jsonParser(type) {
         var pos = jsonState.value[jsonState.i];
         if (pos === " ") continue;
         switch (state) {
-            case State.READY:
+            case "READY":
                 state = readState.READ();
                 break;
 
-            case State.READ_KEY:
+            case "READ_KEY":
                 var get = readState.READ_KEY(); //foreach 등으로 뺄수잇나?
                 key = get[0];
                 state = get[1];
                 break;
 
-            case State.READ_COLON:
+            case "READ_COLON":
                 state = readState.READ_COLON();
                 break;
 
-            case State.READ_VALUE:
+            case "READ_VALUE":
                 var get = readState.READ_VALUE(type);
                 type === "array" ? temp.push(get[0]) : temp[key] = get[0];
                 state = get[1];
                 break;
 
-            case State.READ_NEXT_ARRAY:
+            case "READ_NEXT_ARRAY":
                 var get = readState.READ_NEXT_ARRAY();
                 if (get === "end") return temp;
                 else state = get;
                 break;
 
-            case State.READ_NEXT_OBJECT:
+            case "READ_NEXT_OBJECT":
                 var get = readState.READ_NEXT_OBJECT();
                 if (get === "end") return temp;
                 else state = get;
