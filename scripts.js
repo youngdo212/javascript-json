@@ -1,27 +1,23 @@
-// let answer = '{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }';
+// let answer = '{ "name" : "KIM JUNG"}';
+// let answer = '{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }';
 // let answer = '[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true }, { "name" : "JUNG HO", "alias" : "honux","level" : 1, "married" : true }]'
-let answer = '[ 10, "jk", 4, "314", 99, "crong", false]';
+// let answer = '[ 10, "jk", 4, "314", 99, "name", "crong", false ]';
 
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 let tempStr = '';
 let tempArr = [];
 let is_ready_to_input_Data;
 
 
-const command = () => {
-  if (answer.indexOf('[') !== -1 && answer.indexOf('{') !== -1) { // '['는 있고, '{'는 없음
-    return parseObjects(answer);
-
-  } else if (answer.indexOf('[') === -1 && answer.indexOf('{') !== -1) { // '['는 없고, '{'는 있음
-    parseObjects(answer)
-    return parseValues(tempArr);
-
-  } else if (answer.indexOf('[') !== -1 && answer.indexOf('{') === -1) { // '['는 있고, '{'는 없음
-    return parseArrays(answer);
-
-  }
+let message = {
+  init: `분석할 JSON 데이터를 입력하세요. \n`,
+  error: `지원하지 않는 형식을 포함하고 있습니다.`
 }
-
 
 const parseObjects = (answer) => {
   let counts = {
@@ -57,6 +53,7 @@ const parseObjects = (answer) => {
 const parseKeys = (tempArr) => {
   let temps = [];
   let keys = [];
+
   for (let elem of tempArr) {
     for (let factor of elem) {
       if (factor === ',' || factor === '{') {
@@ -132,6 +129,7 @@ const parseArrays = (answer) => {
     boolean: 0
   };
 
+
   answer = answer.replace(/\[|\]/gi, '');
   for (let elem of answer) {
     tempStr += elem;
@@ -156,4 +154,19 @@ const parseArrays = (answer) => {
 }
 
 
-console.log(command());
+rl.question(message.init, (answer) => {
+  const checkRules = (answer) => {
+    if (answer.indexOf('[') !== -1 && answer.indexOf('{') !== -1) { // '[' 있음, '{' 있음
+      return answer.indexOf('{') < answer.indexOf('[') ? message.error : parseObjects(answer)
+    } else if (answer.indexOf('[') === -1 && answer.indexOf('{') !== -1) { // '[' 없음, '{' 있음
+      return (answer.match(/\"/g) || []).length % 2 !== 0 || (answer.match(/\:/g) || []).length - (answer.match(/\,/g) || []).length !== 1 ? message.error : parseObjects(answer) && parseValues(tempArr);
+    } else if (answer.indexOf('[') !== -1 && answer.indexOf('{') === -1) { // '[' 있음, '{'는 없음
+      return (answer.match(/\:/g) || []).length !== 0 ? message.error : parseArrays(answer);
+    }
+  }
+  console.log(checkRules(answer));
+  rl.close();
+});
+
+
+
