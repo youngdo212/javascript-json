@@ -167,6 +167,3 @@ rl.question(message.init, (answer) => {
   console.log(checkRules(answer));
   rl.close();
 });
-
-
-
