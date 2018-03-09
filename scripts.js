@@ -1,64 +1,51 @@
-// const readline = require('readline');
-// const rl = readline.createInterface({
-//   answer: process.stdin,
-//   output: process.stdout
-// });
-
-// rl.question('분석할 JSON 데이터를 입력하세요: \n', (answer) => {
-
-//   rl.close();
-// });
-
 // let answer = '{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }';
 // let answer = '[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOUN JISU", "alias" : "crong", "level" : 4, "married" : true }, { "name" : "JUNG HO", "alias" : "honux","level" : 1, "married" : true }]'
 let answer = '[ 10, "jk", 4, "314", 99, "crong", false]';
 
 
+let tempStr = '';
+let tempArr = [];
+let is_ready_to_input_Data;
 
-let string = '';
-let arr = [];
-let keys = [];
-let flag;
 
-let counts = {
-  total: 0,
-  number: 0,
-  string: 0,
-  boolean: 0,
-  arrays: 0,
-  objData: 0,
+const command = () => {
+  if (answer.indexOf('[') !== -1 && answer.indexOf('{') !== -1) { // '['는 있고, '{'는 없음
+    return parseObjects(answer);
+
+  } else if (answer.indexOf('[') === -1 && answer.indexOf('{') !== -1) { // '['는 없고, '{'는 있음
+    parseObjects(answer)
+    return parseValues(tempArr);
+
+  } else if (answer.indexOf('[') !== -1 && answer.indexOf('{') === -1) { // '['는 있고, '{'는 없음
+    return parseArrays(answer);
+
+  }
 }
 
 
-if (answer.indexOf('[') !== -1 && answer.indexOf('{') !== -1) {
-  console.log(parseObjects(answer));
-} else if (answer.indexOf('[') === -1 && answer.indexOf('{') !== -1) {
-  parseObjects(answer)
-  console.log(parseValues(arr));
-} else {
-  console.log(parseArrays(answer));
-}
-
-
-function parseObjects(answer) {
+const parseObjects = (answer) => {
+  let counts = {
+    arrays: 0,
+    objData: 0
+  }
   for (let element of answer) {
     if (element === '{') {
-      flag = true;
+      is_ready_to_input_Data = true;
     };
 
-    if (flag) {
-      string += element;
+    if (is_ready_to_input_Data) {
+      tempStr += element;
     };
 
     if (element === '}') {
-      flag = false;
-      arr.push(string);
-      string = '';
+      is_ready_to_input_Data = false;
+      tempArr.push(tempStr);
+      tempStr = '';
     }
   }
-  counts.arrays = arr.length;
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i][0] === '{') {
+  counts.arrays = tempArr.length;
+  for (var i = 0; i < tempArr.length; i++) {
+    if (tempArr[i][0] === '{') {
       counts.objData++
     }
   }
@@ -66,21 +53,22 @@ function parseObjects(answer) {
 }
 
 
-function parseKeys(arr) {
+
+const parseKeys = (tempArr) => {
   let temps = [];
   let keys = [];
-  for (let elem of arr) {
+  for (let elem of tempArr) {
     for (let factor of elem) {
       if (factor === ',' || factor === '{') {
-        flag = true;
+        is_ready_to_input_Data = true;
       };
-      if (flag) {
-        string += factor;
+      if (is_ready_to_input_Data) {
+        tempStr += factor;
       };
       if (factor === ':') {
-        flag = false;
-        temps.push(string);
-        string = '';
+        is_ready_to_input_Data = false;
+        temps.push(tempStr);
+        tempStr = '';
       }
     }
   }
@@ -91,21 +79,30 @@ function parseKeys(arr) {
 }
 
 
-function parseValues(arr) {
+
+const parseValues = (tempArr) => {
   let temps = [];
   let values = [];
-  for (let elem of arr) {
+  let counts = {
+    total: 0,
+    number: 0,
+    string: 0,
+    boolean: 0
+  }
+  for (let elem of tempArr) {
     for (let factor of elem) {
       if (factor === ':') {
-        flag = true;
+        is_ready_to_input_Data = true;
       };
-      if (flag) {
-        string += factor;
+
+      if (is_ready_to_input_Data) {
+        tempStr += factor;
       };
+
       if (factor === ',' || factor === '}') {
-        flag = false;
-        temps.push(string);
-        string = '';
+        is_ready_to_input_Data = false;
+        temps.push(tempStr);
+        tempStr = '';
       }
     }
   }
@@ -115,12 +112,11 @@ function parseValues(arr) {
   values.forEach(elem => {
     counts.total++;
     if (elem.indexOf('"') !== -1) {
-      counts.string++
-    } else
-    if (!isNaN(elem)) {
-      counts.number++
+      counts.string++;
+    } else if (!isNaN(elem)) {
+      counts.number++;
     } else if (elem === 'true' || elem === 'false') {
-      counts.boolean++
+      counts.boolean++;
     }
   })
   return "총 " + counts.total + "개의 객체 데이터 중에 문자열 " + counts.string + "개, 숫자 " + counts.number + "개, 부울 " + counts.boolean + "개가 포함되어 있습니다."
@@ -128,14 +124,24 @@ function parseValues(arr) {
 
 
 
-function parseArrays(answer) {
-  for (var i = 1; i < answer.length - 1; i++) {
-    string += answer[i]
-  }
-  arr = string.split(',').map(elem => {
+const parseArrays = (answer) => {
+  let counts = {
+    total: 0,
+    number: 0,
+    string: 0,
+    boolean: 0
+  };
+
+  answer = answer.replace(/\[|\]/gi, '');
+  for (let elem of answer) {
+    tempStr += elem;
+  };
+
+  tempArr = tempStr.split(',').map(elem => {
     return elem.trim();
-  })
-  arr.forEach(elem => {
+  });
+
+  tempArr.forEach(elem => {
     counts.total++;
     if (elem.indexOf('"') !== -1) {
       counts.string++
@@ -146,5 +152,8 @@ function parseArrays(answer) {
       counts.boolean++
     }
   })
-  return "총 " + counts.number + "개의 데이터 중에 문자열 " + counts.string + "개, 숫자 " + counts.number + "개, 부울 " + counts.boolean + "개가 포함되어 있습니다."
+  return "총 " + counts.total + "개의 데이터 중에 문자열 " + counts.string + "개, 숫자 " + counts.number + "개, 부울 " + counts.boolean + "개가 포함되어 있습니다."
 }
+
+
+console.log(command());
