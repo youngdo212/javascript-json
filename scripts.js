@@ -49,37 +49,28 @@ const errCheck = {
 }
 
 
-const checkRules = (answer) => {
+const init = (answer) => {
   let pre = {
     leftBrace: answer.indexOf('{') !== -1,
     rightBrace: answer.indexOf('}') !== -1,
-
     leftBracket: answer.indexOf('[') !== -1,
     rightBracket: answer.indexOf(']') !== -1
   };
 
-  let checker = {
-    braces: pre.leftBrace && pre.rightBrace,
-    brackets: pre.leftBracket && pre.rightBracket
-  };
+  let braces = pre.leftBrace && pre.rightBrace;
+  let brackets = pre.leftBracket && pre.rightBracket
 
-
-  if (checker.brackets) {
-    if (checker.braces) {
-      return errCheck.locationOfBracket(answer);
-    } else if (!checker.braces) {
-      return errCheck.noColon(answer);
-    }
-  }
-
-  if (!checker.brackets) {
-    if (checker.braces) {
-      return errCheck.properNotations(answer);
-    } else if (!checker.braces) {
-      return message.error;
-    }
-  }
+  brackets ? console.log(hasBrackets(answer, brackets, braces)) : console.log(noBrackets(answer, brackets, braces));
 }
+
+const hasBrackets = (answer, brackets, braces) => {
+  return braces ? errCheck.locationOfBracket(answer) : errCheck.noColon(answer);
+}
+
+const noBrackets = (answer, brackets, braces) => {
+  return braces ? errCheck.properNotations(answer) : message.error;
+}
+
 
 
 const parseArrays = (answer) => {
@@ -112,11 +103,9 @@ const parseArrays = (answer) => {
     }
   })
 
-  if (counts.total === counts.string + counts.boolean + counts.number) {
-    return `총 ${counts.total}개의 데이터 중에 문자열 ${counts.string}개, 숫자 ${counts.number}개, 부울 ${counts.boolean}개가 포함되어 있습니다.`
-  } else {
-    return message.error
-  }
+  return Object.is(counts.total, counts.string + counts.boolean + counts.number) ?
+    `총 ${counts.total}개의 데이터 중에 문자열 ${counts.string}개, 숫자 ${counts.number}개, 부울 ${counts.boolean}개가 포함되어 있습니다.` :
+    message.error
 }
 
 
@@ -218,15 +207,14 @@ const parseValues = (tempArr) => {
       counts.boolean++;
     }
   })
-    if (counts.total === counts.string + counts.boolean + counts.number) {
-      return `총 ${counts.total}개의 객체 데이터 중에 문자열 ${counts.string}개, 숫자 ${counts.number}개, 부울 ${counts.boolean}개가 포함되어 있습니다.`
-    } else {
-      return message.error
-    }
+
+  return Object.is(counts.total, counts.string + counts.boolean + counts.number) ?
+    `총 ${counts.total}개의 객체 데이터 중에 문자열 ${counts.string}개, 숫자 ${counts.number}개, 부울 ${counts.boolean}개가 포함되어 있습니다.` :
+    message.error
 }
 
 
 rl.question(message.init, (answer) => {
-  console.log(checkRules(answer));
+  init(answer);
   rl.close();
 });
