@@ -132,11 +132,12 @@ const parseObjects = (answer) => {
 
   counts.arrays = tempArr.length;
 
-  for (let i = 0; i < tempArr.length; i++) {
-    if (tempArr[i][0] === '{') {
-      counts.objData++
-    }
-  }
+  tempArr.forEach(elem => {
+      if (elem[0] === '{') {
+        counts.objData++
+      }
+    })
+    
   return `${counts.arrays}개의 배열 데이터 중 객체 ${counts.objData}개가 포함되어 있습니다.`
 }
 
