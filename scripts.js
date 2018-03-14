@@ -30,17 +30,15 @@
 
 
 const readline = require('readline');
-
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-
+let Objectkeys = [];
 let tempStr = '';
 let tempArr = [];
 let is_ready_to_input_Data;
-
 let message = {
   init: `분석할 JSON 데이터를 입력하세요. \n`,
   error: `지원하지 않는 형식을 포함하고 있습니다.`
@@ -49,21 +47,25 @@ let message = {
 
 
 const errCheck = {
+
   caseOfArrays(answer) {
     return this._hasNoColon(answer) &&
+      this._hasQuotesEven(answer) &&
       this._isSomethingInCommas(answer) ?
       parseArrays(answer) : message.error;
   },
 
   caseOfObjectArray(answer) {
     return this._leftBraceAfterBracket(answer) &&
+      this._hasQuotesEven(answer) &&
       this._rightBracketAfterBrace(answer) ?
       parseObjects(answer) : message.error;
   },
 
   caseOfObjects(answer) {
     return this._hasQuotesEven(answer) &&
-      this._numberOfCommasAndColons(answer) ?
+      this._numberOfCommasAndColons(answer) &&
+      this._putColonOutsideOfKeys(answer) ?
       parseValues(answer) : message.error;
   },
 
@@ -89,17 +91,23 @@ const errCheck = {
 
   _numberOfCommasAndColons(answer) {
     return (answer.match(/\:/g) || []).length - (answer.match(/\,/g) || []).length === 1;
+  },
+
+  _putColonOutsideOfKeys(answer) {
+    Objectkeys.forEach(elem => {
+      console.log(elem);
+      return elem[elem.length - 1] === ":" ? elem : message.error
+    });
   }
+
 }
-
-
 
 
 
 const init = (answer) => {
   let braces = answer.indexOf('{') !== -1 && answer.indexOf('}') !== -1;
   let brackets = answer.indexOf('[') !== -1 && answer.indexOf(']') !== -1;
-  brackets ? console.log(hasBrackets(answer, brackets, braces)) : console.log(noBrackets(answer, brackets, braces));
+  brackets ? console.log(hasBrackets(answer, brackets, braces)) : console.log(hasNoBrackets(answer, brackets, braces));
 }
 
 const hasBrackets = (answer, brackets, braces) => {
@@ -177,7 +185,6 @@ const parseObjects = (answer) => {
 
 const parseKeys = (tempArr) => {
   let temps = [];
-  let keys = [];
 
   for (let elem of tempArr) {
     for (let factor of elem) {
@@ -195,10 +202,11 @@ const parseKeys = (tempArr) => {
     }
   }
   temps.forEach(elem => {
-    keys.push(elem.replace(/\{|\,/gi, '').replace(/\:|\,}/gi, '').trim());
+    Objectkeys.push(elem.replace(/\{|\,/gi, '').replace(/\,}/gi, '').trim());
   })
-  return keys;
+  return Objectkeys;
 }
+
 
 const parseValues = (tempArr) => {
   let temps = [];
@@ -248,6 +256,7 @@ const parseValues = (tempArr) => {
 }
 
 rl.question(message.init, (answer) => {
+
   init(answer);
   rl.close();
 });
