@@ -30,18 +30,22 @@
 
 
 const readline = require('readline');
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
+
 let tempStr = '';
 let tempArr = [];
 let is_ready_to_input_Data;
+
 let message = {
   init: `분석할 JSON 데이터를 입력하세요. \n`,
   error: `지원하지 않는 형식을 포함하고 있습니다.`
 }
+
 
 
 const errCheck = {
@@ -52,7 +56,8 @@ const errCheck = {
   },
 
   caseOfObjectArray(answer) {
-    return this._braceAfterBracket(answer) ?
+    return this._leftBraceAfterBracket(answer) &&
+      this._rightBracketAfterBrace(answer) ?
       parseObjects(answer) : message.error;
   },
 
@@ -63,15 +68,19 @@ const errCheck = {
   },
 
   _hasNoColon(answer) {
-    return ((answer.match(/\:/g) || []).length === 0)
+    return (answer.match(/\:/g) || []).length === 0;
   },
 
   _isSomethingInCommas(answer) {
-    return (answer.match(/\,.\,/g) === null)
+    return answer.match(/\,.\,/g) === null;
   },
 
-  _braceAfterBracket(answer) {
+  _leftBraceAfterBracket(answer) {
     return answer.indexOf('{') > answer.indexOf('[');
+  },
+
+  _rightBracketAfterBrace(answer) {
+    return answer.indexOf(']') > answer.indexOf('}');
   },
 
   _hasQuotesEven(answer) {
@@ -80,31 +89,24 @@ const errCheck = {
 
   _numberOfCommasAndColons(answer) {
     return (answer.match(/\:/g) || []).length - (answer.match(/\,/g) || []).length === 1;
-  },
-
-
+  }
 }
+
+
+
 
 
 const init = (answer) => {
-  let pre = {
-    leftBrace: answer.indexOf('{') !== -1,
-    rightBrace: answer.indexOf('}') !== -1,
-    leftBracket: answer.indexOf('[') !== -1,
-    rightBracket: answer.indexOf(']') !== -1
-  };
-
-  let braces = pre.leftBrace && pre.rightBrace;
-  let brackets = pre.leftBracket && pre.rightBracket;
+  let braces = answer.indexOf('{') !== -1 && answer.indexOf('}') !== -1;
+  let brackets = answer.indexOf('[') !== -1 && answer.indexOf(']') !== -1;
   brackets ? console.log(hasBrackets(answer, brackets, braces)) : console.log(noBrackets(answer, brackets, braces));
 }
-
 
 const hasBrackets = (answer, brackets, braces) => {
   return braces ? errCheck.caseOfObjectArray(answer) : errCheck.caseOfArrays(answer)
 }
 
-const noBrackets = (answer, brackets, braces) => {
+const hasNoBrackets = (answer, brackets, braces) => {
   return braces ? errCheck.caseOfObjects(answer) : message.error;
 }
 
@@ -197,7 +199,6 @@ const parseKeys = (tempArr) => {
   })
   return keys;
 }
-
 
 const parseValues = (tempArr) => {
   let temps = [];
