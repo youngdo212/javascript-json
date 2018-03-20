@@ -1,4 +1,4 @@
-let input = '[ 10, "jk",4,"314", 99, "name", "crong", true, false ]';
+let input = '[ 10, "jk", 4, "314", 99, "name", "crong", true, false ]';
 
 let flags = {
   isObject: 0,
@@ -12,8 +12,10 @@ let arr = []
 
 let cursor = -1;
 const init = () => {
+
   while (++cursor < input.length) {
     let char = input[cursor];
+
     switch (char) {
       case '[':
         flags.isArray++;
@@ -37,6 +39,18 @@ const init = () => {
         parseString();
         continue;
 
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        parseNumber();
+
       case 't':
         parseBool('true');
       case 'f':
@@ -44,8 +58,6 @@ const init = () => {
       case 'n':
         parseBool('null');
         continue;
-      default:
-        parseNumber();
     }
   }
   return flags;
