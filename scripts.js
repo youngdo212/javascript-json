@@ -1,47 +1,57 @@
-// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }`;
+let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }`;
 // let input = `[ 10, "jk", 4, "314", 99, "name", "crong", true, false ]`;
 // let input = `[ "name" : "KIM JUNG" ]`;
 // let input = `{ "name" : "KIM JUNG" "alias" : "JK" }`;
-// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }`;
-// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`;
+// let input = `{ "name" : "KIM JUNG", "age" :  23, "alias" : "JK", "children" : ["hana", "hayul", "haun"], "level" : 5  }`;
+// let input = `{ "name": "KIM JUNG", "alias"     : "JK", "level"  : 5, "married"   : true }`;
+// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"  ] }`
 
+let char = null;
+let temp = '';
 
-let flags = {
-  isObject: 0,
-  isArray: 0,
-  isStr: 0,
-  isNum: 0,
-  isBool: 0,
-  isKey: 0,
-  isValue: 0
+let parseData = {
+  data: {
+    isObject: 0,
+    isArray: 0
+  },
+
+  value: {
+    isStr: 0,
+    isNum: 0,
+    isBool: 0,
+    isObject: 0,
+    isArray: 0
+  },
+
+  objects: {
+    isKey: 0,
+    isValue: 0
+  },
 }
 
 
 let cursor = -1;
 const init = () => {
   while (++cursor < input.length) {
-    let char = input[cursor];
-
+    char = input[cursor];
     switch (char) {
       case '[':
-        checkArr();
+        parseArray();
         continue;
 
       case '{':
-        checkObj();
+        parseObject();
         continue;
 
       case ' ':
-      case ',':
-        continue;
-        
-        case ':':
-        checkValid();
-        continue;
+        // case ',':
+        continue
 
       case '"':
         parseString();
         continue;
+
+
 
       case '0':
       case '1':
@@ -57,7 +67,6 @@ const init = () => {
         continue;
 
       case 't':
-        debugger;
         parseBool('true');
         continue;
       case 'f':
@@ -66,82 +75,69 @@ const init = () => {
       case 'n':
         parseBool('null');
         continue;
+
+      default:
+
+
     }
+
   }
-  return flags;
+  return parseData;
 }
 
-
-function checkArr() {
-  if (input.charAt(0) === '[' && input.charAt(input.length - 1) === ']') {
-    flags.isArray++
-      return true;
-  }
-}
-
-
-function checkObj() {
-  if (input.charAt(0) === '{' && input.charAt(input.length - 1) === '}') {
-    flags.isObject++
-      return true;
+function isBlank() {
+  if (input.charAt(cursor).match(/\s+/g)) {
+    cursor++;
+    return isBlank();
   }
 }
-
-function checkValid() {
-  return /\:/.test(input.charAt(cursor)) ? parseKey() : flags.isStr++;
-}
-
-function parseKey() {
-  if (checkArr()) {
-    throw new Error("에러 발생")
-  } else {
-    return flags.isKey++;
-  }
-}
-
-
-
 
 function parseString() {
-  cursor = cursor + 1;
+  cursor++;
   if (input.charAt(cursor) === '"') {
-    cursor = cursor + 1;
-    if (/\,|\s|\}|\]/.test(input.charAt(cursor))) {
-      cursor = cursor + 1;
-      checkValid()
-    } else if (/\:/.test(input.charAt(cursor))) {
-      checkValid()
-    } else {
-      throw new Error("에러입니당");
+    cursor++;
+    isBlank();
+    if (input.charAt(cursor) === ',') {
+      parseData.value.isStr++;
     }
-  } else {
-    parseString();
+  } else if (input.charAt(cursor) !== '"') {
+    return parseString();
   }
 }
 
-
-
-
 function parseNumber() {
-  cursor = cursor + 1;
-  if (/\,|\s|\}|\]/g.test(input.charAt(cursor))) {
-    return flags.isNum++;
+  cursor++;
+  isBlank();
+  if (/\,|\]|\}/g.test(input.charAt(cursor))) {
+    return parseData.value.isNum++;
   } else if (typeof (input.charAt(cursor) * 1) === 'number') {
     parseNumber();
   }
 }
 
 
-
-
 function parseBool(bools) {
   if (input.slice(cursor, cursor + bools.length) === bools) {
-    return flags.isBool++
+    return parseData.value.isBool++
   } else {
-    throw new Error("에러 발생");
+    throw new Error('지원하지 않는 형식을 포함하고 있습니다');
   };
 }
 
+
+function parseObject() {
+  if (input.charAt(cursor) === '{' && cursor === 0) {
+    return parseData.data.isObject++;
+    cursor++;
+  }
+}
+
+
+function parseArray() {
+  if (input.charAt(cursor) === '[' && cursor === 0) {
+    return parseData.data.isArray++;
+  }
+}
 
 
 
