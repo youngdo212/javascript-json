@@ -1,6 +1,11 @@
-let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }`;
+// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }`;
 // let input = `[ 10, "jk", 4, "314", 99, "name", "crong", true, false ]`;
 // let input = `[ "name" : "KIM JUNG" ]`;
+// let input = `{ "name" : "KIM JUNG" "alias" : "JK" }`;
+// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : ["hana", "hayul", "haun"] }`;
+// let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }`;
+
+
 let flags = {
   isObject: 0,
   isArray: 0,
@@ -11,26 +16,27 @@ let flags = {
   isValue: 0
 }
 
-let arr = []
 
 let cursor = -1;
 const init = () => {
-
   while (++cursor < input.length) {
     let char = input[cursor];
 
     switch (char) {
       case '[':
-      case '{':
-        checkTypes();
+        checkArr();
         continue;
 
-      case ']':
-      case '}':
-        break;
+      case '{':
+        checkObj();
+        continue;
 
       case ' ':
       case ',':
+        continue;
+        
+        case ':':
+        checkValid();
         continue;
 
       case '"':
@@ -48,11 +54,15 @@ const init = () => {
       case '8':
       case '9':
         parseNumber();
+        continue;
 
       case 't':
+        debugger;
         parseBool('true');
+        continue;
       case 'f':
         parseBool('false');
+        continue;
       case 'n':
         parseBool('null');
         continue;
@@ -61,23 +71,35 @@ const init = () => {
   return flags;
 }
 
-console.log(init());
 
-
-
-function checkTypes() {
+function checkArr() {
   if (input.charAt(0) === '[' && input.charAt(input.length - 1) === ']') {
-    return flags.isArray++
-  } else if (input.charAt(0) === '{' && input.charAt(input.length - 1) === '}') {
-    return flags.isObject++
+    flags.isArray++
+      return true;
   }
 }
 
 
+function checkObj() {
+  if (input.charAt(0) === '{' && input.charAt(input.length - 1) === '}') {
+    flags.isObject++
+      return true;
+  }
+}
 
 function checkValid() {
   return /\:/.test(input.charAt(cursor)) ? parseKey() : flags.isStr++;
 }
+
+function parseKey() {
+  if (checkArr()) {
+    throw new Error("에러 발생")
+  } else {
+    return flags.isKey++;
+  }
+}
+
+
 
 
 function parseString() {
@@ -87,8 +109,10 @@ function parseString() {
     if (/\,|\s|\}|\]/.test(input.charAt(cursor))) {
       cursor = cursor + 1;
       checkValid()
-    } else {
+    } else if (/\:/.test(input.charAt(cursor))) {
       checkValid()
+    } else {
+      throw new Error("에러입니당");
     }
   } else {
     parseString();
@@ -96,15 +120,12 @@ function parseString() {
 }
 
 
-function parseKey() {
-  return flags.isKey++;
-}
 
 
 function parseNumber() {
   cursor = cursor + 1;
   if (/\,|\s|\}|\]/g.test(input.charAt(cursor))) {
-    flags.isNum++;
+    return flags.isNum++;
   } else if (typeof (input.charAt(cursor) * 1) === 'number') {
     parseNumber();
   }
@@ -112,6 +133,16 @@ function parseNumber() {
 
 
 
+
 function parseBool(bools) {
-  return input.slice(cursor, cursor + bools.length) === bools ? flags.isBool++ : new Error("에러 발생");
+  if (input.slice(cursor, cursor + bools.length) === bools) {
+    return flags.isBool++
+  } else {
+    throw new Error("에러 발생");
+  };
 }
+
+
+
+
+console.log(init());
