@@ -1,3 +1,5 @@
+let input = '[ 10, "jk",4,"314", 99, "name", "crong", true, false ]';
+
 let flags = {
   isObject: 0,
   isArray: 0,
@@ -36,9 +38,11 @@ const init = () => {
         continue;
 
       case 't':
+        parseBool('true');
       case 'f':
+        parseBool('false');
       case 'n':
-        parseBool();
+        parseBool('null');
         continue;
       default:
         parseNumber();
@@ -48,9 +52,6 @@ const init = () => {
 }
 
 console.log(init());
-
-
-
 
 
 
@@ -84,58 +85,6 @@ function parseNumber() {
 
 
 
-
-function parseBool() {
-  cursor = cursor + 1;
-  if (input.charAt(cursor) === 'r') {
-    cursor = cursor + 1;
-    if (input.charAt(cursor) === 'u') {
-      cursor = cursor + 1;
-      if (input.charAt(cursor) === 'e') {
-        flags.isBool++;
-      } else {
-        throw new Error("error입니다")
-      }
-    } else {
-      throw new Error("error입니다")
-    }
-  } else if (input.charAt(cursor) === 'a') {
-    cursor = cursor + 1;
-    if (input.charAt(cursor) === 'l') {
-      cursor = cursor + 1;
-      if (input.charAt(cursor) === 's') {
-        cursor = cursor + 1;
-        if (input.charAt(cursor) === 'e') {
-          flags.isBool++;
-        } else {
-          throw new Error("error입니다")
-        }
-      } else {
-        throw new Error("error입니다")
-      }
-    } else {
-      throw new Error("error입니다")
-    }
-  } else if (input.charAt(cursor) === 'n') {
-    cursor = cursor + 1;
-    if (input.charAt(cursor) === 'u') {
-      cursor = cursor + 1;
-      if (input.charAt(cursor) === 'l') {
-        cursor = cursor + 1;
-        if (input.charAt(cursor) === 'l') {
-          flags.isBool++;
-        } else {
-          throw new Error("error입니다")
-        }
-      } else {
-        throw new Error("error입니다")
-      }
-    } else {
-      throw new Error("error입니다")
-    }
-  }
-  cursor = cursor + 1;
-  if (!(/\,|\s|\}|\]/g.test(input.charAt(cursor)))) {
-    throw new Error("error입니다")
-  }
+function parseBool(bools) {
+  return input.slice(cursor, cursor + bools.length) === bools ? flags.isBool++ : new Error("에러 발생");
 }
