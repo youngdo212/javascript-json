@@ -1,11 +1,14 @@
-let input = '[ 10, "jk", 4, "314", 99, "name", "crong", true, false ]';
-
+let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married": true }`;
+// let input = `[ 10, "jk", 4, "314", 99, "name", "crong", true, false ]`;
+// let input = `[ "name" : "KIM JUNG" ]`;
 let flags = {
   isObject: 0,
   isArray: 0,
   isStr: 0,
   isNum: 0,
-  isBool: 0
+  isBool: 0,
+  isKey: 0,
+  isValue: 0
 }
 
 let arr = []
@@ -18,17 +21,12 @@ const init = () => {
 
     switch (char) {
       case '[':
-        flags.isArray++;
-        continue;
-
       case '{':
-        flags.isObject++;
+        checkTypes();
         continue;
-
-      case '}':
-        break;
 
       case ']':
+      case '}':
         break;
 
       case ' ':
@@ -67,23 +65,40 @@ console.log(init());
 
 
 
+function checkTypes() {
+  if (input.charAt(0) === '[' && input.charAt(input.length - 1) === ']') {
+    return flags.isArray++
+  } else if (input.charAt(0) === '{' && input.charAt(input.length - 1) === '}') {
+    return flags.isObject++
+  }
+}
+
+
+
+function checkValid() {
+  return /\:/.test(input.charAt(cursor)) ? parseKey() : flags.isStr++;
+}
+
+
 function parseString() {
   cursor = cursor + 1;
   if (input.charAt(cursor) === '"') {
     cursor = cursor + 1;
     if (/\,|\s|\}|\]/.test(input.charAt(cursor))) {
       cursor = cursor + 1;
-      if (/[^\:]/.test(input.charAt(cursor))) {
-        flags.isStr++
-      }
+      checkValid()
     } else {
-      parseString();
+      checkValid()
     }
   } else {
     parseString();
   }
 }
 
+
+function parseKey() {
+  return flags.isKey++;
+}
 
 
 function parseNumber() {
