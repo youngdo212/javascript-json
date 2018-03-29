@@ -7,8 +7,8 @@
 // let input = `{ "name" : "KIM JUNG" "alias" : "JK" }`;
 // let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : [ "hana", "hayul", "haun" ] }`
 
-// let input = `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOON JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
-let input = `[ { "name" : "master's course", "opened" : true }, [ "java", "javascript", "swift" ] ]`;
+let input = `[ { "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "married" : true }, { "name" : "YOON JISU", "alias" : "crong", "level" : 4, "married" : true } ]`
+let input = `{ "name" : "KIM JUNG", "alias" : "JK", "level" : 5, "children" : [ "hana", "hayul", "haun" ] }`;
 
 let char = null;
 let parseData = {
