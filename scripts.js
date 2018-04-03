@@ -1,18 +1,20 @@
-var input = `[1,2,[1,2,[],3],3]`;
-var data = `[{value: 1}, {value: 2}, {value: [{value: 1}, {value: 2}, {}, {value: 3}]}, {value:3}]`
-var char;
-var stack = 0;
+var text = `[1,2,[[11,[112233,"aaa",[23424,[444,[23243]]]],112],55, 99], 33]`;
+
 var res = [];
 
-function myParse(val) {
+function initial(val) {
   var cursor = -1;
   var arr = [0];
   var obj = [];
-  val = val.trim();
+  var stack = 0;
+  var char;
 
+  val = val.trim();
   if (val[0] === '[' && val[val.length - 1] === ']') {
     val = val.substring(1, val.length - 1).trim();
   }
+
+
   while (++cursor < val.length) {
     char = val[cursor];
     switch (char) {
@@ -32,27 +34,27 @@ function myParse(val) {
     }
   }
 
+
   for (var i = 0; i < arr.length; i++) {
-    debugger;
     if (val.slice(arr[i], arr[i + 1])[0] !== ',') {
       obj.push(val.slice(arr[i], arr[i + 1]).trim());
     } else {
       obj.push(val.slice(arr[i], arr[i + 1]).substring(1).trim());
     }
   }
-
+  
   res.push(obj);
+
   for (var i = 0; i < obj.length; i++) {
     if (obj[i][0] === '[') {
-      myParse(obj[i]);
+      initial(obj[i]);
     }
   }
-  return res
+  return res;
 }
 
 
-
-function secondParse(val) {
+function parsing(val) {
   for (var i = 0; i < val.length; i++) {
     for (var j = 0; j < val[i].length; j++) {
       if (val[i][j][0] === '[') {
@@ -61,8 +63,7 @@ function secondParse(val) {
     }
   }
   var answer = val[0]
-  return answer;
+  return JSON.stringify(answer, null, 4);
 }
 
-
-console.log(secondParse(myParse(input)));
+console.log(JSON.stringify((text)));
