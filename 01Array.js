@@ -1,5 +1,4 @@
 var str = "[123, 22, 33]";
-// var str2 = "[123, [24,[22],[1,2,[3]],[33]";
 
 const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value)
 
@@ -24,7 +23,7 @@ const removeBracket = str => {
     return str; 
 }
 
-const _map = (arr, fn) => {
+const _map = fn =>arr=> {
     const mappingArr = []
     for(let i=0; i<arr.length; i++){
         mappingArr.push(fn(arr[i]));
@@ -57,7 +56,7 @@ const resultToObj = arr => {
 
 
 const ArrayParser = str => {
-    return pipe(splited, (arr)=>_map(arr, trimed), (arr)=>_map(arr,removeBracket),resultToObj)(str)
+    return pipe(splited, _map(trimed), _map(removeBracket),resultToObj)(str)
 }
 var result = ArrayParser(str);
 console.log('result', result);
