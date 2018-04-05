@@ -1,6 +1,6 @@
-// var str = "['1a3','1a'3',[[null,false,['11',[112233],112],55, '99'],33, 3d3, true]";
+var str = "['1a3','1a'3','0feaea',[[null,false,['11',[112233],112],55, '99']],33, 3d3, true]";
 
-var str = "['1a3','1a'3',[[null,,55, '99'],33, 3d3, true]";
+// var str = "['1a3','1a'3',[[null,,55, '99'],33, 3d3, true]";
 
 const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value)
 
