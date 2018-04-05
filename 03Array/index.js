@@ -1,5 +1,5 @@
-var str = "[12,[3],[[2],[2],[33]],8,10,[1,2,3,4,5]]";
-
+// var str = "[12,[3],[1,2,3,[2,4,[1,2]],[2],[33]],8,10,[1,2,3,4,5]]";
+var str2 = "[123,[22],33,[[[3]]],[1,2,3,4,5]]";
 const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value)
 
 
@@ -53,9 +53,7 @@ const resultToObj = arr => {
 
     const result = arr.reduce((ac,c)=>{
         const childItem = c[0]===left ? 
-        { type: 'array', value: 'ArrayObject', 
-           child: [{type:'number', value: c.slice(1,c.length-1), child:[]}]
-        } 
+        ArrayParser(c)
         :
         { type: 'number', value: c, child:[]};
         ac.child.push(childItem)
@@ -70,5 +68,5 @@ const ArrayParser = str => {
     return pipe(trimed,removeFirstBrackets, splitArrItem,resultToObj)(str)
 }
 
-const result = ArrayParser(str);
+const result = ArrayParser(str2);
 console.log('result', result);

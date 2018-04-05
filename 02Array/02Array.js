@@ -62,15 +62,6 @@ const resultToObj = arr => {
 
 
 
-
-
-
-
-
-
-
-
-
 const ArrayParser = str => {
     return pipe(trimed,splitArrItem,resultToObj)(str)
 }

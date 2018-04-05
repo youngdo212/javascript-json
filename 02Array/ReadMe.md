@@ -23,3 +23,9 @@ type number value child: []
 2. 배열을 만나면 [] 열고 닫힐 때 까지 값 저장 후 ,를 만났을 떄 저장 
 3. 마지막 원소 -1까지 순회 하게 한다. 
 
+
+```
+example answer 
+숫자인 경우 1번 형태  배열인 경우 아래오 같은 형태
+    { type: 'array', value: ArrayObject, child: [{type:'number', value:22, child:[]}] }
+```
