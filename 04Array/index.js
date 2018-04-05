@@ -1,4 +1,6 @@
-var str = "['1a3','1a'3',[null,false,['11',[112233],112],55, '99'],33, 3d3, true]";
+// var str = "['1a3','1a'3',[[null,false,['11',[112233],112],55, '99'],33, 3d3, true]";
+
+var str = "['1a3','1a'3',[[null,,55, '99'],33, 3d3, true]";
 
 const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value)
 
@@ -18,6 +20,9 @@ const _isArrayString = str => {
 const trimed = str => str.trim()
 
 const removeFirstBrackets = str => str.slice(1,str.length-1)
+
+//split Item이 잘 못 된 경우 ?.? 
+
 
 const splitArrItem = str => {
     let item = '',
@@ -39,8 +44,11 @@ const splitArrItem = str => {
             item+=str[i]
         }  
     }
+    if(close !==2){
+        item = {error: item}
+    }
     itemList.push(item);
-    console.log('itemList', itemList);
+    // console.log('itemList', itemList);
     return itemList;
 }
 
