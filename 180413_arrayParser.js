@@ -1,34 +1,33 @@
 function ArrayParser(str){
-  let result = null;
-  let location = [];
-  let depth = 0;
-  let temp = '';
+  const stack = [[]];
+  let tempValue = '';
   for(let i = 0; i < str.length; i++){
     if(str[i] === '['){
-      if(result) location[depth].push({type: 'array', value: 'ArrayObject', child: []});
-      else result = {type: 'array', value: 'ArrayObject', child : []};
-      location[depth + 1] = location[depth] ? location[depth][location[depth].length-1].child : result.child;
-      depth++;
+      stack[stack.length-1].push({type: 'array', value: 'ArrayObject', child: []});
+      stack.push([]);
     }
     else if(str[i] === ']'){
-      if(temp) location[depth].push({type: 'number', value: temp, child: []});
-      temp = '';
-      depth--;
+      if(tempValue) stack[stack.length-1].push({type: 'number', value: tempValue, child: []});
+      tempValue = '';
+      const child = stack.pop();
+      const last = stack.pop();
+      const lastData = last.pop();
+      lastData.child.push(...child);
+      last.push(lastData);
+      stack.push(last);
     }
     else if(str[i] === ','){
-      if(temp) location[depth].push({type: 'number', value: temp, child:[]});
-      temp = '';
+      if(tempValue) stack[stack.length-1].push({type: 'number', value: tempValue, child: []});
+      tempValue = '';
     }
     else if(str[i] === ' '){
       continue;
     }
     else{
-      temp += str[i];
+      tempValue += str[i];
     }
   }
-  result = result || {type: 'number', value: temp, child: []};
-  
-  return result;
+  return tempValue ? {type: 'number', value: tempValue, child: []} : stack.pop().pop();
 }
 
 let testcase1 = '[12, [14, 55], 15]';
