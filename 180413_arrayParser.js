@@ -20,8 +20,7 @@ class ChildStack{
     if(data) this.addData(data);
     this.stack.push([]);
   }
-  combineStack(){
-    const child = this.stack.pop();
+  concatChild(child){
     const lastStack = this.stack.pop();
     const lastData = lastStack.pop();
     lastData.pushChild(child);
@@ -46,7 +45,7 @@ function ArrayParser(str){
     else if(isPaused(str[i])){
       if(tempValue) stack.addData(new DataStucture('number', tempValue.trim()));
       tempValue = '';
-      if(isClosed(str[i])) stack.combineStack();
+      if(isClosed(str[i])) stack.concatChild(stack.getLastStack());
     }
     else{
       tempValue += str[i];
@@ -75,5 +74,5 @@ let testcase4 = '[123,[22,23,[11,[112233],112],55],33]';
 let testcase5 = '12345'
 let testcase6 = '[1,3,[1,2],4,[5,6]]'
 
-let result = ArrayParser(testcase1);
+let result = ArrayParser(testcase6);
 console.log(JSON.stringify(result, null, 2));
