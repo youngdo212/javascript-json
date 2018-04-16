@@ -9,26 +9,47 @@ class DataStucture{
   }
 }
 
+class ChildStack{
+  constructor(){
+    this.stack = [];
+  }
+  addData(data){
+    this.stack[this.stack.length-1].push(data);
+  }
+  buildStack(data){
+    if(data) this.addData(data);
+    this.stack.push([]);
+  }
+  combineStack(){
+    const child = this.stack.pop();
+    const lastStack = this.stack.pop();
+    const lastData = lastStack.pop();
+    lastData.pushChild(child);
+    lastStack.push(lastData);
+    this.stack.push(lastStack);
+  }
+  getLastStack(){
+    return this.stack.pop();
+  }
+}
+
 function ArrayParser(str){
-  const stack = [[]];
+  const stack = new ChildStack();
   let tempValue = '';
+
+  stack.buildStack();  
+
   for(let i = 0; i < str.length; i++){
     if(str[i] === '['){
-      stack[stack.length-1].push(new DataStucture('array', 'ArrayObject'));
-      stack.push([]);
+      stack.buildStack(new DataStucture('array', 'ArrayObject'));
     }
     else if(str[i] === ']'){
-      if(tempValue) stack[stack.length-1].push(new DataStucture('number', tempValue));
+      if(tempValue) stack.addData(new DataStucture('number', tempValue));
       tempValue = '';
-      const child = stack.pop();
-      const lastStack = stack.pop();
-      const lastData = lastStack.pop();
-      lastData.pushChild(child);
-      lastStack.push(lastData);
-      stack.push(lastStack);
+      stack.combineStack();
     }
     else if(str[i] === ','){
-      if(tempValue) stack[stack.length-1].push(new DataStucture('number', tempValue));
+      if(tempValue) stack.addData(new DataStucture('number', tempValue));
       tempValue = '';
     }
     else if(str[i] === ' '){
@@ -38,7 +59,8 @@ function ArrayParser(str){
       tempValue += str[i];
     }
   }
-  return tempValue ? new DataStucture('number', tempValue) : stack.pop().pop();
+  
+  return tempValue ? new DataStucture('number', tempValue) : stack.getLastStack().pop();
 }
 
 
@@ -50,5 +72,5 @@ let testcase4 = '[123,[22,23,[11,[112233],112],55],33]';
 let testcase5 = '12345'
 let testcase6 = '[1,3,[1,2],4,[5,6]]'
 
-let result = ArrayParser(testcase6);
+let result = ArrayParser(testcase1);
 console.log(JSON.stringify(result, null, 2));
