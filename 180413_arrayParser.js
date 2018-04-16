@@ -40,30 +40,33 @@ function ArrayParser(str){
   stack.buildStack();  
 
   for(let i = 0; i < str.length; i++){
-    if(str[i] === '['){
+    if(isOpened(str[i])){
       stack.buildStack(new DataStucture('array', 'ArrayObject'));
     }
-    else if(str[i] === ']'){
-      if(tempValue) stack.addData(new DataStucture('number', tempValue));
+    else if(isPaused(str[i])){
+      if(tempValue) stack.addData(new DataStucture('number', tempValue.trim()));
       tempValue = '';
-      stack.combineStack();
-    }
-    else if(str[i] === ','){
-      if(tempValue) stack.addData(new DataStucture('number', tempValue));
-      tempValue = '';
-    }
-    else if(str[i] === ' '){
-      continue;
+      if(isClosed(str[i])) stack.combineStack();
     }
     else{
       tempValue += str[i];
     }
   }
-  
-  return tempValue ? new DataStucture('number', tempValue) : stack.getLastStack().pop();
+
+  return tempValue ? new DataStucture('number', tempValue.trim()) : stack.getLastStack().pop();
 }
 
+function isOpened(e){
+  return e === '[';
+}
 
+function isClosed(e){
+  return e === ']';
+}
+
+function isPaused(e){
+  return e === ',' || e === ']';
+}
 
 let testcase1 = '[12, [14, 55], 15]';
 let testcase2 = '[1, [55, 3]]'
