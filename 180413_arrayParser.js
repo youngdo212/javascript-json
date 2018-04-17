@@ -32,6 +32,31 @@ class ChildStack{
   }
 }
 
+class Check{
+  constructor(value){
+    this.value = value;
+  }
+  isBoolean(){
+    return this.value === 'true' || this.value === 'false';
+  }
+  isNull(){
+    return this.value === 'null';
+  }
+  isString(){ // 리팩토링
+    if(this.value.match(/'.+?'/)){
+      if(this.value === this.value.match(/'.+?'/)[0]) return true;
+      else throw `${this.value}는 올바른 문자열이 아닙니다`;
+    }
+    return false;
+  }
+  isNumber(){ // 리팩토링
+    if(this.value.match(/\d/)){
+      return this.value === this.value.match(/\d+/)[0];
+    }
+    return false;
+  }
+}
+
 function ArrayParser(str){
   const stack = new ChildStack();
   let value = '';
@@ -70,15 +95,11 @@ function isPaused(e){
 }
 
 function getType(value){
-  if(value === 'true' || value === 'false') return 'boolean';
-  else if(value === 'null') return 'null';
-  else if(value.indexOf("'") !== -1){
-    let check = value.match(/'.+?'/)[0];
-    if(value.length === value.match(/'.+?'/)[0].length) return 'string';
-    else throw `${value}은 올바른 문자열이 아닙니다`;
-  }else if(value.match(/\d/)){
-    if(value.length === value.match(/\d+/)[0].length) return 'number';
-  }
+  const value2 = new Check(value); // value2 이름 바꾸자
+  if(value2.isBoolean()) return 'boolean';
+  else if(value2.isNull()) return 'null';
+  else if(value2.isString()) return 'string';
+  else if(value2.isNumber()) return 'number';
   throw `${value}는 알 수 없는 타입입니다`;
 }
 
