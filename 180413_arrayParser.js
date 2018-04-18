@@ -1,6 +1,7 @@
 class DataStucture{
-  constructor(type, value, child = []){
+  constructor(type, key, value, child = []){
     this.type = type;
+    this.key = key;
     this.value = value;
     this.child = child;
   }
@@ -12,9 +13,11 @@ class DataStucture{
 class Child{
   constructor(){
     this.child = [];
+    this.key = 0;
   }
-  addData(data){
-    this.child.push(data);
+  addData({type, key = this.key, value}){
+    this.child.push(new DataStucture(type, key, value));
+    this.key++;
   }
   get lastData(){
     return this.child[this.child.length-1];
@@ -73,12 +76,13 @@ function ArrayParser(str){
 
   for(let i = 0; i < str.length; i++){
     if(isOpened(str[i])){
-      stack[stack.length-1].addData(new DataStucture('array', 'ArrayObject'));
+      const data = stack[1] ? {type: 'array', value: 'ArrayObject'} : {type: 'array', key: null, value: 'ArrayObject'}
+      stack[stack.length-1].addData(data);
       stack.push(new Child());
     }
     else if(isPaused(str[i])){
       if(!value.isEmpty()){
-        stack[stack.length-1].addData(new DataStucture(value.type, value.value));
+        stack[stack.length-1].addData({type: value.type, value: value.value});
         value.initialize();
       }
       if(isClosed(str[i])){
@@ -90,8 +94,9 @@ function ArrayParser(str){
       value.push(str[i]);
     }
   }
+  value.isEmpty() ? null : stack[stack.length-1].addData({type: value.type, key: null, value: value.value})
 
-  return value.isEmpty() ? stack.pop().lastData : new DataStucture(value.type, value.value);
+  return stack.pop().lastData;
 }
 
 function isOpened(e){
