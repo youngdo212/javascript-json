@@ -24,6 +24,21 @@ class Child{
   }
 }
 
+class ChildStack{
+  constructor(){
+    this.stack = [];
+  }
+  buildStack(){
+    this.stack.push(new Child());
+  }
+  get lastChild(){
+    return this.stack[this.stack.length-1];
+  }
+  popChild(){
+    return this.stack.pop();
+  }
+}
+
 class Value{
   constructor(){
     this.value = '';
@@ -69,46 +84,46 @@ class Value{
 }
 
 function ArrayParser(str){
-  const stack = [];
+  const stack = new ChildStack();
   let value = new Value();
 
-  stack.push(new Child());
+  stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
     if(isOpened(str[i])){
-      const data = stack[1] ? {type: 'array', value: 'ArrayObject'} : {type: 'array', key: null, value: 'ArrayObject'}
-      stack[stack.length-1].addData(data);
-      stack.push(new Child());
+      const data = stack.stack[1] ? {type: 'array', value: 'ArrayObject'} : {type: 'array', key: null, value: 'ArrayObject'}
+      stack.lastChild.addData(data);
+      stack.buildStack();
     }
     else if(isPaused(str[i])){
       if(!value.isEmpty()){
-        stack[stack.length-1].addData({type: value.type, value: value.value});
+        stack.lastChild.addData({type: value.type, value: value.value});
         value.initialize();
       }
       if(isClosed(str[i])){
-        const child = stack.pop().child;
-        stack[stack.length-1].lastData.pushChild(child);
+        const child = stack.popChild().child;
+        stack.lastChild.lastData.pushChild(child);
       }
     }
     else{
       value.push(str[i]);
     }
   }
-  value.isEmpty() ? null : stack[stack.length-1].addData({type: value.type, key: null, value: value.value})
+  value.isEmpty() ? null : stack.lastChild.addData({type: value.type, key: null, value: value.value})
 
-  return stack.pop().lastData;
+  return stack.popChild().lastData;
 }
 
 function isOpened(e){
-  return e === '[';
+  return e === '[' || e === '{';
 }
 
 function isClosed(e){
-  return e === ']';
+  return e === ']' || e === '}';
 }
 
 function isPaused(e){
-  return e === ',' || e === ']';
+  return e === ',' || e === ']' || e === '}';
 }
 
 let testcase1 = '[12, [14, 55], 15]';
