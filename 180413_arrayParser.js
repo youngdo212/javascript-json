@@ -32,9 +32,9 @@ class ChildStack{
   }
 }
 
-class Check{
-  constructor(value){
-    this.value = value;
+class Value{
+  constructor(){
+    this.value = '';
   }
   isBoolean(){
     return this.value === 'true' || this.value === 'false';
@@ -45,41 +45,60 @@ class Check{
   isString(){ // 리팩토링
     if(this.value.match(/'.+?'/)){
       if(this.value === this.value.match(/'.+?'/)[0]) return true;
-      else throw `${this.value}는 올바른 문자열이 아닙니다`;
+      else this.throwStringError();
     }
     return false;
   }
-  isNumber(){ // 리팩토링
-    if(this.value.match(/\d/)){
-      return this.value === this.value.match(/\d+/)[0];
-    }
-    return false;
+  isNumber(){
+    return this.value.match(/\d/) ? this.value === this.value.match(/\d+/)[0] : false;
+  }
+  isEmpty(){
+    return this.value ? false : true;
+  }
+  get type(){
+    return this.isBoolean() ? 'boolean' : 
+    this.isNull() ? 'null' : 
+    this.isString() ? 'string' : 
+    this.isNumber() ? 'number' : 
+    this.throwTypeError();
+  }
+  throwTypeError(){
+    throw `${this.value}는 알 수 없는 타입입니다`;
+  }
+  throwStringError(){
+    throw `${this.value}는 올바른 문자열이 아닙니다`;
+  }
+  push(str){
+    if(str !== ' ') this.value += str;
+  }
+  initialize(){
+    this.value = '';
   }
 }
 
 function ArrayParser(str){
   const stack = new ChildStack();
-  let value = '';
+  let value = new Value();
 
-  stack.buildStack();  
+  stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
     if(isOpened(str[i])){
       stack.buildStack(new DataStucture('array', 'ArrayObject'));
     }
     else if(isPaused(str[i])){
-      if(value){
-        stack.addData(new DataStucture(getType(value.trim()), value.trim()));
-        value = '';
+      if(!value.isEmpty()){
+        stack.addData(new DataStucture(value.type, value.value));
+        value.initialize();
       }
       if(isClosed(str[i])) stack.concatChild(stack.getLastStack());
     }
     else{
-      value += str[i];
+      value.push(str[i]);
     }
   }
 
-  return value ? new DataStucture(getType(value.trim()), value.trim()) : stack.getLastStack().pop();
+  return value.isEmpty() ? stack.getLastStack().pop() : new DataStucture(value.type, value.value);
 }
 
 function isOpened(e){
@@ -92,15 +111,6 @@ function isClosed(e){
 
 function isPaused(e){
   return e === ',' || e === ']';
-}
-
-function getType(value){
-  const value2 = new Check(value); // value2 이름 바꾸자
-  if(value2.isBoolean()) return 'boolean';
-  else if(value2.isNull()) return 'null';
-  else if(value2.isString()) return 'string';
-  else if(value2.isNumber()) return 'number';
-  throw `${value}는 알 수 없는 타입입니다`;
 }
 
 let testcase1 = '[12, [14, 55], 15]';
