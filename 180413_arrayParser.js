@@ -9,26 +9,15 @@ class DataStucture{
   }
 }
 
-class ChildStack{
+class Child{
   constructor(){
-    this.stack = [];
+    this.child = [];
   }
   addData(data){
-    this.stack[this.stack.length-1].push(data);
+    this.child.push(data);
   }
-  buildStack(data){
-    if(data) this.addData(data);
-    this.stack.push([]);
-  }
-  concatChild(child){
-    const lastStack = this.stack.pop();
-    const lastData = lastStack.pop();
-    lastData.pushChild(child);
-    lastStack.push(lastData);
-    this.stack.push(lastStack);
-  }
-  getLastStack(){
-    return this.stack.pop();
+  get lastData(){
+    return this.child[this.child.length-1];
   }
 }
 
@@ -77,28 +66,32 @@ class Value{
 }
 
 function ArrayParser(str){
-  const stack = new ChildStack();
+  const stack = [];
   let value = new Value();
 
-  stack.buildStack();
+  stack.push(new Child());
 
   for(let i = 0; i < str.length; i++){
     if(isOpened(str[i])){
-      stack.buildStack(new DataStucture('array', 'ArrayObject'));
+      stack[stack.length-1].addData(new DataStucture('array', 'ArrayObject'));
+      stack.push(new Child());
     }
     else if(isPaused(str[i])){
       if(!value.isEmpty()){
-        stack.addData(new DataStucture(value.type, value.value));
+        stack[stack.length-1].addData(new DataStucture(value.type, value.value));
         value.initialize();
       }
-      if(isClosed(str[i])) stack.concatChild(stack.getLastStack());
+      if(isClosed(str[i])){
+        const child = stack.pop().child;
+        stack[stack.length-1].lastData.pushChild(child);
+      }
     }
     else{
       value.push(str[i]);
     }
   }
 
-  return value.isEmpty() ? stack.getLastStack().pop() : new DataStucture(value.type, value.value);
+  return value.isEmpty() ? stack.pop().lastData : new DataStucture(value.type, value.value);
 }
 
 function isOpened(e){
@@ -120,6 +113,7 @@ let testcase4 = '[123,[22,23,[11,[112233],112],55],33]';
 let testcase5 = '12345'
 let testcase6 = '[1,3,[1,2],4,[5,6]]'
 let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
+let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 
 let result = ArrayParser(testcase7);
 console.log(JSON.stringify(result, null, 2));
