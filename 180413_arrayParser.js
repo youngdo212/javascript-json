@@ -95,17 +95,25 @@ class ChildStack{
 function ArrayParser(str){
   const stack = new ChildStack();
   let accumulatedValue = '';
+  let key;
 
   stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
     if(stack.isOpenedBy(str[i])){
-      stack.lastChild.addData({type: getType(str[i]), key: stack.stack[1] ? undefined : null, value: getValue(str[i])});
+      stack.lastChild.addData({type: getType(str[i]), key: stack.stack[1] ? key : null, value: getValue(str[i])});
+      key = undefined;
       stack.buildStack();
     }
     else if(stack.isPausedBy(str[i])){
+      if(str[i] === ':'){
+        key = accumulatedValue;
+        accumulatedValue = '';
+        continue;
+      }
       if(accumulatedValue){
-        stack.lastChild.addData({type: getType(accumulatedValue), value: accumulatedValue});
+        stack.lastChild.addData({type: getType(accumulatedValue), key: key, value: accumulatedValue});
+        key = undefined;
         accumulatedValue = '';
       }
       if(stack.isClosedBy(str[i])){
@@ -172,5 +180,5 @@ let testcase6 = '[1,3,[1,2],4,[5,6]]'
 let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 
-let result = ArrayParser(testcase7);
+let result = ArrayParser(testcase8);
 console.log(JSON.stringify(result, null, 2));
