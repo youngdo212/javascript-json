@@ -37,6 +37,15 @@ class ChildStack{
   popChild(){
     return this.stack.pop();
   }
+  isOpenedBy(e){
+    return e === '[' || e === '{';
+  }
+  isClosedBy(e){
+    return e === ']' || e === '}';
+  }
+  isPausedBy(e){
+    return e === ',' || e === ']' || e === '}' || e === ':';
+  }
 }
 
 class Value{
@@ -90,17 +99,16 @@ function ArrayParser(str){
   stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
-    if(isOpened(str[i])){
-      const data = stack.stack[1] ? {type: 'array', value: 'ArrayObject'} : {type: 'array', key: null, value: 'ArrayObject'}
-      stack.lastChild.addData(data);
+    if(stack.isOpenedBy(str[i])){
+      stack.lastChild.addData({type: 'array', key: stack.stack[1] ? undefined : null, value: 'ArrayObject'});
       stack.buildStack();
     }
-    else if(isPaused(str[i])){
+    else if(stack.isPausedBy(str[i])){
       if(!value.isEmpty()){
         stack.lastChild.addData({type: value.type, value: value.value});
         value.initialize();
       }
-      if(isClosed(str[i])){
+      if(stack.isClosedBy(str[i])){
         const child = stack.popChild().child;
         stack.lastChild.lastData.pushChild(child);
       }
@@ -112,18 +120,6 @@ function ArrayParser(str){
   value.isEmpty() ? null : stack.lastChild.addData({type: value.type, key: null, value: value.value})
 
   return stack.popChild().lastData;
-}
-
-function isOpened(e){
-  return e === '[' || e === '{';
-}
-
-function isClosed(e){
-  return e === ']' || e === '}';
-}
-
-function isPaused(e){
-  return e === ',' || e === ']' || e === '}';
 }
 
 let testcase1 = '[12, [14, 55], 15]';
