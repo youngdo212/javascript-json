@@ -48,65 +48,65 @@ class ChildStack{
   }
 }
 
-class Value{
-  constructor(){
-    this.value = '';
-  }
-  isBoolean(){
-    return this.value === 'true' || this.value === 'false';
-  }
-  isNull(){
-    return this.value === 'null';
-  }
-  isString(){ // 리팩토링
-    if(this.value.match(/'.+?'/)){
-      if(this.value === this.value.match(/'.+?'/)[0]) return true;
-      else this.throwStringError();
-    }
-    return false;
-  }
-  isNumber(){
-    return this.value.match(/\d/) ? this.value === this.value.match(/\d+/)[0] : false;
-  }
-  isEmpty(){
-    return this.value ? false : true;
-  }
-  get type(){
-    return this.isBoolean() ? 'boolean' : 
-    this.isNull() ? 'null' : 
-    this.isString() ? 'string' : 
-    this.isNumber() ? 'number' : 
-    this.throwTypeError();
-  }
-  throwTypeError(){
-    throw `${this.value}는 알 수 없는 타입입니다`;
-  }
-  throwStringError(){
-    throw `${this.value}는 올바른 문자열이 아닙니다`;
-  }
-  push(str){
-    if(str !== ' ') this.value += str;
-  }
-  initialize(){
-    this.value = '';
-  }
-}
+// class Value{
+//   constructor(){
+//     this.value = '';
+//   }
+//   isBoolean(){
+//     return this.value === 'true' || this.value === 'false';
+//   }
+//   isNull(){
+//     return this.value === 'null';
+//   }
+//   isString(){ // 리팩토링
+//     if(this.value.match(/'.+?'/)){
+//       if(this.value === this.value.match(/'.+?'/)[0]) return true;
+//       else this.throwStringError();
+//     }
+//     return false;
+//   }
+//   isNumber(){
+//     return this.value.match(/\d/) ? this.value === this.value.match(/\d+/)[0] : false;
+//   }
+//   isEmpty(){
+//     return this.value ? false : true;
+//   }
+//   get type(){
+//     return this.isBoolean() ? 'boolean' : 
+//     this.isNull() ? 'null' : 
+//     this.isString() ? 'string' : 
+//     this.isNumber() ? 'number' : 
+//     this.throwTypeError();
+//   }
+//   throwTypeError(){
+//     throw `${this.value}는 알 수 없는 타입입니다`;
+//   }
+//   throwStringError(){
+//     throw `${this.value}는 올바른 문자열이 아닙니다`;
+//   }
+//   push(str){
+//     if(str !== ' ') this.value += str;
+//   }
+//   initialize(){
+//     this.value = '';
+//   }
+// }
 
 function ArrayParser(str){
   const stack = new ChildStack();
-  let value = new Value();
+  let accumulatedValue = '';
 
   stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
     if(stack.isOpenedBy(str[i])){
-      stack.lastChild.addData({type: 'array', key: stack.stack[1] ? undefined : null, value: 'ArrayObject'});
+      stack.lastChild.addData({type: getType(str[i]), key: stack.stack[1] ? undefined : null, value: getValue(str[i])});
       stack.buildStack();
     }
     else if(stack.isPausedBy(str[i])){
-      if(!value.isEmpty()){
-        stack.lastChild.addData({type: value.type, value: value.value});
-        value.initialize();
+      if(accumulatedValue){
+        stack.lastChild.addData({type: getType(accumulatedValue), value: accumulatedValue});
+        accumulatedValue = '';
       }
       if(stack.isClosedBy(str[i])){
         const child = stack.popChild().child;
@@ -114,12 +114,53 @@ function ArrayParser(str){
       }
     }
     else{
-      value.push(str[i]);
+      accumulatedValue += str[i] === ' ' ? '' : str[i];
     }
   }
-  value.isEmpty() ? null : stack.lastChild.addData({type: value.type, key: null, value: value.value})
+  accumulatedValue ? stack.lastChild.addData({type: getType(accumulatedValue), key: null, value: accumulatedValue}) : null;
 
   return stack.popChild().lastData;
+}
+
+function getType(value){
+  function isBoolean(){
+    return value === 'true' || value === 'false';
+  };
+  function isNull(){
+    return value === 'null';
+  };
+  function isString(){ // 리팩토링
+    if(value.match(/'.+?'/)){
+      if(value === value.match(/'.+?'/)[0]) return true;
+      else throwStringError();
+    }
+    return false;
+  };
+  function isNumber(){
+    return value.match(/\d/) ? value === value.match(/\d+/)[0] : false;
+  };
+  function isArray(){
+    return value === '[' || value === ']';
+  };
+  function isObject(){
+    return value === '{' || value === '}';
+  };
+  function throwTypeError(){
+    throw `${value}는 알 수 없는 타입입니다`;
+  };
+  function throwStringError(){
+    throw `${value}는 올바른 문자열이 아닙니다`;
+  };
+  return isBoolean() ? 'boolean' : 
+  isNull() ? 'null' : 
+  isString() ? 'string' :
+  isNumber() ? 'number' :
+  isArray() ? 'array' : 
+  isObject() ? 'object' : throwTypeError();
+}
+
+function getValue(value){
+  return getType(value) === 'array' ? 'ArrayObject' : 'Object';
 }
 
 let testcase1 = '[12, [14, 55], 15]';
