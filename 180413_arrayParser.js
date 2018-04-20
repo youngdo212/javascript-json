@@ -1,22 +1,34 @@
-class DataStucture{
-  constructor(type, key, value, child = []){
-    this.type = type;
-    this.key = key;
-    this.value = value;
-    this.child = child;
+class Data{
+  constructor(){
+    this.type = undefined;
+    this.key = undefined;
+    this.value = undefined;
+    // this.done = true;
+    this.temp = '';
+    this.parent = undefined;    
+    this.child = [];    
   }
   pushChild(child){
     this.child.push(...child);
   }
+  isEmpty(){
+    return !this.temp;
+  }
+  push(e){
+    this.temp = e === ' ' ? this.temp : this.temp + e;// 스트링일 경우는  temp 사이에 공백의 문자열을 포함해야 한다
+  }
 }
 
 class Child{
-  constructor(){
+  constructor(parent){
     this.child = [];
     this.key = 0;
+    this.parent = parent;
   }
-  addData({type, key = this.key, value}){
-    this.child.push(new DataStucture(type, key, value));
+  addData(data){
+    data.key = data.key || this.key;
+    data.parent = this.parent;
+    this.child.push(data);
     this.key++;
   }
   get lastData(){
@@ -29,7 +41,8 @@ class ChildStack{
     this.stack = [];
   }
   buildStack(){
-    this.stack.push(new Child());
+    let parent = this.lastChild ? this.lastChild.lastData.type : undefined;
+    this.stack.push(new Child(parent));
   }
   get lastChild(){
     return this.stack[this.stack.length-1];
@@ -48,85 +61,52 @@ class ChildStack{
   }
 }
 
-// class Value{
-//   constructor(){
-//     this.value = '';
-//   }
-//   isBoolean(){
-//     return this.value === 'true' || this.value === 'false';
-//   }
-//   isNull(){
-//     return this.value === 'null';
-//   }
-//   isString(){ // 리팩토링
-//     if(this.value.match(/'.+?'/)){
-//       if(this.value === this.value.match(/'.+?'/)[0]) return true;
-//       else this.throwStringError();
-//     }
-//     return false;
-//   }
-//   isNumber(){
-//     return this.value.match(/\d/) ? this.value === this.value.match(/\d+/)[0] : false;
-//   }
-//   isEmpty(){
-//     return this.value ? false : true;
-//   }
-//   get type(){
-//     return this.isBoolean() ? 'boolean' : 
-//     this.isNull() ? 'null' : 
-//     this.isString() ? 'string' : 
-//     this.isNumber() ? 'number' : 
-//     this.throwTypeError();
-//   }
-//   throwTypeError(){
-//     throw `${this.value}는 알 수 없는 타입입니다`;
-//   }
-//   throwStringError(){
-//     throw `${this.value}는 올바른 문자열이 아닙니다`;
-//   }
-//   push(str){
-//     if(str !== ' ') this.value += str;
-//   }
-//   initialize(){
-//     this.value = '';
-//   }
-// }
-
 function ArrayParser(str){
   const stack = new ChildStack();
-  let accumulatedValue = '';
-  let key;
+  let currData = new Data();
 
   stack.buildStack();
 
   for(let i = 0; i < str.length; i++){
-    if(stack.isOpenedBy(str[i])){
-      stack.lastChild.addData({type: getType(str[i]), key: stack.stack[1] ? key : null, value: getValue(str[i])});
-      key = undefined;
+    if(stack.isOpenedBy(str[i]) && currData.isEmpty()){
+      currData.type = getType(str[i]); // destructuring
+      currData.value = getValue(str[i]); // destructuring
+      currData.temp = undefined;
+      stack.lastChild.addData(currData);
       stack.buildStack();
+      currData = new Data();
     }
     else if(stack.isPausedBy(str[i])){
       if(str[i] === ':'){
-        key = accumulatedValue;
-        accumulatedValue = '';
+        currData.key = currData.temp.trim();
+        currData.temp = '';
         continue;
       }
-      if(accumulatedValue){
-        stack.lastChild.addData({type: getType(accumulatedValue), key: key, value: accumulatedValue});
-        key = undefined;
-        accumulatedValue = '';
+      if(!currData.isEmpty()){
+        currData.value = currData.temp.trim();
+        currData.type = getType(currData.value);
+        currData.temp = undefined;
+        stack.lastChild.addData(currData);
+        currData = new Data();
       }
       if(stack.isClosedBy(str[i])){
+        // if(currData.parent.type !== getType(str[i])) throw new Error(`열린 문자와 닫히는 문자가 일치하지 않습니다: ${str[i]}`);
         const child = stack.popChild().child;
+        // stack.lastChild.lastData.done = true;
         stack.lastChild.lastData.pushChild(child);
       }
     }
     else{
-      accumulatedValue += str[i] === ' ' ? '' : str[i];
+      currData.push(str[i]);
     }
   }
-  accumulatedValue ? stack.lastChild.addData({type: getType(accumulatedValue), key: null, value: accumulatedValue}) : null;
-
+  if(!currData.isEmpty()){
+    currData.value = currData.temp.trim();
+    currData.type = getType(currData.value);
+    currData.temp = undefined;    
+    stack.lastChild.addData(currData);
+  }
+  
   return stack.popChild().lastData;
 }
 
