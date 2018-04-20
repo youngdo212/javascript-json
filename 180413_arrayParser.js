@@ -1,21 +1,29 @@
 class Data{
   constructor(){
     this.type = undefined;
-    this.key = undefined;
+    this.key = undefined; // {value: undefined, done: false}
     this.value = undefined;
     // this.done = true;
     this.temp = '';
-    this.parent = undefined;    
-    this.child = [];    
+    this.parent = undefined;
+    this.child = [];
   }
   pushChild(child){
     this.child.push(...child);
   }
   isEmpty(){
-    return !this.temp;
+    return !this.temp.trim(); // return !this.temp.trim();
   }
   push(e){
-    this.temp = e === ' ' ? this.temp : this.temp + e;// 스트링일 경우는  temp 사이에 공백의 문자열을 포함해야 한다
+    // if(this.parent === 'object' && !this.key.done) this.key.value = this.key.value ? this.key.value + e || e;
+    this.temp = this.temp ? this.temp + e : e;
+    // this.temp = e === ' ' ? this.temp : this.temp + e;// 스트링일 경우는  temp 사이에 공백의 문자열을 포함해야 한다
+  }
+  // setProperty(){
+  //   if(this.parent === 'object') [this.key, this.value] = this.value.split(':').map(e=>e.trim());
+  // }
+  initialize(target = this.temp.trim()){
+    [this.type, this.value, this.temp] = [getType(target), getValue(target), undefined];
   }
 }
 
@@ -57,7 +65,7 @@ class ChildStack{
     return e === ']' || e === '}';
   }
   isPausedBy(e){
-    return e === ',' || e === ']' || e === '}' || e === ':';
+    return this.isClosedBy(e) || e === ',' || e === ':';
   }
 }
 
@@ -69,23 +77,20 @@ function ArrayParser(str){
 
   for(let i = 0; i < str.length; i++){
     if(stack.isOpenedBy(str[i]) && currData.isEmpty()){
-      currData.type = getType(str[i]); // destructuring
-      currData.value = getValue(str[i]); // destructuring
-      currData.temp = undefined;
+      currData.initialize(str[i]);
       stack.lastChild.addData(currData);
       stack.buildStack();
       currData = new Data();
     }
     else if(stack.isPausedBy(str[i])){
       if(str[i] === ':'){
-        currData.key = currData.temp.trim();
+        //currData.key.value = currData.key.value.trim();
+        currData.key = currData.temp.trim(); // currData.key.done = true
         currData.temp = '';
         continue;
       }
       if(!currData.isEmpty()){
-        currData.value = currData.temp.trim();
-        currData.type = getType(currData.value);
-        currData.temp = undefined;
+        currData.initialize();
         stack.lastChild.addData(currData);
         currData = new Data();
       }
@@ -101,9 +106,7 @@ function ArrayParser(str){
     }
   }
   if(!currData.isEmpty()){
-    currData.value = currData.temp.trim();
-    currData.type = getType(currData.value);
-    currData.temp = undefined;    
+    currData.initialize();    
     stack.lastChild.addData(currData);
   }
   
@@ -148,7 +151,7 @@ function getType(value){
 }
 
 function getValue(value){
-  return getType(value) === 'array' ? 'ArrayObject' : 'Object';
+  return getType(value) === 'array' ? 'ArrayObject' : getType(value) === 'object' ? 'Object' : value;
 }
 
 let testcase1 = '[12, [14, 55], 15]';
