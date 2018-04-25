@@ -1,22 +1,41 @@
 const tokenizer = require('./tokenizer.js').tokenizer;
 const lexer = require('./lexer.js').lexer;
 
+class SyntaxError{
+  throwArrayKeyError(value){
+    throw `배열에는 키 값을 설정할 수 없습니다: ${value}`;
+  }
+  throwObjectKeyError(value){
+    throw `키 값이 존재하지 않습니다 : ${value}`; // value값이 존재하지 않습니다 추가
+  }
+  throwElementError(value){
+    throw `여러 원소가 존재할 수 없는 자료형입니다`;
+  }
+  throwCloseTypeError(){
+    throw `닫히는 타입이 다릅니다`;
+  }
+  throwCloseError(){
+    throw `닫히지 않았습니다`;
+  }
+}
+
 class Child{
   constructor({type} = {}){
     this.type = type;
     this.key = type === 'array' ? 0 : undefined;
     this.elements = [];
+    this.error = new SyntaxError();
   }
   push(node){
     if(this.type === 'array'){
-      const key = node.key ? this.throwArrayKeyError(node.value) : this.key;
+      const key = node.key ? this.error.throwArrayKeyError(node.value) : this.key;
       node.key = key;
       this.elements.push(node);
       this.key++;
     }
     else if(this.type === 'object'){
       if(this.key === undefined){
-        if(node.type !== 'key') this.throwObjectKeyError(node.value);
+        if(node.type !== 'key') this.error.throwObjectKeyError(node.value);
         this.key = node.value;
       }
       else{
@@ -27,45 +46,34 @@ class Child{
       }
     }
     else{
-      if(this.elements.length > 0) this.throwElementError();
+      if(this.elements.length > 0) this.error.throwElementError();
       this.elements.push(node);
     }
   }
   get lastNode(){
     return this.elements[this.elements.length-1];
   }
-  throwArrayKeyError(value){
-    throw `배열에는 키 값을 설정할 수 없습니다: ${value}`;
-  }
-  throwObjectKeyError(value){
-    throw `키 값이 존재하지 않습니다 : ${value}`; // value값이 존재하지 않습니다 추가
-  }
-  throwElementError(value){
-    throw `여러 원소가 존재할 수 없는 자료형입니다`;
-  }
 }
 
 class Stack{
   constructor(){
     this.stack = [];
+    this.error = new SyntaxError();
   }
   build(node){
     node ? this.lastChild.push(node) : null;
     this.stack.push(new Child(node));    
   }
   close(node){
-    if(this.lastChild.type !== node.type) this.throwCloseError();
+    if(this.lastChild.type !== node.type) this.error.throwCloseTypeError();
     const lastChild = this.stack.pop();
     this.lastChild.lastNode.child.push(...lastChild.elements);
   }
   isUnclosed(){
-    return this.stack.length > 1;
+    return this.stack.length > 1 ? this.error.throwCloseError() : null;
   }
   get lastChild(){
     return this.stack[this.stack.length-1];
-  }
-  throwCloseError(){
-    throw `닫히는 타입이 다릅니다`;
   }
 }
 
@@ -80,7 +88,7 @@ function arrayparser(ast){
     else stack.lastChild.push(node);
   })
 
-  if(stack.isUnclosed()) throw `닫히지 않았습니다`;
+  stack.isUnclosed();
 
   return stack.lastChild.elements.pop(); // element가 이상하다
 }
@@ -99,5 +107,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult(testcase1);
+let result = getResult("[1,2,3");
 console.log(JSON.stringify(result, null, 2));
