@@ -1,3 +1,6 @@
+const tokenizer = require('./tokenizer.js').tokenizer;
+const lexer = require('./lexer.js').lexer;
+
 class Child{
   constructor({type} = {}){
     this.type = type;
@@ -96,5 +99,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult(testcase9);
+let result = getResult(testcase1);
 console.log(JSON.stringify(result, null, 2));

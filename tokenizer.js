@@ -1,8 +1,4 @@
-// function trim(string){
-//   return string ? string.trim() : string;
-// };
-
-function tokenizer(code){
+exports.tokenizer = function(code){
   const tokens = [];
   let token = '';
   let foundString = false;

@@ -1,4 +1,4 @@
-function lexer(tokens){
+exports.lexer = function(tokens){
   const ast = [];
 
   tokens.forEach(token => {
