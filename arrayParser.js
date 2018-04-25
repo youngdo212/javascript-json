@@ -6,7 +6,10 @@ class SyntaxError{
     throw `배열에는 키 값을 설정할 수 없습니다: ${value}`;
   }
   throwObjectKeyError(value){
-    throw `키 값이 존재하지 않습니다 : ${value}`; // value값이 존재하지 않습니다 추가
+    throw `키가 존재하지 않습니다 : ${value}`;
+  }
+  throwObjectValueError(value){
+    throw `다음 키의 값이 존재하지 않습니다: ${value}`;
   }
   throwElementError(value){
     throw `여러 원소가 존재할 수 없는 자료형입니다`;
@@ -27,28 +30,33 @@ class Child{
     this.error = new SyntaxError();
   }
   push(node){
-    if(this.type === 'array'){
-      const key = node.key ? this.error.throwArrayKeyError(node.value) : this.key;
-      node.key = key;
-      this.elements.push(node);
-      this.key++;
+    const pushIn = {
+      'array' : this.pushInArray,
+      'object' : this.pushInObject,
+      'undefined' : this.pushAtFirst
     }
-    else if(this.type === 'object'){
-      if(this.key === undefined){
-        if(node.type !== 'key') this.error.throwObjectKeyError(node.value);
-        this.key = node.value;
-      }
-      else{
-        const key = this.key;
-        node.key = key;
-        this.elements.push(node);
-        this.key = undefined;      
-      }
+    pushIn[this.type].call(this, node);
+  }
+  pushInArray(node){
+    node.key = node.key ? this.error.throwArrayKeyError(node.value) : this.key;
+    this.elements.push(node);
+    this.key++;
+  }
+  pushInObject(node){
+    if(this.key === undefined){
+      if(node.type !== 'key') this.error.throwObjectKeyError(node.value);
+      this.key = node.value;
     }
     else{
-      if(this.elements.length > 0) this.error.throwElementError();
+      if(node.type === 'key' || node.type === 'empty') this.error.throwObjectValueError(this.key);
+      node.key = this.key;
       this.elements.push(node);
+      this.key = undefined;      
     }
+  }
+  pushAtFirst(node){
+    if(this.elements.length > 0) this.error.throwElementError();
+    this.elements.push(node);
   }
   get lastNode(){
     return this.elements[this.elements.length-1];
@@ -107,5 +115,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult("[1,2,3");
+let result = getResult("{1}");
 console.log(JSON.stringify(result, null, 2));
