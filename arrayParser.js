@@ -68,7 +68,10 @@ class Stack{
     this.error = new SyntaxError();
   }
   buildBy(node){
-    node ? this.lastChild.push(node) : null;
+    if(node){
+      node.state = undefined;
+      this.lastChild.push(node);
+    }
     this.stack.push(new Child(node));    
   }
   closeBy(node){
@@ -114,5 +117,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult("['a', 1]");
+let result = getResult(testcase1);
 console.log(JSON.stringify(result, null, 2));
