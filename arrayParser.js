@@ -33,7 +33,7 @@ class Child{
     const pushIn = {
       'array' : this.pushInArray,
       'object' : this.pushInObject,
-      'undefined' : this.pushAtFirst
+      'undefined' : this.pushFirstTime
     }
     pushIn[this.type].call(this, node);
   }
@@ -53,7 +53,7 @@ class Child{
       this.key = undefined;      
     }
   }
-  pushAtFirst(node){
+  pushFirstTime(node){
     if(this.elements.length > 0) this.error.throwElementError();
     this.elements.push(node);
   }
