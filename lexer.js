@@ -26,12 +26,10 @@ class TypeCheck{
     return this.value === 'null';
   }
   isString(){
-    const compareValue = this.value.match(/'.+?'/);
-    return compareValue ? this.value === compareValue[0] : false;
+    return this.value === this.value.match(/('.+?')*/)[0];
   }
   isNumber(){
-    const compareValue = this.value.match(/\d+/);
-    return compareValue ? this.value === compareValue[0] : false;  
+    return this.value === this.value.match(/\d*/)[0];
   }
   isArray(){
     return this.value === '[' || this.value === ']';
