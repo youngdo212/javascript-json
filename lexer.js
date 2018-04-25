@@ -1,11 +1,11 @@
 function lexer(tokens){
-  const data = [];
+  const ast = [];
 
   tokens.forEach(token => {
-    data.push(getData(token));
+    ast.push(getData(token));
   });
 
-  return data;
+  return ast;
 }
 
 function getData(token){
@@ -14,9 +14,11 @@ function getData(token){
   const state = getState(token);
 
   return {
+    key: undefined,    
     type: type,
     value: value,
-    state: state
+    state: state,
+    child: []
   };
 }
 
