@@ -11,7 +11,7 @@ class SyntaxError{
   throwObjectValueError(value){
     throw `다음 키의 값이 존재하지 않습니다: ${value}`;
   }
-  throwElementError(value){
+  throwElementError(){
     throw `여러 원소가 존재할 수 없는 자료형입니다`;
   }
   throwCloseTypeError(){
@@ -38,7 +38,7 @@ class Child{
     pushIn[this.type].call(this, node);
   }
   pushInArray(node){
-    node.key = node.key ? this.error.throwArrayKeyError(node.value) : this.key;
+    node.key = node.type === 'key' ? this.error.throwArrayKeyError(node.value) : this.key;
     this.elements.push(node);
     this.key++;
   }
@@ -115,5 +115,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult("{1}");
+let result = getResult("[a:1]");
 console.log(JSON.stringify(result, null, 2));
