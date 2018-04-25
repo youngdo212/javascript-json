@@ -25,7 +25,7 @@ class SyntaxError{
 class Child{
   constructor({type} = {}){
     this.type = type;
-    this.key = type === 'array' ? 0 : undefined;
+    this.key = (type === 'array') ? 0 : undefined; // 0은 배열의 키(index)입니다. 0을 const키워드로 정의해서 사용해야 될까요?
     this.elements = [];
     this.error = new SyntaxError();
   }
@@ -38,14 +38,13 @@ class Child{
     pushIn[this.type].call(this, node);
   }
   pushInArray(node){
-    node.key = node.type === 'key' ? this.error.throwArrayKeyError(node.value) : this.key;
+    node.key = (node.type === 'key') ? this.error.throwArrayKeyError(node.value) : this.key;
     this.elements.push(node);
     this.key++;
   }
   pushInObject(node){
     if(this.key === undefined){
-      if(node.type !== 'key') this.error.throwObjectKeyError(node.value);
-      this.key = node.value;
+      this.key = (node.type === 'key') ? node.value : this.error.throwObjectKeyError(node.value);
     }
     else{
       if(node.type === 'key' || node.type === 'empty') this.error.throwObjectValueError(this.key);
@@ -77,7 +76,7 @@ class Stack{
     const lastChild = this.stack.pop();
     this.lastChild.lastNode.child.push(...lastChild.elements);
   }
-  isUnclosed(){
+  checkUnclosed(){
     return this.stack.length > 1 ? this.error.throwCloseError() : null;
   }
   get lastChild(){
@@ -96,7 +95,7 @@ function arrayparser(ast){
     else stack.lastChild.push(node);
   })
 
-  stack.isUnclosed();
+  stack.checkUnclosed();
 
   return stack.lastChild.elements.pop(); // element가 이상하다
 }
@@ -115,5 +114,5 @@ let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
 let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 let testcase9 = "'[]'";
 
-let result = getResult("[a:1]");
+let result = getResult("['a', 1]");
 console.log(JSON.stringify(result, null, 2));
