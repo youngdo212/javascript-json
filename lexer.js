@@ -2,89 +2,84 @@ exports.lexer = function(tokens){
   const ast = [];
 
   tokens.forEach(token => {
-    ast.push(getData(token));
+    ast.push(new DataStructure(token));
   });
-
+  
   return ast;
 }
 
-function getData(token){
-  const type = getType(token);
-  const value = getValue(type, token);
-  const state = getState(token);
-
-  return {
-    key: undefined,    
-    type: type,
-    value: value,
-    state: state,
-    child: []
-  };
-}
-
-function getType(value){
-  return isBoolean(value) ? 'boolean' : 
-  isNull(value) ? 'null' : 
-  isString(value) ? 'string' :
-  isNumber(value) ? 'number' :
-  isArray(value) ? 'array' :
-  isObject(value) ? 'object' :
-  isKey(value) ? 'key' :
-  isEmpty(value) ? 'empty' : throwError(value);
-}
-
-function throwError(value){
-  throw `${value}는 올바른 타입이 아닙니다`;
-}
-
-function isBoolean(value){
-  return value === 'true' || value === 'false';
-}
-
-function isNull(value){
-  return value === 'null';
-}
-
-function isString(value){
-  const compareValue = value.match(/'.+?'/);
-  return compareValue ? value === compareValue[0] : false;
-}
-
-function isNumber(value){
-  const compareValue = value.match(/\d+/);
-  return compareValue ? value === compareValue[0] : false;  
-}
-
-function isArray(value){
-  return value === '[' || value === ']';
-}
-
-function isObject(value){
-  return value === '{' || value === '}';
-}
-
-function isKey(value){
-  const {length} = value;
-  if(value[length-1] === ':'){
-    const compareValue = value.match(/\w+/);
-    return compareValue ? value.slice(0,length-1) === compareValue[0] : false;
+class TypeError{
+  throwTypeError(value){
+    throw `${value}는 올바른 타입이 아닙니다`;
   }
-  return false;
 }
 
-function isEmpty(value){
-  return value === '';
+class TypeCheck{
+  constructor(value){
+    this.value = value;
+    this.error = new TypeError();
+  }
+  isBoolean(){
+    return this.value === 'true' || this.value === 'false';
+  }
+  isNull(){
+    return this.value === 'null';
+  }
+  isString(){
+    const compareValue = this.value.match(/'.+?'/);
+    return compareValue ? this.value === compareValue[0] : false;
+  }
+  isNumber(){
+    const compareValue = this.value.match(/\d+/);
+    return compareValue ? this.value === compareValue[0] : false;  
+  }
+  isArray(){
+    return this.value === '[' || this.value === ']';
+  }
+  isObject(){
+    return this.value === '{' || this.value === '}';
+  }
+  isKey(){
+    const {length} = this.value;
+    if(this.value[length-1] === ':'){
+      const compareValue = this.value.match(/\w+/);
+      return compareValue ? this.value.slice(0,length-1) === compareValue[0] : false;
+    }
+    return false;
+  }
+  isEmpty(){
+    return this.value === '';
+  }
 }
 
-function getValue(type, value){
-  if(type === 'array') return 'ArrayObject';
-  if(type === 'object') return 'Object';
-  if(type === 'key') return value.slice(0, value.length-1);
-  return value;
-}
-
-function getState(value){
-  if(value === '[' || value === '{') return 'open';
-  if(value === ']' || value === '}') return 'close';
-  return undefined;
+class DataStructure{
+  constructor(source){
+    this.key = undefined;
+    this.type = this.getType(source);
+    this.value = this.getValue(this.type, source);
+    this.state = this.getState(source);
+    this.child = [];
+  }
+  getType(source){
+    const mySource = new TypeCheck(source);
+    return mySource.isBoolean() ? 'boolean' : 
+    mySource.isNull() ? 'null' : 
+    mySource.isString() ? 'string' :
+    mySource.isNumber() ? 'number' :
+    mySource.isArray() ? 'array' :
+    mySource.isObject() ? 'object' :
+    mySource.isKey() ? 'key' :
+    mySource.isEmpty() ? 'empty' : mySource.error.throwTypeError(source);
+  }
+  getValue(type, source){
+    if(type === 'array') return 'ArrayObject';
+    if(type === 'object') return 'Object';
+    if(type === 'key') return source.slice(0, source.length-1);
+    return source;
+  }
+  getState(source){
+    if(source === '[' || source === '{') return 'open';
+    if(source === ']' || source === '}') return 'close';
+    return undefined;
+  }
 }
