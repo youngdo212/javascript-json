@@ -67,11 +67,11 @@ class Stack{
     this.stack = [];
     this.error = new SyntaxError();
   }
-  build(node){
+  buildBy(node){
     node ? this.lastChild.push(node) : null;
     this.stack.push(new Child(node));    
   }
-  close(node){
+  closeBy(node){
     if(this.lastChild.type !== node.type) this.error.throwCloseTypeError();
     const lastChild = this.stack.pop();
     this.lastChild.lastNode.child.push(...lastChild.elements);
@@ -87,17 +87,17 @@ class Stack{
 function arrayparser(ast){
   let stack = new Stack();
 
-  stack.build();
+  stack.buildBy();
 
   ast.forEach(node => {
-    if(node.state === 'open') stack.build(node);
-    else if(node.state === 'close') stack.close(node);
+    if(node.state === 'open') stack.buildBy(node);
+    else if(node.state === 'close') stack.closeBy(node);
     else stack.lastChild.push(node);
   })
 
   stack.checkUnclosed();
 
-  return stack.lastChild.elements.pop(); // element가 이상하다
+  return stack.lastChild.lastNode;
 }
 
 let pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
