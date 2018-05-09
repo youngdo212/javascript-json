@@ -1,4 +1,6 @@
-exports.expect = function(result){
+const {deepEqual} = require("./deepEqual.js");
+
+const expect = function(result){
   return new Expect(result);
 }
 
@@ -7,7 +9,7 @@ class Expect{
     this.result = result;
   }
   toBe(answer){
-    if(this.result === answer) return 'OK';
-    return `FAIL (targetValue is ${this.result}, expectValue is ${answer})`;
+    if(deepEqual(this.result, answer)) return 'OK';
+    return `FAIL (targetValue is ${JSON.stringify(this.result)}, expectValue is ${JSON.stringify(answer)})`;
   }
 }
