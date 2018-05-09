@@ -26,7 +26,7 @@ class TypeCheck{
     return this.value === 'null';
   }
   isString(){
-    return this.value === this.value.match(/('.+?')*/)[0];
+    return this.value === this.value.match(/('.+?')?/)[0];
   }
   isNumber(){
     return this.value === this.value.match(/\d*/)[0];
