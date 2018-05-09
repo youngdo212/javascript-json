@@ -1,6 +1,6 @@
 const {deepEqual} = require("./deepEqual.js");
 
-const expect = function(result){
+exports.expect = function(result){
   return new Expect(result);
 }
 
