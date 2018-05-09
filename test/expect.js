@@ -1,13 +1,13 @@
-exports.expect = function(answer){
-  return new Expect(answer);
+exports.expect = function(result){
+  return new Expect(result);
 }
 
 class Expect{
-  constructor(answer){
-    this.answer = answer;
+  constructor(result){
+    this.result = result;
   }
-  toBe(result){
-    if(this.answer === result) return 'OK';
-    return `FAIL (targetValue is ${result}, expectValue is ${this.answer}`;
+  toBe(answer){
+    if(this.result === answer) return 'OK';
+    return `FAIL (targetValue is ${this.result}, expectValue is ${answer})`;
   }
 }
