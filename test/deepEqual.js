@@ -1,4 +1,4 @@
-exports.deepEqual = function(a,b){
+exports.deepEqual = function deepEqual(a,b){
   if(isObject(a,b)){
     if(!hasSameProperty(a,b)) return false;
     for(let property in a){
