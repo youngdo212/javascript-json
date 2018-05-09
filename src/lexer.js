@@ -60,14 +60,14 @@ class DataStructure{
   }
   getType(source){
     const mySource = new TypeCheck(source);
-    return mySource.isBoolean() ? 'boolean' : 
-    mySource.isNull() ? 'null' : 
-    mySource.isString() ? 'string' :
-    mySource.isNumber() ? 'number' :
-    mySource.isArray() ? 'array' :
-    mySource.isObject() ? 'object' :
-    mySource.isKey() ? 'key' :
-    mySource.isEmpty() ? 'empty' : mySource.error.throwTypeError(source);
+    return mySource.isEmpty() ? 'empty' : 
+      mySource.isBoolean() ? 'boolean' : 
+      mySource.isNull() ? 'null' : 
+      mySource.isString() ? 'string' :
+      mySource.isNumber() ? 'number' :
+      mySource.isArray() ? 'array' :
+      mySource.isObject() ? 'object' :
+      mySource.isKey() ? 'key' : mySource.error.throwTypeError(source);
   }
   getValue(type, source){
     if(type === 'array') return 'ArrayObject';
