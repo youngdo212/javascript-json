@@ -41,3 +41,8 @@ test("key와 value를 나누는 기호(:)는 앞과 합쳐지고 뒤를 구분�
   const result = tokenizer("{ a: 123}");
   return expect(result).toBe(["{", "a:", "123", "}"]);
 })
+
+test("key값의 앞 뒤 공백은 제거한다", function(){
+  const result = tokenizer("{ key  :1}");
+  return expect(result).toBe(["{", "key:", "1", "}"]);
+})
