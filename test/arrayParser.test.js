@@ -2,88 +2,50 @@ const {test} = require("./test.js");
 const {expect} = require("./expect.js");
 const {arrayParser} = require("../src/arrayParser.js");
 
-test("true를 올바르게 파싱한다", function(){
-  const testcase = "true";
-  const result = arrayParser(testcase);
-  const answer = {
+const testcase = {
+  "true": {
     key: undefined, 
     type: 'boolean', 
     value: 'true', 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("false를 올바르게 파싱한다", function(){
-  const testcase = "false";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "false": {
     key: undefined, 
     type: 'boolean', 
     value: 'false', 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("null을 올바르게 파싱한다", function(){
-  const testcase = "null";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "null": {
     key: undefined, 
     type: 'null', 
     value: 'null', 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("문자열을 올바르게 파싱한다", function(){
-  const testcase = "'hello, world'";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "string": {
     key: undefined, 
     type: 'string', 
     value: "'hello, world'", 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("숫자를 올바르게 파싱한다", function(){
-  const testcase = "12345";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "number": {
     key: undefined, 
     type: 'number', 
     value: '12345', 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("빈 문자를 올바르게 파싱한다", function(){
-  const testcase = "";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "empty": {
     key: undefined, 
     type: 'empty', 
     value: '', 
     state: undefined, 
     child:[]
-  }
-  expect(result).toBe(answer);
-})
-
-test("배열을 올바르게 파싱한다", function(){
-  const testcase = "[123,'abc']";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "array": {
     key: undefined, 
     type: 'array', 
     value: 'ArrayObject', 
@@ -101,14 +63,8 @@ test("배열을 올바르게 파싱한다", function(){
       state: undefined, 
       child:[]
     }]
-  }
-  expect(result).toBe(answer);
-})
-
-test("중첩 배열을 올바르게 파싱한다", function(){
-  const testcase = "[1,[2]]";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "recuresiveArray": {
     key: undefined, 
     type: 'array', 
     value: 'ArrayObject', 
@@ -132,14 +88,8 @@ test("중첩 배열을 올바르게 파싱한다", function(){
         child:[]
       }]
     }]
-  }
-  expect(result).toBe(answer);
-})
-
-test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(){
-  const testcase = "[123,]";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "emptyArray": {
     key: undefined, 
     type: 'array', 
     value: 'ArrayObject', 
@@ -157,14 +107,8 @@ test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(
       state: undefined, 
       child:[]
     }]
-  }
-  expect(result).toBe(answer);
-})
-
-test("객체를 올바르게 파싱한다", function(){
-  const testcase = "{a:123, b: 321}";
-  const result = arrayParser(testcase);
-  const answer = {
+  },
+  "object": {
     key: undefined, 
     type: 'object', 
     value: 'Object', 
@@ -183,6 +127,75 @@ test("객체를 올바르게 파싱한다", function(){
       child:[]
     }]
   }
+}
+
+test("true를 올바르게 파싱한다", function(){
+  const testcase = "true";
+  const result = arrayParser(testcase);
+  const answer = testcase["true"];
+  expect(result).toBe(answer);
+})
+
+test("false를 올바르게 파싱한다", function(){
+  const testcase = "false";
+  const result = arrayParser(testcase);
+  const answer = testcase["false"];
+  expect(result).toBe(answer);
+})
+
+test("null을 올바르게 파싱한다", function(){
+  const testcase = "null";
+  const result = arrayParser(testcase);
+  const answer = testcase["null"];
+  expect(result).toBe(answer);
+})
+
+test("문자열을 올바르게 파싱한다", function(){
+  const testcase = "'hello, world'";
+  const result = arrayParser(testcase);
+  const answer = testcase["string"];
+  expect(result).toBe(answer);
+})
+
+test("숫자를 올바르게 파싱한다", function(){
+  const testcase = "12345";
+  const result = arrayParser(testcase);
+  const answer = testcase["number"];
+  expect(result).toBe(answer);
+})
+
+test("빈 문자를 올바르게 파싱한다", function(){
+  const testcase = "";
+  const result = arrayParser(testcase);
+  const answer = testcase["empty"];
+  expect(result).toBe(answer);
+})
+
+test("배열을 올바르게 파싱한다", function(){
+  const testcase = "[123,'abc']";
+  const result = arrayParser(testcase);
+  const answer = testcase["array"];
+  expect(result).toBe(answer);
+})
+
+test("중첩 배열을 올바르게 파싱한다", function(){
+  const testcase = "[1,[2]]";
+  const result = arrayParser(testcase);
+  const answer = testcase["recursiveArray"];
+  expect(result).toBe(answer);
+})
+
+test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(){
+  const testcase = "[123,]";
+  const result = arrayParser(testcase);
+  const answer = testcase["emptyArray"];
+  expect(result).toBe(answer);
+})
+
+test("객체를 올바르게 파싱한다", function(){
+  const testcase = "{a:123, b: 321}";
+  const result = arrayParser(testcase);
+  const answer = testcase["object"];
   expect(result).toBe(answer);
 })
 
