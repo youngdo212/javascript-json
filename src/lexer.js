@@ -39,9 +39,8 @@ class TypeCheck{
   }
   isKey(){
     const {length} = this.value;
-    if(this.value[length-1] === ':'){
-      const compareValue = this.value.match(/\w+/);
-      return compareValue ? this.value.slice(0,length-1) === compareValue[0] : false;
+    if(this.value[length-1] === ':' && length > 1){
+      return this.value.slice(0,length-1) ===  this.value.match(/\w*/)[0];
     }
     return false;
   }
