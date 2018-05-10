@@ -12,7 +12,7 @@ test("true를 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("false를 올바르게 파싱한다", function(){
@@ -25,7 +25,7 @@ test("false를 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("null을 올바르게 파싱한다", function(){
@@ -38,7 +38,7 @@ test("null을 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("문자열을 올바르게 파싱한다", function(){
@@ -51,7 +51,7 @@ test("문자열을 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("숫자를 올바르게 파싱한다", function(){
@@ -64,7 +64,7 @@ test("숫자를 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("빈 문자를 올바르게 파싱한다", function(){
@@ -77,7 +77,7 @@ test("빈 문자를 올바르게 파싱한다", function(){
     state: undefined, 
     child:[]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("배열을 올바르게 파싱한다", function(){
@@ -102,7 +102,7 @@ test("배열을 올바르게 파싱한다", function(){
       child:[]
     }]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("중첩 배열을 올바르게 파싱한다", function(){
@@ -133,7 +133,7 @@ test("중첩 배열을 올바르게 파싱한다", function(){
       }]
     }]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(){
@@ -158,7 +158,7 @@ test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(
       child:[]
     }]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("객체를 올바르게 파싱한다", function(){
@@ -183,7 +183,7 @@ test("객체를 올바르게 파싱한다", function(){
       child:[]
     }]
   }
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("열림과 닫힘의 문자가 다를경우([1,2}) 에러메시지를 출력한다", function(){
@@ -192,11 +192,11 @@ test("열림과 닫힘의 문자가 다를경우([1,2}) 에러메시지를 출�
   const answer = `닫히는 타입이 다릅니다`;
   try{
     result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("닫히지 않았을 경우 에러메시지를 출력한다", function(){
@@ -205,11 +205,11 @@ test("닫히지 않았을 경우 에러메시지를 출력한다", function(){
   const answer = `닫히지 않았습니다`;
   try{
     result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("객체에 키가 없을 경우 에러메시지를 출력한다", function(){
@@ -218,11 +218,11 @@ test("객체에 키가 없을 경우 에러메시지를 출력한다", function(
   const answer = `키가 존재하지 않습니다 : 1`;
   try{
     result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("객체에 키는 있지만 값이 없을 경우 에러메시지를 출력한다", function(){
@@ -231,9 +231,9 @@ test("객체에 키는 있지만 값이 없을 경우 에러메시지를 출력�
   const answer = `다음 키의 값이 존재하지 않습니다: key`;
   try{
     result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })

@@ -11,7 +11,7 @@ test("'true'의 타입, 값, 상태를 올바르게 파악한다", function(){
     state: undefined, 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("'true'의 오타를 확인하여 에러메시지를 출력한다", function(){
@@ -20,11 +20,11 @@ test("'true'의 오타를 확인하여 에러메시지를 출력한다", functio
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("'false'의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -36,7 +36,7 @@ test("'false'의 타입, 값, 상태를 올바르게 파악한다", function(){
     state: undefined, 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("'false'의 오타를 확인하여 에러메시지를 출력한다", function(){
@@ -45,11 +45,11 @@ test("'false'의 오타를 확인하여 에러메시지를 출력한다", functi
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("'null'의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -61,7 +61,7 @@ test("'null'의 타입, 값, 상태를 올바르게 파악한다", function(){
     state: undefined, 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("'null'의 오타를 확인하여 에러메시지를 출력한다", function(){
@@ -70,11 +70,11 @@ test("'null'의 오타를 확인하여 에러메시지를 출력한다", functio
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("문자열의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -86,7 +86,7 @@ test("문자열의 타입, 값, 상태를 올바르게 파악한다", function()
     state: undefined, 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("문자열의 따옴표(')가 3개인 경우 에러메시지를 출력한다", function(){
@@ -95,11 +95,11 @@ test("문자열의 따옴표(')가 3개인 경우 에러메시지를 출력한�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("문자열의 따옴표(')가 4개인 경우 에러메시지를 출력한다", function(){
@@ -108,11 +108,11 @@ test("문자열의 따옴표(')가 4개인 경우 에러메시지를 출력한�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("문자열의 따옴표(')가 5개 이상인 경우 에러메시지를 출력한다", function(){
@@ -121,11 +121,11 @@ test("문자열의 따옴표(')가 5개 이상인 경우 에러메시지를 출�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("숫자의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -137,7 +137,7 @@ test("숫자의 타입, 값, 상태를 올바르게 파악한다", function(){
     state: undefined, 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("숫자에 문자가 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -146,11 +146,11 @@ test("숫자에 문자가 들어가 있는 경우 에러메시지를 출력한�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("열린 배열([)의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -162,7 +162,7 @@ test("열린 배열([)의 타입, 값, 상태를 올바르게 파악한다", fun
     state: "open", 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("열린 배열([)에 다른 값이 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -171,11 +171,11 @@ test("열린 배열([)에 다른 값이 들어가 있는 경우 에러메시지�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("닫힌 배열(])의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -187,7 +187,7 @@ test("닫힌 배열(])의 타입, 값, 상태를 올바르게 파악한다", fun
     state: "close", 
     child:[]
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("닫힌 배열(])에 다른 값이 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -196,11 +196,11 @@ test("닫힌 배열(])에 다른 값이 들어가 있는 경우 에러메시지�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("열린 객체({)의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -212,7 +212,7 @@ test("열린 객체({)의 타입, 값, 상태를 올바르게 파악한다", fun
     state: "open", 
     child: []
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("열린 객체({)에 다른 값이 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -221,11 +221,11 @@ test("열린 객체({)에 다른 값이 들어가 있는 경우 에러메시지�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("닫힌 객체(})의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -237,7 +237,7 @@ test("닫힌 객체(})의 타입, 값, 상태를 올바르게 파악한다", fun
     state: "close", 
     child: []
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("닫힌 객체(})에 다른 값이 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -246,11 +246,11 @@ test("닫힌 객체(})에 다른 값이 들어가 있는 경우 에러메시지�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("키의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -262,7 +262,7 @@ test("키의 타입, 값, 상태를 올바르게 파악한다", function(){
     state: undefined, 
     child: []
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })
 
 test("키 값에 띄어쓰기가 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -271,11 +271,11 @@ test("키 값에 띄어쓰기가 들어가 있는 경우 에러메시지를 출�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("키 값에 특수문자가 들어가 있는 경우 에러메시지를 출력한다", function(){
@@ -284,11 +284,11 @@ test("키 값에 특수문자가 들어가 있는 경우 에러메시지를 출�
   const answer = `${typo}는 올바른 타입이 아닙니다`
   try{
     result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
-    return expect(error).toBe(answer);  
+    expect(error).toBe(answer);  
   }
-  return 'FAIL (에러메시지가 출력되지 않았습니다)';
 })
 
 test("빈 문자열의 타입, 값, 상태를 올바르게 파악한다", function(){
@@ -300,5 +300,5 @@ test("빈 문자열의 타입, 값, 상태를 올바르게 파악한다", functi
     state: undefined, 
     child: []
   }]
-  return expect(result).toBe(answer);
+  expect(result).toBe(answer);
 })

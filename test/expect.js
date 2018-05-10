@@ -9,7 +9,7 @@ class Expect{
     this.result = result;
   }
   toBe(answer){
-    if(deepEqual(this.result, answer)) return 'OK';
-    return `FAIL (targetValue is ${JSON.stringify(this.result)}, expectValue is ${JSON.stringify(answer)})`;
+    if(deepEqual(this.result, answer)) console.log('OK');
+    else console.log(`FAIL (targetValue is ${JSON.stringify(this.result)}, expectValue is ${JSON.stringify(answer)})`);
   }
 }
