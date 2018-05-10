@@ -291,6 +291,19 @@ test("키 값에 특수문자가 들어가 있는 경우 에러메시지를 출�
   }
 })
 
+test("키 값에 빈 문자열이 들어가 있는 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = ":"
+  const answer = `${typo}는 올바른 타입이 아닙니다`
+  try{
+    result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
 test("빈 문자열의 타입, 값, 상태를 올바르게 파악한다", function(){
   const result = lexer([""]);
   const answer = [{
