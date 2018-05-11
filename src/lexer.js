@@ -26,12 +26,10 @@ class TypeCheck{
     return this.value === 'null';
   }
   isString(){
-    const compareValue = this.value.match(/'.+?'/);
-    return compareValue ? this.value === compareValue[0] : false;
+    return this.value === this.value.match(/('.+?')?/)[0];
   }
   isNumber(){
-    const compareValue = this.value.match(/\d+/);
-    return compareValue ? this.value === compareValue[0] : false;  
+    return this.value === this.value.match(/\d*/)[0];
   }
   isArray(){
     return this.value === '[' || this.value === ']';
@@ -41,9 +39,8 @@ class TypeCheck{
   }
   isKey(){
     const {length} = this.value;
-    if(this.value[length-1] === ':'){
-      const compareValue = this.value.match(/\w+/);
-      return compareValue ? this.value.slice(0,length-1) === compareValue[0] : false;
+    if(this.value[length-1] === ':' && length > 1){
+      return this.value.slice(0,length-1) ===  this.value.match(/\w*/)[0];
     }
     return false;
   }
@@ -62,14 +59,14 @@ class DataStructure{
   }
   getType(source){
     const mySource = new TypeCheck(source);
-    return mySource.isBoolean() ? 'boolean' : 
-    mySource.isNull() ? 'null' : 
-    mySource.isString() ? 'string' :
-    mySource.isNumber() ? 'number' :
-    mySource.isArray() ? 'array' :
-    mySource.isObject() ? 'object' :
-    mySource.isKey() ? 'key' :
-    mySource.isEmpty() ? 'empty' : mySource.error.throwTypeError(source);
+    return mySource.isEmpty() ? 'empty' : 
+      mySource.isBoolean() ? 'boolean' : 
+      mySource.isNull() ? 'null' : 
+      mySource.isString() ? 'string' :
+      mySource.isNumber() ? 'number' :
+      mySource.isArray() ? 'array' :
+      mySource.isObject() ? 'object' :
+      mySource.isKey() ? 'key' : mySource.error.throwTypeError(source);
   }
   getValue(type, source){
     if(type === 'array') return 'ArrayObject';

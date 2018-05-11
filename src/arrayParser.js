@@ -87,7 +87,7 @@ class Stack{
   }
 }
 
-function arrayparser(ast){
+function arrayParser(ast){
   let stack = new Stack();
 
   stack.buildBy();
@@ -105,17 +105,18 @@ function arrayparser(ast){
 
 let pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
 
-let getResult = pipe(tokenizer, lexer, arrayparser);
+exports.arrayParser = pipe(tokenizer, lexer, arrayParser);
 
-let testcase1 = '[12, [14, 55], 15]';
-let testcase2 = '[1, [55, 3]]'
-let testcase3 = '[1, [[2]]]'
-let testcase4 = '[123,[22,23,[11,[112233],112],55],33]';
-let testcase5 = '12345'
-let testcase6 = '[1,3,[1,2],4,[5,6]]'
-let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
-let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
-let testcase9 = "'[]'";
+// let testcase1 = '[12, [14, 55], 15]';
+// let testcase2 = '[1, [55, 3]]'
+// let testcase3 = '[1, [[2]]]'
+// let testcase4 = '[123,[22,23,[11,[112233],112],55],33]';
+// let testcase5 = '12345'
+// let testcase6 = '[1,3,[1,2],4,[5,6]]'
+// let testcase7 = "['1a3',[null,false,['11',[112233],112],55, '99'],33, true]";
+// let testcase8 = "['1a3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
+// let testcase9 = "'[]'";
 
-let result = getResult(testcase1);
-console.log(JSON.stringify(result, null, 2));
+// let ArrayParser = pipe(tokenizer, lexer, arrayParser);
+// let result = ArrayParser(testcase1);
+// console.log(JSON.stringify(result, null, 2));
