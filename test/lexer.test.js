@@ -254,11 +254,11 @@ test("닫힌 객체(})에 다른 값이 들어가 있는 경우 에러메시지�
 })
 
 test("키의 타입, 값, 상태를 올바르게 파악한다", function(){
-  const result = lexer(["myKey:"]);
+  const result = lexer(["myKey1:"]);
   const answer = [{
     key: undefined, 
     type: 'key', 
-    value: "myKey", 
+    value: "myKey1", 
     state: undefined, 
     child: []
   }]
@@ -295,6 +295,19 @@ test("키 값에 빈 문자열이 들어가 있는 경우 에러메시지를 출
   let result;
   const typo = ":"
   const answer = `${typo}는 올바른 타입이 아닙니다`
+  try{
+    result = lexer([typo]);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
+test("키 값이 숫자와 문자의 혼용일 때 숫자가 앞에 올 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = "1a:"
+  const answer = `키에 숫자와 문자 혼용 시 숫자는 앞에 올 수 없습니다: ${typo.slice(0,typo.length-1)}`;
   try{
     result = lexer([typo]);
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
