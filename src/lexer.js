@@ -8,13 +8,10 @@ exports.lexer = function(tokens){
   return ast;
 }
 
-class TypeError{
+const lexicalError = {
   throwTypeError(value){
     throw `${value}는 올바른 타입이 아닙니다`;
-  }
-}
-
-class ValueError{
+  },
   throwKeyValueError(value){
     throw `키에 숫자와 문자 혼용 시 숫자는 앞에 올 수 없습니다: ${value}`;
   }
@@ -23,7 +20,7 @@ class ValueError{
 class TypeCheck{
   constructor(value){
     this.value = value;
-    this.error = new TypeError();
+    this.error = lexicalError;
   }
   isBoolean(){
     return this.value === 'true' || this.value === 'false';
@@ -59,7 +56,7 @@ class ValueCheck{
   constructor(type, value){
     this.type = type;
     this.value = value;
-    this.error = new ValueError();
+    this.error = lexicalError;
   }
   isValid(){
     if(this.type === 'key') return this.isValidKey();
