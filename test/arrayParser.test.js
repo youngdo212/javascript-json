@@ -1,6 +1,6 @@
 const {test} = require("./test.js");
 const {expect} = require("./expect.js");
-const {arrayParser} = require("../src/arrayParser.js");
+const ArrayParser = require("../src/arrayParser.js");
 
 const answercase = {
   "true": {
@@ -131,70 +131,80 @@ const answercase = {
 
 test("true를 올바르게 파싱한다", function(){
   const testcase = "true";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["true"];
   expect(result).toBe(answer);
 })
 
 test("false를 올바르게 파싱한다", function(){
   const testcase = "false";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["false"];
   expect(result).toBe(answer);
 })
 
 test("null을 올바르게 파싱한다", function(){
   const testcase = "null";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["null"];
   expect(result).toBe(answer);
 })
 
 test("문자열을 올바르게 파싱한다", function(){
   const testcase = "'hello, world'";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["string"];
   expect(result).toBe(answer);
 })
 
 test("숫자를 올바르게 파싱한다", function(){
   const testcase = "12345";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["number"];
   expect(result).toBe(answer);
 })
 
 test("빈 문자를 올바르게 파싱한다", function(){
   const testcase = "";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["empty"];
   expect(result).toBe(answer);
 })
 
 test("배열을 올바르게 파싱한다", function(){
   const testcase = "[123,'abc']";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["array"];
   expect(result).toBe(answer);
 })
 
 test("중첩 배열을 올바르게 파싱한다", function(){
   const testcase = "[1,[2]]";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["recursiveArray"];
   expect(result).toBe(answer);
 })
 
 test("배열의 빈 공간(empty토큰)을 올바르게 파싱한다", function(){
   const testcase = "[123,]";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["emptyArray"];
   expect(result).toBe(answer);
 })
 
 test("객체를 올바르게 파싱한다", function(){
   const testcase = "{a:123, b: 321}";
-  const result = arrayParser(testcase);
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getAST();
   const answer = answercase["object"];
   expect(result).toBe(answer);
 })
@@ -204,7 +214,8 @@ test("배열이 객체로 닫힐 경우 에러메시지를 출력한다", functi
   const typo = "[1,2}"
   const answer = `정상적으로 종료되지 않은 배열이 있습니다`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -217,7 +228,8 @@ test("배열이 닫히지 않을 경우 에러메시지를 출력한다", functi
   const typo = "[1,2"
   const answer = `정상적으로 종료되지 않은 배열이 있습니다`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -230,7 +242,8 @@ test("불필요한 배열 닫힘이 있을 경우 에러메시지를 출력한�
   const typo = "{a:3}]"
   const answer = `불필요한 닫힘 기호가 존재합니다: ]`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -243,7 +256,8 @@ test("객체가 배열로 닫힐 경우 에러메시지를 출력한다", functi
   const typo = "{a:3]"
   const answer = `정상적으로 종료되지 않은 객체가 있습니다`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -256,7 +270,8 @@ test("객체가 닫히지 않을 경우 에러메시지를 출력한다", functi
   const typo = "{a:[1,2]"
   const answer = `정상적으로 종료되지 않은 객체가 있습니다`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -269,7 +284,8 @@ test("불필요한 객체 닫힘이 있을 경우 에러메시지를 출력한�
   const typo = "[3]}"
   const answer = `불필요한 닫힘 기호가 존재합니다: }`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -282,7 +298,8 @@ test("객체에 키가 없을 경우 에러메시지를 출력한다", function(
   const typo = "{1}"
   const answer = `키가 존재하지 않습니다 : 1`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
@@ -295,10 +312,19 @@ test("객체에 키는 있지만 값이 없을 경우 에러메시지를 출력�
   const typo = "{key:}"
   const answer = `다음 키의 값이 존재하지 않습니다: key`;
   try{
-    result = arrayParser(typo);
+    myArrayParser = new ArrayParser(typo);
+    const result = myArrayParser.getAST();
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
   }
   catch(error){
     expect(error).toBe(answer);  
   }
+})
+
+test("통계를 정확하게 산출한다", function(){
+  const testcase = "[1,[2]]";
+  const myArrayParser = new ArrayParser(testcase);
+  const result = myArrayParser.getStats();
+  const answer = `숫자: 2개, 문자열: 0개, null: 0개, boolean: 0개, 빈 데이터: 0개, 배열: 2개, 객체: 0개`;
+  expect(result).toBe(answer);
 })
