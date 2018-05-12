@@ -14,11 +14,17 @@ class SyntaxError{
   throwElementError(){
     throw `여러 원소가 존재할 수 없는 자료형입니다`;
   }
-  throwCloseTypeError(){
-    throw `닫히는 타입이 다릅니다`;
+  throwCloseError(unclosedType, currentType){
+    if(unclosedType) this.throwUnclosedError(unclosedType);
+    else this.throwOverCloseError(currentType);
   }
-  throwCloseError(){
-    throw `닫히지 않았습니다`;
+  throwUnclosedError(type){
+    if(type === 'array') throw '정상적으로 종료되지 않은 배열이 있습니다';
+    if(type === 'object') throw '정상적으로 종료되지 않은 객체가 있습니다';
+  }
+  throwOverCloseError(type){
+    if(type === 'array') throw '불필요한 닫힘 기호가 존재합니다: ]';
+    if(type === 'object') throw '불필요한 닫힘 기호가 존재합니다: }';
   }
 }
 
@@ -75,12 +81,12 @@ class Stack{
     this.stack.push(new Child(node));    
   }
   closeBy(node){
-    if(this.lastChild.type !== node.type) this.error.throwCloseTypeError();
+    if(this.lastChild.type !== node.type) this.error.throwCloseError(this.lastChild.type, node.type);
     const lastChild = this.stack.pop();
     this.lastChild.lastNode.child.push(...lastChild.elements);
   }
   checkUnclosed(){
-    return this.stack.length > 1 ? this.error.throwCloseError() : null;
+    return this.stack.length > 1 ? this.error.throwCloseError(this.lastChild.type) : null;
   }
   get lastChild(){
     return this.stack[this.stack.length-1];
@@ -106,6 +112,9 @@ function arrayParser(ast){
 let pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
 
 exports.arrayParser = pipe(tokenizer, lexer, arrayParser);
+
+
+
 
 // let testcase1 = '[12, [14, 55], 15]';
 // let testcase2 = '[1, [55, 3]]'

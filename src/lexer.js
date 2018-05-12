@@ -14,6 +14,12 @@ class TypeError{
   }
 }
 
+class ValueError{
+  throwKeyValueError(value){
+    throw `키에 숫자와 문자 혼용 시 숫자는 앞에 올 수 없습니다: ${value}`;
+  }
+}
+
 class TypeCheck{
   constructor(value){
     this.value = value;
@@ -49,6 +55,23 @@ class TypeCheck{
   }
 }
 
+class ValueCheck{
+  constructor(type, value){
+    this.type = type;
+    this.value = value;
+    this.error = new ValueError();
+  }
+  isValid(){
+    if(this.type === 'key') return this.isValidKey();
+  }
+  isValidKey(){
+    if(/\d/.test(this.value) && /\D/.test(this.value)){
+      return /\D/.test(this.value[0]);
+    }
+    return true;
+  }
+}
+
 class DataStructure{
   constructor(source){
     this.key = undefined;
@@ -71,7 +94,11 @@ class DataStructure{
   getValue(type, source){
     if(type === 'array') return 'ArrayObject';
     if(type === 'object') return 'Object';
-    if(type === 'key') return source.slice(0, source.length-1);
+    if(type === 'key'){
+      const keyValue = source.slice(0, source.length-1);
+      const mySource = new ValueCheck(type, keyValue);
+      return mySource.isValid() ? keyValue : mySource.error.throwKeyValueError(keyValue);
+    }
     return source;
   }
   getState(source){

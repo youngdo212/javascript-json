@@ -199,10 +199,10 @@ test("객체를 올바르게 파싱한다", function(){
   expect(result).toBe(answer);
 })
 
-test("열림과 닫힘의 문자가 다를경우([1,2}) 에러메시지를 출력한다", function(){
+test("배열이 객체로 닫힐 경우 에러메시지를 출력한다", function(){
   let result;
   const typo = "[1,2}"
-  const answer = `닫히는 타입이 다릅니다`;
+  const answer = `정상적으로 종료되지 않은 배열이 있습니다`;
   try{
     result = arrayParser(typo);
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
@@ -212,10 +212,62 @@ test("열림과 닫힘의 문자가 다를경우([1,2}) 에러메시지를 출�
   }
 })
 
-test("닫히지 않았을 경우 에러메시지를 출력한다", function(){
+test("배열이 닫히지 않을 경우 에러메시지를 출력한다", function(){
   let result;
   const typo = "[1,2"
-  const answer = `닫히지 않았습니다`;
+  const answer = `정상적으로 종료되지 않은 배열이 있습니다`;
+  try{
+    result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
+test("불필요한 배열 닫힘이 있을 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = "{a:3}]"
+  const answer = `불필요한 닫힘 기호가 존재합니다: ]`;
+  try{
+    result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
+test("객체가 배열로 닫힐 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = "{a:3]"
+  const answer = `정상적으로 종료되지 않은 객체가 있습니다`;
+  try{
+    result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
+test("객체가 닫히지 않을 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = "{a:[1,2]"
+  const answer = `정상적으로 종료되지 않은 객체가 있습니다`;
+  try{
+    result = arrayParser(typo);
+    console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
+  }
+  catch(error){
+    expect(error).toBe(answer);  
+  }
+})
+
+test("불필요한 객체 닫힘이 있을 경우 에러메시지를 출력한다", function(){
+  let result;
+  const typo = "[3]}"
+  const answer = `불필요한 닫힘 기호가 존재합니다: }`;
   try{
     result = arrayParser(typo);
     console.log('FAIL (에러메시지가 출력되지 않았습니다)');    
