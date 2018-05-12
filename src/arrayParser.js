@@ -6,30 +6,26 @@ module.exports = class ArrayParser{
   constructor(source){
     this.originSource = source;
     this.ast = this.parse(source);
-    this.stats = {
-      'number': 0,
-      'string': 0,
-      'null': 0,
-      'boolean': 0,
-      'empty': 0,
-      'array': 0,
-      'object': 0
-    }
-    this.setStats(this.ast);
+    this.stats = this.calcStats(this.ast);
   }
   parse(source){
     const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
     const parsingProcess = pipe(tokenizer, lexer, parser);
     return parsingProcess(source);
   }
-  setStats(node){
-    this.stats[node.type]++;
-    node.child.forEach(childNode => {
-      this.setStats(childNode);
-    })
+  calcStats(node){
+    return node.child.reduce((acc, childNode) => this.mergeStats(acc, this.calcStats(childNode)), {[node.type]: 1})
+  }
+  mergeStats(originStats, targetStats){
+    const newStats = Object.assign({}, originStats);
+    for(let key in targetStats){
+      newStats[key] = newStats[key] || 0;
+      newStats[key] = newStats[key] + targetStats[key];
+    }
+    return newStats;
   }
   getStats(){
-    return `숫자: ${this.stats.number}개, 문자열: ${this.stats.string}개, null: ${this.stats.null}개, boolean: ${this.stats.boolean}개, 빈 데이터: ${this.stats.empty}개, 배열: ${this.stats.array}개, 객체: ${this.stats.object}개`;
+    return `숫자: ${this.stats.number || 0}개, 문자열: ${this.stats.string || 0}개, null: ${this.stats.null || 0}개, boolean: ${this.stats.boolean || 0}개, 빈 데이터: ${this.stats.empty || 0}개, 배열: ${this.stats.array || 0}개, 객체: ${this.stats.object || 0}개`;
   }
   getAST(){
     return this.ast;
